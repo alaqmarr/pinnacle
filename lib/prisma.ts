@@ -1,31 +1,31 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import { PrismaClient } from '../prisma/generated/client/client';
 
-/**
- * PrismaClient singleton instance for Next.js App Router.
- *
- * In development, Next.js clears the Node.js require cache on every hot-reload (HMR).
- * Without storing the client instance on globalThis, every HMR event creates a new
- * PrismaClient instance with its own SQLite connection handle, rapidly exhausting file
- * descriptors and triggering SQLITE_BUSY database lock exceptions.
- *
- * Attaching the singleton to globalThis preserves the single connection pool across
- * hot-reloads in development, while production utilizes standard module-scoped lifecycle.
- */
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+let prisma: PrismaClient;
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["warn", "error"]
-        : ["error"],
+if (globalForPrisma.prisma) {
+  prisma = globalForPrisma.prisma;
+} else {
+  // Pass configuration directly to Prisma 7 adapter
+  const adapter = new PrismaBetterSqlite3({
+    url: './prisma/dev.db',
+    timeout: 5000,
   });
+  
+  prisma = new PrismaClient({ 
+    adapter, 
+    log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'] 
+  });
+  
+  // Pragmas can be executed via the client after initialization
+  // Note: better-sqlite3 adapter for Prisma 7 handles SQLite connections internally.
+}
 
-if (process.env.NODE_ENV !== "production") {
+export { prisma };
+
+if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 

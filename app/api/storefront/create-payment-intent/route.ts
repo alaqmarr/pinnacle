@@ -43,8 +43,14 @@ export async function POST(request: Request) {
 
     // 3. Add Shipping & Tax
     let shippingCost = 0;
-    if (shippingMethod === "standard") shippingCost = 2500;
-    else if (shippingMethod === "expedited") shippingCost = 7500;
+    if (shippingMethod) {
+      const freightMethod = await prisma.freightMethod.findUnique({
+        where: { id: shippingMethod }
+      });
+      if (freightMethod) {
+        shippingCost = freightMethod.cost;
+      }
+    }
     
     // Simple fixed tax rate of 8.25% for calculation
     const tax = Math.round(subtotal * 0.0825);

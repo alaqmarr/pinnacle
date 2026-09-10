@@ -23,6 +23,21 @@ export default async function CheckoutPage() {
     where: { id: "singleton" }
   });
 
+  let savedAddresses: any[] = [];
+  let freightMethods: any[] = [];
+  
+  if (session?.user?.id) {
+    savedAddresses = await prisma.address.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  freightMethods = await prisma.freightMethod.findMany({
+    where: { active: true },
+    orderBy: { cost: "asc" }
+  });
+
   return (
     <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
       {/* Breadcrumbs */}
@@ -49,6 +64,8 @@ export default async function CheckoutPage() {
 
       <CheckoutClient 
         sessionUser={session?.user || null} 
+        savedAddresses={savedAddresses}
+        freightMethods={freightMethods}
         stripePublishableKey={settings?.stripeEnabled ? (settings?.stripePublishableKey || undefined) : undefined}
       />
     </div>

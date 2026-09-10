@@ -10,15 +10,20 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "test": "node tests/runner.js"
+    "test": "node tests/runner.js",
+    "deploy": "git stash && git pull && npm i --legacy-peer-deps && npx prisma generate && npx prisma db push && npm run build",
+    "update": "git stash && git pull && npm i --legacy-peer-deps && npx prisma generate && npx prisma db push && npm run build && pm2 restart pinnacle"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1129.0",
     "@aws-sdk/s3-request-presigner": "^3.1129.0",
-    "@prisma/client": "5.21.1",
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "@stripe/react-stripe-js": "^6.9.0",
     "@stripe/stripe-js": "^7.10.0",
+    "@types/better-sqlite3": "^9.6.0",
     "bcryptjs": "2.4.3",
+    "better-sqlite3": "^13.0.3",
     "next": "^16.3.4",
     "next-auth": "4.24.10",
     "nodemailer": "6.9.15",
@@ -38,7 +43,7 @@
     "@types/uuid": "^10.0.0",
     "autoprefixer": "10.4.20",
     "postcss": "8.4.47",
-    "prisma": "5.21.1",
+    "prisma": "^7.10.0",
     "tailwindcss": "3.4.14",
     "typescript": "5.6.3"
   }

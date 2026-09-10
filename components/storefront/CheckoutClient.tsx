@@ -75,7 +75,7 @@ function StripeReviewForm({
 }
 
 
-export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionUser: any, stripePublishableKey?: string }) {
+export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddresses = [], freightMethods = [] }: { sessionUser: any, stripePublishableKey?: string, savedAddresses?: any[], freightMethods?: any[] }) {
   const router = useRouter();
   const { items, subtotal, totalItems, clearCart, isHydrated } = useCart();
 
@@ -86,29 +86,32 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
 
   const allowCredit = sessionUser?.allowCredit ?? false;
 
+  const defaultAddress = savedAddresses.find((a: any) => a.isDefault) || savedAddresses[0];
+
   const [customer, setCustomer] = useState({
-    fullName: sessionUser?.name || "",
+    fullName: defaultAddress?.fullName || sessionUser?.name || "",
     email: sessionUser?.email || "",
-    phone: "",
-    company: "",
+    phone: defaultAddress?.phone || "",
+    company: defaultAddress?.company || "",
   });
 
   const [shippingAddress, setShippingAddress] = useState({
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    state: "TX",
-    postalCode: "",
+    addressLine1: defaultAddress?.addressLine1 || "",
+    addressLine2: defaultAddress?.addressLine2 || "",
+    city: defaultAddress?.city || "",
+    state: defaultAddress?.state || "TX",
+    postalCode: defaultAddress?.postalCode || "",
   });
 
-  const [shippingMethod, setShippingMethod] = useState<"standard" | "expedited" | "pickup">("standard");
+  const [shippingMethod, setShippingMethod] = useState<string>(freightMethods.length > 0 ? freightMethods[0].id : "standard");
   const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "PAYPAL" | "PO_NET30">("STRIPE");
 
   const [orderNotes, setOrderNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const shippingCost = shippingMethod === "expedited" ? 4850 : shippingMethod === "pickup" ? 0 : 1495;
+  const selectedFreight = freightMethods.find((m: any) => m.id === shippingMethod);
+  const shippingCost = selectedFreight ? selectedFreight.cost : 0;
   const tax = Math.round(subtotal * 0.0825);
   const total = subtotal + shippingCost + tax;
 
@@ -123,6 +126,47 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
       return "Please provide a valid 5-digit US postal ZIP code (e.g. 75201 or 75201-1234).";
     }
     return null;
+  };
+
+  const validateStep2 = () => {
+    if (!shippingMethod) return "Please select a freight method.";
+    return null;
+  };
+
+  const handleZipCodeBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const zip = e.target.value.trim();
+    if (US_ZIP_REGEX.test(zip)) {
+      try {
+        const res = await fetch(`https://api.zippopotam.us/us/${zip.split('-')[0]}`);
+        if (res.ok) {
+          const data = await res.json();
+          const place = data.places[0];
+          setShippingAddress(prev => ({
+            ...prev,
+            city: place["place name"],
+            state: place["state abbreviation"]
+          }));
+        }
+      } catch (err) {
+        console.error("Zip code lookup failed", err);
+      }
+    }
+  };
+
+  const handleAddressSelect = (addr: any) => {
+    setCustomer(prev => ({
+      ...prev,
+      fullName: addr.fullName,
+      phone: addr.phone || "",
+      company: addr.company || "",
+    }));
+    setShippingAddress({
+      addressLine1: addr.addressLine1,
+      addressLine2: addr.addressLine2 || "",
+      city: addr.city,
+      state: addr.state,
+      postalCode: addr.postalCode,
+    });
   };
 
   const handleNextStep = async () => {
@@ -223,39 +267,68 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
         )}
 
         {step === 1 && (
-          <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-            <div className="border-b border-slate-100 pb-3">
-              <h2 className="text-lg font-bold text-slate-900">Step 1: Shipping Address & Facility Contact</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input label="Full Name / Contact" required name="fullName" placeholder="John Smith" value={customer.fullName} onChange={(e) => setCustomer({ ...customer, fullName: e.target.value })} />
-              <Input label="Email Address" required name="email" type="email" placeholder="john@company.com" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
-              <Input label="Phone Number" name="phone" placeholder="(555) 123-4567" value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
-              <Input label="Company Name" name="company" placeholder="Acme Corp" value={customer.company} onChange={(e) => setCustomer({ ...customer, company: e.target.value })} />
-            </div>
-            <div className="space-y-4 pt-2">
-              <Input label="Address Line 1" required name="addressLine1" placeholder="123 Warehouse Blvd" value={shippingAddress.addressLine1} onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine1: e.target.value })} />
-              <Input label="Address Line 2 (Optional)" name="addressLine2" placeholder="Suite 200, Dock B" value={shippingAddress.addressLine2} onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine2: e.target.value })} />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Input label="City" required name="city" placeholder="Dallas" value={shippingAddress.city} onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })} />
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">State</label>
-                  <select className="w-full p-3 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:border-sky-500" value={shippingAddress.state} onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}>
-                    <option value="TX">Texas (TX)</option>
-                    <option value="CA">California (CA)</option>
-                    <option value="NY">New York (NY)</option>
-                    <option value="FL">Florida (FL)</option>
-                    <option value="IL">Illinois (IL)</option>
-                    <option value="PA">Pennsylvania (PA)</option>
+            <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="border-b border-slate-100 pb-3">
+                <h2 className="text-lg font-bold text-slate-900">Step 1: Shipping Information</h2>
+              </div>
+              
+              {savedAddresses && savedAddresses.length > 0 && (
+                <div className="mb-6 p-4 rounded-xl border border-sky-100 bg-sky-50">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Use a Saved Address</label>
+                  <select 
+                    className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white"
+                    onChange={(e) => {
+                      const addr = savedAddresses.find((a: any) => a.id === e.target.value);
+                      if (addr) handleAddressSelect(addr);
+                    }}
+                    defaultValue={defaultAddress?.id || ""}
+                  >
+                    <option value="" disabled>Select an address...</option>
+                    {savedAddresses.map((a: any) => (
+                      <option key={a.id} value={a.id}>
+                        {a.fullName} - {a.addressLine1}, {a.city}, {a.state} {a.postalCode}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <Input label="ZIP Code" required name="postalCode" placeholder="75201" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value })} />
+              )}
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Full Name" required name="fullName" value={customer.fullName} onChange={(e) => setCustomer({ ...customer, fullName: e.target.value })} />
+                  <Input label="Email Address" type="email" required name="email" value={customer.email} onChange={(e) => setCustomer({ ...customer, email: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input label="Phone Number" required name="phone" placeholder="(555) 555-5555" value={customer.phone} onChange={(e) => setCustomer({ ...customer, phone: e.target.value })} />
+                  <Input label="Company Name (Optional)" name="company" placeholder="Pinnacle Logistics" value={customer.company} onChange={(e) => setCustomer({ ...customer, company: e.target.value })} />
+                </div>
+
+                <div className="pt-4 border-t border-slate-100">
+                  <Input label="Address Line 1" required name="addressLine1" placeholder="123 Industrial Way" value={shippingAddress.addressLine1} onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine1: e.target.value })} />
+                </div>
+                <Input label="Address Line 2 (Optional)" name="addressLine2" placeholder="Suite 100, Loading Dock B" value={shippingAddress.addressLine2} onChange={(e) => setShippingAddress({ ...shippingAddress, addressLine2: e.target.value })} />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <Input label="City" required name="city" value={shippingAddress.city} onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })} />
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">State</label>
+                    <select required className="w-full p-3 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" value={shippingAddress.state} onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}>
+                      <option value="">Select State</option>
+                      <option value="TX">Texas (TX)</option>
+                      <option value="CA">California (CA)</option>
+                      <option value="NY">New York (NY)</option>
+                      <option value="FL">Florida (FL)</option>
+                      <option value="IL">Illinois (IL)</option>
+                      <option value="PA">Pennsylvania (PA)</option>
+                    </select>
+                  </div>
+                  <Input label="ZIP Code" required name="postalCode" placeholder="75201" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value })} onBlur={handleZipCodeBlur} />
               </div>
             </div>
-            <div className="pt-4 flex justify-end">
-              <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>Continue to Shipping Method →</Button>
+              <div className="pt-4 flex justify-end">
+                <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>Continue to Shipping Method →</Button>
+              </div>
             </div>
-          </div>
         )}
 
         {step === 2 && (
@@ -263,31 +336,23 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
             <div className="border-b border-slate-100 pb-3">
               <h2 className="text-lg font-bold text-slate-900">Step 2: Select Freight Shipping Method</h2>
             </div>
-            <div className="space-y-3">
-              <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === "standard" ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200" : "border-slate-200 hover:border-slate-300"}`}>
-                <div className="flex items-center gap-4">
-                  <input type="radio" name="shipping" value="standard" checked={shippingMethod === "standard"} onChange={() => setShippingMethod("standard")} className="text-sky-600 focus:ring-sky-500" />
-                  <div>
-                    <strong className="text-sm font-bold text-slate-900 block">Standard Ground Freight</strong>
-                    <span className="text-xs text-slate-500">3-5 business days. LTL carrier with liftgate service available.</span>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-slate-900">$14.95</span>
-              </label>
-              <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === "expedited" ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200" : "border-slate-200 hover:border-slate-300"}`}>
-                <div className="flex items-center gap-4">
-                  <input type="radio" name="shipping" value="expedited" checked={shippingMethod === "expedited"} onChange={() => setShippingMethod("expedited")} className="text-sky-600 focus:ring-sky-500" />
-                  <div>
-                    <strong className="text-sm font-bold text-slate-900 block">Expedited Priority (1-2 Days)</strong>
-                    <span className="text-xs text-slate-500">Next day or 2-day delivery via dedicated dispatch.</span>
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-slate-900">$48.50</span>
-              </label>
-            </div>
+              <div className="space-y-3">
+                {freightMethods.map((method: any) => (
+                  <label key={method.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === method.id ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200" : "border-slate-200 hover:border-slate-300"}`}>
+                    <div className="flex items-center gap-4">
+                      <input type="radio" name="shipping" value={method.id} checked={shippingMethod === method.id} onChange={() => setShippingMethod(method.id)} className="text-sky-600 focus:ring-sky-500" />
+                      <div>
+                        <strong className="text-sm font-bold text-slate-900 block">{method.name}</strong>
+                        {method.description && <span className="text-xs text-slate-500">{method.description}</span>}
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-slate-900">{formatUSD(method.cost)}</span>
+                  </label>
+                ))}
+              </div>
             <div className="pt-4 flex justify-between">
-              <Button type="button" variant="outline" size="md" onClick={() => setStep(1)}>← Back to Address</Button>
-              <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>Continue to Payment →</Button>
+              <Button type="button" variant="outline" size="md" onClick={() => setStep(1)}>&larr; Back to Address</Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>Continue &rarr;</Button>
             </div>
           </div>
         )}
@@ -341,7 +406,7 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
 
             <div className="pt-4 flex justify-between">
               <Button type="button" variant="outline" size="md" onClick={() => setStep(2)}>← Back to Freight</Button>
-              <Button type="button" variant="primary" size="lg" isLoading={isSubmitting} onClick={handleNextStep}>Review Order Details →</Button>
+              <Button type="button" variant="primary" size="lg" isLoading={isSubmitting} onClick={handleNextStep}>Review Order Details &rarr;</Button>
             </div>
           </div>
         )}
@@ -362,7 +427,7 @@ export function CheckoutClient({ sessionUser, stripePublishableKey }: { sessionU
               </div>
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <strong className="text-slate-900 font-bold uppercase tracking-wider block mb-2">Method & Billing</strong>
-                <p className="text-slate-800"><span className="font-medium">Freight:</span> {shippingMethod}</p>
+                <p className="text-slate-800"><span className="font-medium">Freight:</span> {selectedFreight?.name}</p>
                 <p className="text-slate-800 mt-1"><span className="font-medium">Payment:</span> {paymentMethod}</p>
               </div>
             </div>
