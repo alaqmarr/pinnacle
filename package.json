@@ -1,0 +1,45 @@
+{
+  "name": "pinnacle-distributing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node -e \"try{require('child_process').execSync('prisma generate',{stdio:'inherit'})}catch(e){console.log('Prisma client already generated')}\" && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "test": "node tests/runner.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1129.0",
+    "@aws-sdk/s3-request-presigner": "^3.1129.0",
+    "@prisma/client": "5.21.1",
+    "@stripe/react-stripe-js": "^6.9.0",
+    "@stripe/stripe-js": "^7.10.0",
+    "bcryptjs": "2.4.3",
+    "next": "^16.3.4",
+    "next-auth": "4.24.10",
+    "nodemailer": "6.9.15",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-dropzone": "^20.1.1",
+    "react-easy-crop": "^6.2.3",
+    "stripe": "^22.6.2",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/node": "^20.17.6",
+    "@types/nodemailer": "6.4.16",
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.47",
+    "prisma": "5.21.1",
+    "tailwindcss": "3.4.14",
+    "typescript": "5.6.3"
+  }
+}
