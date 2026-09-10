@@ -22,6 +22,7 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
         redirect: false,
         email,
         password,
+        callbackUrl: `${window.location.origin}${callbackUrl || "/admin"}`,
       });
 
       if (res?.error) {
