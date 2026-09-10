@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import LoginFormClient from "./LoginFormClient";
 
 interface LoginPageProps {
@@ -17,8 +18,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const search = (await searchParams) || {};
   const callbackUrl = search.callbackUrl || "";
 
-  if (session) {
-    redirect(callbackUrl || (session.user?.role === "ADMIN" ? "/admin" : "/"));
+  let redirectUrl = "";
+  if (session?.user?.email) {
+    // Check if user still exists in DB to prevent infinite redirect loops on DB resets
+    const dbUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, role: true }
+    });
+    if (dbUser) {
+      redirectUrl = callbackUrl || (dbUser.role === "ADMIN" ? "/admin" : "/");
+    }
+  }
+
+  if (redirectUrl) {
+    redirect(redirectUrl);
   }
 
   const errorParam = search.error || "";

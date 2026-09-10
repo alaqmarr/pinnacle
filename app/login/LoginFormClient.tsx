@@ -28,18 +28,14 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
         setError("Invalid email or password. Please verify your credentials and try again.");
         setLoading(false);
       } else {
-        // Automatically fetch session to get role if we don't have a callback
-        // The middleware will handle redirecting admins properly anyway, 
-        // so we can just refresh and route.
-        router.refresh();
-        if (callbackUrl) {
-          router.push(callbackUrl);
-        } else {
-          router.push("/admin"); // Default to admin for admins. Standard users hitting /admin are redirected to /
-        }
+        // Use full page reload to ensure auth state is completely synchronized
+        // and avoid any Next.js App Router client-side transition anomalies.
+        const dest = callbackUrl || "/admin";
+        window.location.assign(dest);
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      console.error("Login catch error:", err);
+      setError(`An unexpected error occurred: ${err instanceof Error ? err.message : String(err)}`);
       setLoading(false);
     }
   };
