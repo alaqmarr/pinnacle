@@ -18,11 +18,16 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
     setLoading(true);
 
     try {
+      const fallback = callbackUrl || "/admin";
+      const absoluteCallbackUrl = fallback.startsWith("http") 
+        ? fallback 
+        : `${window.location.origin}${fallback.startsWith("/") ? fallback : `/${fallback}`}`;
+
       const res = await signIn("credentials", {
         redirect: false,
         email,
         password,
-        callbackUrl: `${window.location.origin}${callbackUrl || "/admin"}`,
+        callbackUrl: absoluteCallbackUrl,
       });
 
       if (res?.error) {
