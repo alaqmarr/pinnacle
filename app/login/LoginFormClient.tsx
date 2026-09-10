@@ -36,8 +36,7 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
       } else {
         // Use full page reload to ensure auth state is completely synchronized
         // and avoid any Next.js App Router client-side transition anomalies.
-        const dest = callbackUrl || "/admin";
-        window.location.assign(dest);
+        window.location.assign(absoluteCallbackUrl);
       }
     } catch (err) {
       console.error("Login catch error:", err);
