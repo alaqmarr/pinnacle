@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseUSDToCents } from "@/lib/currency";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import { generateSlug } from "@/lib/slug";
 
 export default function NewProductForm({
   categories,
@@ -14,16 +15,47 @@ export default function NewProductForm({
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
+    slug: "",
     sku: "",
     price: "",
     stock: "0",
     categoryId: categories[0]?.id || "",
     description: "",
+    originDispatch: "",
     image: "",
     featured: false,
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const handleNameChange = (val: string) => {
+    const generated = generateSlug(val);
+    setFormData((prev) => ({
+      ...prev,
+      name: val,
+      slug: generated,
+    }));
+  };
+
+  React.useEffect(() => {
+    if (!formData.name) return;
+    const timer = setTimeout(async () => {
+      const base = generateSlug(formData.name);
+      if (!base) return;
+      try {
+        const res = await fetch(`/api/admin/check-slug?slug=${encodeURIComponent(base)}&type=product`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.slug) {
+            setFormData((prev) => ({ ...prev, slug: data.slug }));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [formData.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +83,13 @@ export default function NewProductForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name.trim(),
+          slug: formData.slug.trim(),
           sku: formData.sku.trim(),
           price: cents,
           stock: parseInt(formData.stock, 10) || 0,
           categoryId: formData.categoryId || null,
           description: formData.description.trim(),
+          originDispatch: formData.originDispatch.trim() || null,
           image: formData.image.trim(),
           featured: formData.featured,
         }),
@@ -92,12 +126,28 @@ export default function NewProductForm({
             type="text"
             required
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder="e.g. Heavy Duty Corrugated Box 16x16x16"
             className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
         </div>
 
+        <div>
+          <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+            Slug (Auto-generated) *
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.slug}
+            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+            placeholder="heavy-duty-corrugated-box-16x16x16"
+            className="w-full px-3.5 py-2 text-sm font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
             SKU (Unique Item Number) *
@@ -111,9 +161,7 @@ export default function NewProductForm({
             className="w-full px-3.5 py-2 text-sm font-mono border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
             Price in USD ($) *
@@ -158,6 +206,22 @@ export default function NewProductForm({
             ))}
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+          Origin / Dispatch Location (Optional)
+        </label>
+        <input
+          type="text"
+          value={formData.originDispatch}
+          onChange={(e) => setFormData({ ...formData, originDispatch: e.target.value })}
+          placeholder="e.g. Dallas Distribution Center, TX (Leave blank for default warehouse)"
+          className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+        />
+        <p className="text-[11px] text-slate-500 mt-1">
+          If left blank, defaults to the global warehouse address configured in Settings.
+        </p>
       </div>
 
       <div>

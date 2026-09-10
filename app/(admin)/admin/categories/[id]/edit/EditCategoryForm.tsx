@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { generateSlug } from "@/lib/slug";
 
 export default function EditCategoryForm({
   category,
@@ -24,6 +25,35 @@ export default function EditCategoryForm({
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const handleNameChange = (val: string) => {
+    const generated = generateSlug(val);
+    setFormData((prev) => ({
+      ...prev,
+      name: val,
+      slug: generated,
+    }));
+  };
+
+  React.useEffect(() => {
+    if (!formData.name) return;
+    const timer = setTimeout(async () => {
+      const base = generateSlug(formData.name);
+      if (!base) return;
+      try {
+        const res = await fetch(`/api/admin/check-slug?slug=${encodeURIComponent(base)}&type=category&ignoreId=${encodeURIComponent(category.id)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.slug) {
+            setFormData((prev) => ({ ...prev, slug: data.slug }));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [formData.name, category.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +102,7 @@ export default function EditCategoryForm({
           type="text"
           required
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => handleNameChange(e.target.value)}
           className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
         />
       </div>

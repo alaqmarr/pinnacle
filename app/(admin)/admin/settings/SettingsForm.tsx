@@ -8,6 +8,7 @@ export interface SettingsState {
   contactEmail: string;
   contactPhone: string;
   address: string;
+  warehouseAddress?: string;
   businessHours: string;
   hours: string;
   mapEmbedUrl: string;
@@ -266,6 +267,23 @@ export default function SettingsForm({
               className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
             />
           </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+            Default Warehouse Address (Origin Dispatch Fallback)
+          </label>
+          <input
+            type="text"
+            name="warehouseAddress"
+            value={formData.warehouseAddress || ""}
+            onChange={handleChange}
+            placeholder="1234 Industrial Parkway, Suite 100, Dallas, TX 75201"
+            className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Used as the default shipping origin dispatch location for products that do not specify a custom origin dispatch.
+          </p>
         </div>
       </div>
 

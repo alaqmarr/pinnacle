@@ -70,12 +70,12 @@ export function CartPageClient() {
             {items.map((item) => (
               <div key={item.productId} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4 min-w-0">
-                  <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 p-1 overflow-hidden">
+                  <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 p-0 m-0 overflow-hidden">
                     {item.image ? (
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover block m-0 p-0"
                       />
                     ) : (
                       <svg className="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

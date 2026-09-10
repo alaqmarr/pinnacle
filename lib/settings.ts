@@ -17,6 +17,7 @@ export interface GlobalSettingData {
   contactEmail: string;
   contactPhone: string;
   address: string;
+  warehouseAddress?: string | null;
   hours: string;
   mapEmbedUrl: string | null;
   smtpHost: string | null;
@@ -42,6 +43,7 @@ export interface PublicGlobalSettings {
   contactEmail: string;
   contactPhone: string;
   address: string;
+  warehouseAddress?: string | null;
   hours: string;
   businessHours: string;
   mapEmbedUrl: string | null;
@@ -56,6 +58,7 @@ export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "upd
   contactEmail: "info@pinnacledistributing.com",
   contactPhone: "(800) 555-0199",
   address: "1234 Pinnacle Way, Suite 100, Dallas, TX 75201",
+  warehouseAddress: "1234 Industrial Parkway, Suite 100, Dallas, TX 75201",
   hours: "Monday - Friday: 8:00 AM - 5:00 PM CST",
   mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d107310.8872242183!2d-96.883733!3d32.820586!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864e99157230c001%3A0x83f0f73f2c524029!2sDallas%2C%20TX!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus",
   smtpHost: null,
@@ -118,6 +121,7 @@ export type UpdateGlobalSettingsInput = Partial<{
   contactEmail: string;
   contactPhone: string;
   address: string;
+  warehouseAddress?: string | null;
   hours: string;
   mapEmbedUrl: string | null;
   smtpHost: string | null;
@@ -180,6 +184,7 @@ export async function updateGlobalSettings(
     "contactEmail",
     "contactPhone",
     "address",
+    "warehouseAddress",
     "hours",
     "mapEmbedUrl",
     "smtpHost",
@@ -223,6 +228,7 @@ export function getPublicSettings(settings: GlobalSettingData): PublicGlobalSett
     contactEmail: settings.contactEmail,
     contactPhone: settings.contactPhone,
     address: settings.address,
+    warehouseAddress: settings.warehouseAddress || settings.address || "1234 Industrial Parkway, Suite 100, Dallas, TX 75201",
     hours: settings.hours,
     businessHours: settings.hours,
     mapEmbedUrl: settings.mapEmbedUrl,

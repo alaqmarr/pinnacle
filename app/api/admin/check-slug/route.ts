@@ -12,29 +12,31 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    let existing = null;
-    let finalSlug = slug;
-
-    // Check if it exists
     const checkExists = async (testSlug: string) => {
+      const whereClause: any = { slug: testSlug };
+      if (ignoreId) {
+        whereClause.id = { not: ignoreId };
+      }
       if (type === "category") {
         return await prisma.category.findFirst({
-          where: { slug: testSlug, id: { not: ignoreId || undefined } }
+          where: whereClause,
         });
       } else if (type === "product") {
         return await prisma.product.findFirst({
-          where: { slug: testSlug, id: { not: ignoreId || undefined } }
+          where: whereClause,
         });
       }
       return null;
     };
 
-    existing = await checkExists(finalSlug);
+    let finalSlug = slug;
+    let existing = await checkExists(finalSlug);
 
-    // If it exists, append a 4 digit random string in front with _
-    if (existing) {
+    // If it exists, append a 4 digit random string prefixed with an underscore (e.g. _1234)
+    while (existing) {
       const randomStr = Math.floor(1000 + Math.random() * 9000).toString();
-      finalSlug = `${randomStr}_${finalSlug}`;
+      finalSlug = `${slug}_${randomStr}`;
+      existing = await checkExists(finalSlug);
     }
 
     return NextResponse.json({ slug: finalSlug });

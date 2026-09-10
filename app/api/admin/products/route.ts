@@ -69,6 +69,7 @@ export async function GET(req: NextRequest) {
         } : null,
         image: imageList[0] || "",
         images: imageList,
+        originDispatch: prod.originDispatch || null,
         featured: prod.featured,
         createdAt: prod.createdAt.toISOString(),
         updatedAt: prod.updatedAt.toISOString(),
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
     }
 
     const trimmedSku = sku.trim();
-    const trimmedOrigin = originDispatch?.trim() || null;
+    const trimmedOrigin = typeof originDispatch === "string" && originDispatch.trim() ? originDispatch.trim() : null;
 
     // Check duplicate SKU
     const existingSku = await prisma.product.findUnique({
@@ -152,16 +153,20 @@ export async function POST(req: NextRequest) {
 
     // Check slug uniqueness; append random string if collided
     let finalSlug = baseSlug;
-    const existingSlug = await prisma.product.findFirst({
-      where: {
-        OR: [
-          { slug: finalSlug },
-          { id: finalSlug }
-        ]
+    while (true) {
+      const existingSlug = await prisma.product.findFirst({
+        where: {
+          OR: [
+            { slug: finalSlug },
+            { id: finalSlug }
+          ]
+        }
+      });
+      if (existingSlug) {
+        finalSlug = `${baseSlug}_${Math.floor(1000 + Math.random() * 9000).toString()}`;
+      } else {
+        break;
       }
-    });
-    if (existingSlug) {
-      finalSlug = `${Math.floor(1000 + Math.random() * 9000).toString()}_${baseSlug}`;
     }
 
     // Verify category if specified
@@ -227,6 +232,7 @@ export async function POST(req: NextRequest) {
           } : null,
           image: imageList[0] || "",
           images: imageList,
+          originDispatch: product.originDispatch || null,
           featured: product.featured,
           createdAt: product.createdAt.toISOString(),
           updatedAt: product.updatedAt.toISOString(),

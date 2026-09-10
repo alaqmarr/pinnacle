@@ -22,6 +22,7 @@ export interface ProductDetailClientProps {
       name: string;
       slug: string;
     } | null;
+    originDispatch?: string | null;
   };
 }
 
@@ -41,42 +42,43 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         parsedImages = [product.images.trim()];
       }
     } catch {
-      if (product.images.trim()) parsedImages = [product.images.trim()];
+      parsedImages = product.images ? [product.images] : [];
     }
   }
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const activeImage = parsedImages[activeImageIndex] || null;
+  const activeImage = parsedImages[activeImageIndex] || parsedImages[0] || "";
 
-  const inventory = product.inventory ?? 0;
-  const isOutOfStock = inventory <= 0;
-  const isLowStock = inventory > 0 && inventory <= 10;
-  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const handleAddToCart = () => {
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: activeImage,
+        slug: product.slug,
+        sku: product.sku,
+      },
+      quantity
+    );
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
-  const handleAddToCart = async () => {
-    if (isOutOfStock || status !== "idle") return;
-
-    try {
-      setStatus("loading");
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      addToCart(
-        {
-          id: product.id,
-          name: product.name,
-          slug: product.slug,
-          price: product.price,
-          image: activeImage,
-          sku: product.sku,
-        },
-        quantity
-      );
-      
-      setStatus("success");
-    } catch (err) {
-      setStatus("error");
-    } finally {
-      setTimeout(() => setStatus("idle"), 2000);
+  const handleBuyNow = () => {
+    addToCart(
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: activeImage,
+        slug: product.slug,
+        sku: product.sku,
+      },
+      quantity
+    );
+    if (typeof window !== "undefined") {
+      window.location.href = "/cart";
     }
   };
 
@@ -84,12 +86,12 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
       {/* Visual Image Gallery (Left) */}
       <div className="space-y-4">
-        <div className="aspect-square w-full rounded-2xl border border-slate-200 bg-white p-8 flex items-center justify-center overflow-hidden shadow-xs relative">
+        <div className="aspect-square w-full rounded-2xl border border-slate-200 bg-white p-0 m-0 flex items-center justify-center overflow-hidden shadow-xs relative">
           {activeImage ? (
             <img
               src={activeImage}
               alt={product.name}
-              className="max-h-full max-w-full object-contain"
+              className="w-full h-full object-cover block m-0 p-0"
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-slate-300">
@@ -111,13 +113,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 key={idx}
                 type="button"
                 onClick={() => setActiveImageIndex(idx)}
-                className={`w-16 h-16 rounded-lg border p-1 bg-white overflow-hidden shrink-0 transition-all ${
+                className={`w-16 h-16 rounded-lg border p-0 m-0 bg-white overflow-hidden shrink-0 transition-all ${
                   idx === activeImageIndex
                     ? "border-sky-600 ring-2 ring-sky-200"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-contain" />
+                <img src={img} alt="" className="w-full h-full object-cover block m-0 p-0" />
               </button>
             ))}
           </div>
@@ -129,91 +131,102 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         <div>
           <div className="flex items-center gap-3 mb-2">
             {product.category && (
-              <Badge variant="category">{product.category.name}</Badge>
+              <Badge variant="category" className="text-xs text-sky-800 bg-sky-50/50 border-sky-200">
+                {product.category.name}
+              </Badge>
             )}
-            {isOutOfStock ? (
-              <Badge variant="outOfStock">Out of Stock</Badge>
-            ) : isLowStock ? (
-              <Badge variant="lowStock">{`Low Stock: ${inventory} remaining`}</Badge>
-            ) : (
-              <Badge variant="inStock">In Stock & Ready to Ship</Badge>
+            {product.sku && (
+              <span className="text-xs font-mono text-slate-400 tracking-wider">
+                SKU: {product.sku}
+              </span>
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             {product.name}
           </h1>
 
-          {product.sku && (
-            <p className="font-mono text-xs font-semibold text-slate-400 uppercase tracking-wider mt-1">
-              SKU: {product.sku}
-            </p>
-          )}
-        </div>
-
-        {/* Pricing Block */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <div className="flex items-baseline space-x-3">
+          <div className="mt-4 flex items-baseline gap-4">
             <span className="text-3xl sm:text-4xl font-black text-slate-900">
               {formatUSD(product.price)}
             </span>
-            <span className="text-xs text-slate-500 font-medium">/ unit</span>
+            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+              / Unit • Industrial Wholesale
+            </span>
           </div>
-
-          <p className="text-xs text-amber-700 font-semibold flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            Bulk Wholesale Tier: Save 10% on pallet quantities (50+ units).
-          </p>
         </div>
 
-        {/* Short Description */}
+        {/* Stock status */}
+        <div className="flex items-center gap-2">
+          {product.inventory && product.inventory > 0 ? (
+            <>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wide">
+                In Stock ({product.inventory} Available for Dispatch)
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-xs font-bold text-amber-700 uppercase tracking-wide">
+                Backorder Available (Ships in 3-5 days)
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Description */}
         {product.description && (
-          <div className="prose prose-slate text-sm text-slate-600 leading-relaxed">
-            <p>{product.description}</p>
+          <div className="border-t border-slate-100 pt-4">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+              Item Overview & Specs
+            </h2>
+            <div className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+              {product.description}
+            </div>
           </div>
         )}
 
-        {/* Quantity and Purchasing Stepper */}
-        <div className="space-y-3 pt-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            Order Quantity
-          </label>
-          <div className="flex flex-wrap items-center gap-4">
-            <QuantitySelector
-              quantity={quantity}
-              onChange={setQuantity}
-              disabled={isOutOfStock}
-              max={inventory > 0 ? inventory : 9999}
-              size="md"
-            />
+        {/* Purchasing Controls */}
+        <div className="border-t border-slate-200 pt-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Quantity
+              </label>
+              <QuantitySelector
+                quantity={quantity}
+                onChange={setQuantity}
+                min={1}
+                max={product.inventory && product.inventory > 0 ? product.inventory : 999}
+              />
+            </div>
 
+            <div className="flex-1 pt-6">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full text-slate-700 border-slate-300 hover:bg-slate-50 font-bold"
+                onClick={handleBuyNow}
+              >
+                Instant Buy
+              </Button>
+            </div>
+          </div>
+
+          <div>
             <Button
-              type="button"
-              className={`w-full sm:w-auto transition-all duration-300 ${
-                status === "loading" ? "bg-slate-700 text-slate-200 cursor-wait" :
-                status === "success" ? "bg-emerald-600 hover:bg-emerald-700 text-white" :
-                status === "error" ? "bg-red-600 hover:bg-red-700 text-white" :
-                ""
-              }`}
-              variant={isOutOfStock ? "outline" : "primary"}
               size="lg"
-              disabled={isOutOfStock || status === "loading" || status === "success"}
+              className="w-full font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-sm"
               onClick={handleAddToCart}
-              id="add-to-cart-btn"
             >
-              {isOutOfStock ? (
-                "Out of Stock"
-              ) : status === "loading" ? (
-                "Adding..."
-              ) : status === "success" ? (
+              {isAdded ? (
                 <>
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  <svg className="w-5 h-5 mr-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Added to Cart!
                 </>
-              ) : status === "error" ? (
-                "Error Adding!"
               ) : (
                 <>
                   <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,7 +245,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            <span>Ships directly from Dallas Logistics Warehouse within 24 hours.</span>
+            <span>Ships directly from {product.originDispatch || "Dallas Logistics Warehouse"} within 24 hours.</span>
           </div>
           <div className="flex items-center space-x-2">
             <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

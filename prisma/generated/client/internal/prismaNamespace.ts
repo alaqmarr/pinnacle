@@ -1690,6 +1690,7 @@ export const GlobalSettingScalarFieldEnum = {
   contactEmail: 'contactEmail',
   contactPhone: 'contactPhone',
   address: 'address',
+  warehouseAddress: 'warehouseAddress',
   hours: 'hours',
   mapEmbedUrl: 'mapEmbedUrl',
   smtpHost: 'smtpHost',

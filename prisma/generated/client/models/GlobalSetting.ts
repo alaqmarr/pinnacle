@@ -40,6 +40,7 @@ export type GlobalSettingMinAggregateOutputType = {
   contactEmail: string | null
   contactPhone: string | null
   address: string | null
+  warehouseAddress: string | null
   hours: string | null
   mapEmbedUrl: string | null
   smtpHost: string | null
@@ -66,6 +67,7 @@ export type GlobalSettingMaxAggregateOutputType = {
   contactEmail: string | null
   contactPhone: string | null
   address: string | null
+  warehouseAddress: string | null
   hours: string | null
   mapEmbedUrl: string | null
   smtpHost: string | null
@@ -92,6 +94,7 @@ export type GlobalSettingCountAggregateOutputType = {
   contactEmail: number
   contactPhone: number
   address: number
+  warehouseAddress: number
   hours: number
   mapEmbedUrl: number
   smtpHost: number
@@ -128,6 +131,7 @@ export type GlobalSettingMinAggregateInputType = {
   contactEmail?: true
   contactPhone?: true
   address?: true
+  warehouseAddress?: true
   hours?: true
   mapEmbedUrl?: true
   smtpHost?: true
@@ -154,6 +158,7 @@ export type GlobalSettingMaxAggregateInputType = {
   contactEmail?: true
   contactPhone?: true
   address?: true
+  warehouseAddress?: true
   hours?: true
   mapEmbedUrl?: true
   smtpHost?: true
@@ -180,6 +185,7 @@ export type GlobalSettingCountAggregateInputType = {
   contactEmail?: true
   contactPhone?: true
   address?: true
+  warehouseAddress?: true
   hours?: true
   mapEmbedUrl?: true
   smtpHost?: true
@@ -293,6 +299,7 @@ export type GlobalSettingGroupByOutputType = {
   contactEmail: string
   contactPhone: string
   address: string
+  warehouseAddress: string | null
   hours: string
   mapEmbedUrl: string | null
   smtpHost: string | null
@@ -342,6 +349,7 @@ export type GlobalSettingWhereInput = {
   contactEmail?: Prisma.StringFilter<"GlobalSetting"> | string
   contactPhone?: Prisma.StringFilter<"GlobalSetting"> | string
   address?: Prisma.StringFilter<"GlobalSetting"> | string
+  warehouseAddress?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   hours?: Prisma.StringFilter<"GlobalSetting"> | string
   mapEmbedUrl?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   smtpHost?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
@@ -368,6 +376,7 @@ export type GlobalSettingOrderByWithRelationInput = {
   contactEmail?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  warehouseAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   hours?: Prisma.SortOrder
   mapEmbedUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   smtpHost?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -397,6 +406,7 @@ export type GlobalSettingWhereUniqueInput = Prisma.AtLeast<{
   contactEmail?: Prisma.StringFilter<"GlobalSetting"> | string
   contactPhone?: Prisma.StringFilter<"GlobalSetting"> | string
   address?: Prisma.StringFilter<"GlobalSetting"> | string
+  warehouseAddress?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   hours?: Prisma.StringFilter<"GlobalSetting"> | string
   mapEmbedUrl?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   smtpHost?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
@@ -423,6 +433,7 @@ export type GlobalSettingOrderByWithAggregationInput = {
   contactEmail?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  warehouseAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   hours?: Prisma.SortOrder
   mapEmbedUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   smtpHost?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -457,6 +468,7 @@ export type GlobalSettingScalarWhereWithAggregatesInput = {
   contactEmail?: Prisma.StringWithAggregatesFilter<"GlobalSetting"> | string
   contactPhone?: Prisma.StringWithAggregatesFilter<"GlobalSetting"> | string
   address?: Prisma.StringWithAggregatesFilter<"GlobalSetting"> | string
+  warehouseAddress?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   hours?: Prisma.StringWithAggregatesFilter<"GlobalSetting"> | string
   mapEmbedUrl?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   smtpHost?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
@@ -483,6 +495,7 @@ export type GlobalSettingCreateInput = {
   contactEmail?: string
   contactPhone?: string
   address?: string
+  warehouseAddress?: string | null
   hours?: string
   mapEmbedUrl?: string | null
   smtpHost?: string | null
@@ -509,6 +522,7 @@ export type GlobalSettingUncheckedCreateInput = {
   contactEmail?: string
   contactPhone?: string
   address?: string
+  warehouseAddress?: string | null
   hours?: string
   mapEmbedUrl?: string | null
   smtpHost?: string | null
@@ -535,6 +549,7 @@ export type GlobalSettingUpdateInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   contactPhone?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouseAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hours?: Prisma.StringFieldUpdateOperationsInput | string
   mapEmbedUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -561,6 +576,7 @@ export type GlobalSettingUncheckedUpdateInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   contactPhone?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouseAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hours?: Prisma.StringFieldUpdateOperationsInput | string
   mapEmbedUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -587,6 +603,7 @@ export type GlobalSettingCreateManyInput = {
   contactEmail?: string
   contactPhone?: string
   address?: string
+  warehouseAddress?: string | null
   hours?: string
   mapEmbedUrl?: string | null
   smtpHost?: string | null
@@ -613,6 +630,7 @@ export type GlobalSettingUpdateManyMutationInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   contactPhone?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouseAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hours?: Prisma.StringFieldUpdateOperationsInput | string
   mapEmbedUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -639,6 +657,7 @@ export type GlobalSettingUncheckedUpdateManyInput = {
   contactEmail?: Prisma.StringFieldUpdateOperationsInput | string
   contactPhone?: Prisma.StringFieldUpdateOperationsInput | string
   address?: Prisma.StringFieldUpdateOperationsInput | string
+  warehouseAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   hours?: Prisma.StringFieldUpdateOperationsInput | string
   mapEmbedUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   smtpHost?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -665,6 +684,7 @@ export type GlobalSettingCountOrderByAggregateInput = {
   contactEmail?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  warehouseAddress?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   mapEmbedUrl?: Prisma.SortOrder
   smtpHost?: Prisma.SortOrder
@@ -695,6 +715,7 @@ export type GlobalSettingMaxOrderByAggregateInput = {
   contactEmail?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  warehouseAddress?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   mapEmbedUrl?: Prisma.SortOrder
   smtpHost?: Prisma.SortOrder
@@ -721,6 +742,7 @@ export type GlobalSettingMinOrderByAggregateInput = {
   contactEmail?: Prisma.SortOrder
   contactPhone?: Prisma.SortOrder
   address?: Prisma.SortOrder
+  warehouseAddress?: Prisma.SortOrder
   hours?: Prisma.SortOrder
   mapEmbedUrl?: Prisma.SortOrder
   smtpHost?: Prisma.SortOrder
@@ -753,6 +775,7 @@ export type GlobalSettingSelect<ExtArgs extends runtime.Types.Extensions.Interna
   contactEmail?: boolean
   contactPhone?: boolean
   address?: boolean
+  warehouseAddress?: boolean
   hours?: boolean
   mapEmbedUrl?: boolean
   smtpHost?: boolean
@@ -779,6 +802,7 @@ export type GlobalSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   contactEmail?: boolean
   contactPhone?: boolean
   address?: boolean
+  warehouseAddress?: boolean
   hours?: boolean
   mapEmbedUrl?: boolean
   smtpHost?: boolean
@@ -805,6 +829,7 @@ export type GlobalSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   contactEmail?: boolean
   contactPhone?: boolean
   address?: boolean
+  warehouseAddress?: boolean
   hours?: boolean
   mapEmbedUrl?: boolean
   smtpHost?: boolean
@@ -831,6 +856,7 @@ export type GlobalSettingSelectScalar = {
   contactEmail?: boolean
   contactPhone?: boolean
   address?: boolean
+  warehouseAddress?: boolean
   hours?: boolean
   mapEmbedUrl?: boolean
   smtpHost?: boolean
@@ -851,7 +877,7 @@ export type GlobalSettingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
+export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
 
 export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSetting"
@@ -862,6 +888,7 @@ export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.Inter
     contactEmail: string
     contactPhone: string
     address: string
+    warehouseAddress: string | null
     hours: string
     mapEmbedUrl: string | null
     smtpHost: string | null
@@ -1308,6 +1335,7 @@ export interface GlobalSettingFieldRefs {
   readonly contactEmail: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly contactPhone: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly address: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly warehouseAddress: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly hours: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly mapEmbedUrl: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly smtpHost: Prisma.FieldRef<"GlobalSetting", 'String'>

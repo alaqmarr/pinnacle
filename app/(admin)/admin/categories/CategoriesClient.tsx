@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import { generateSlug } from "@/lib/slug";
 
 export interface CategoryItem {
   id: string;
@@ -53,11 +54,7 @@ export default function CategoriesClient({
     if (!isAddOpen && !editCategory) return;
     
     const delayDebounceFn = setTimeout(async () => {
-      const generatedSlug = formData.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+      const generatedSlug = generateSlug(formData.name);
 
       if (!generatedSlug) return;
 
@@ -96,6 +93,7 @@ export default function CategoriesClient({
     setFormData((prev) => ({
       ...prev,
       name: val,
+      slug: generateSlug(val),
     }));
   };
 
@@ -458,7 +456,7 @@ export default function CategoriesClient({
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
                 />
               </div>

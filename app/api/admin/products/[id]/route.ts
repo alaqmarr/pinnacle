@@ -44,6 +44,7 @@ export async function GET(
       } : null,
       image: imageList[0] || "",
       images: imageList,
+      originDispatch: product.originDispatch || null,
       featured: product.featured,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
@@ -111,14 +112,18 @@ async function updateProduct(
       if (typeof body.slug === "string" && body.slug.trim()) {
         const trimmedSlug = body.slug.trim();
         if (trimmedSlug !== existing.slug) {
-          const slugExists = await prisma.product.findFirst({
-            where: { slug: trimmedSlug },
-          });
-          if (slugExists) {
-            updateData.slug = `${Math.floor(1000 + Math.random() * 9000).toString()}_${trimmedSlug}`;
-          } else {
-            updateData.slug = trimmedSlug;
+          let testSlug = trimmedSlug;
+          while (true) {
+            const slugExists = await prisma.product.findFirst({
+              where: { slug: testSlug, id: { not: existing.id } },
+            });
+            if (slugExists) {
+              testSlug = `${trimmedSlug}_${Math.floor(1000 + Math.random() * 9000).toString()}`;
+            } else {
+              break;
+            }
           }
+          updateData.slug = testSlug;
         }
       }
     }
@@ -166,7 +171,7 @@ async function updateProduct(
     }
 
     if (body.originDispatch !== undefined) {
-      updateData.originDispatch = typeof body.originDispatch === "string" ? body.originDispatch.trim() : "";
+      updateData.originDispatch = typeof body.originDispatch === "string" && body.originDispatch.trim() ? body.originDispatch.trim() : null;
     }
 
     if (body.categoryId !== undefined) {
@@ -228,6 +233,7 @@ async function updateProduct(
         } : null,
         image: imageList[0] || "",
         images: imageList,
+        originDispatch: updated.originDispatch || null,
         featured: updated.featured,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),

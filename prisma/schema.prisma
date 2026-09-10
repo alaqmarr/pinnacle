@@ -245,6 +245,7 @@ model GlobalSetting {
   contactEmail      String   @default("info@pinnacledistributing.com")
   contactPhone      String   @default("(800) 555-0199")
   address           String   @default("1234 Industrial Parkway, Suite 100, Dallas, TX 75201")
+  warehouseAddress  String?  @default("1234 Industrial Parkway, Suite 100, Dallas, TX 75201")
   hours             String   @default("Monday - Friday: 8:00 AM - 5:00 PM CST")
   mapEmbedUrl       String?
   smtpHost          String?

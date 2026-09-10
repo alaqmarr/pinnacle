@@ -25,6 +25,7 @@ export default async function AdminSettingsPage() {
           contactEmail: settings.contactEmail,
           contactPhone: settings.contactPhone,
           address: settings.address,
+          warehouseAddress: settings.warehouseAddress || settings.address || "",
           businessHours: settings.hours,
           hours: settings.hours,
           mapEmbedUrl: settings.mapEmbedUrl || "",

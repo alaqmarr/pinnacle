@@ -97,6 +97,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     where: { id: "singleton" },
   });
 
+  const resolvedOriginDispatch =
+    product.originDispatch?.trim() ||
+    globalSettings?.warehouseAddress?.trim() ||
+    globalSettings?.address?.trim() ||
+    "1234 Industrial Parkway, Suite 100, Dallas, TX 75201";
+
   // Fetch related products in the same category
   let relatedProducts: any[] = [];
   if (product.categoryId) {
@@ -141,7 +147,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       </nav>
 
       {/* Main PDP Component */}
-      <ProductDetailClient product={product} />
+      <ProductDetailClient product={{ ...product, originDispatch: resolvedOriginDispatch }} />
 
       {/* Industrial Specifications & Compliance Table */}
       <div className="bg-white rounded-xl border border-slate-200 p-8 shadow-xs space-y-6">
@@ -171,8 +177,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
           <div className="flex justify-between py-2.5 border-b border-slate-100 text-xs">
             <span className="font-medium text-slate-500">Origin / Dispatch:</span>
-            <span className="font-bold text-slate-900 line-clamp-1 max-w-[200px] sm:max-w-[300px] text-right" title={product.originDispatch || globalSettings?.address || "Warehouse"}>
-              {product.originDispatch || globalSettings?.address || "Warehouse"}
+            <span className="font-bold text-slate-900 line-clamp-1 max-w-[200px] sm:max-w-[300px] text-right" title={resolvedOriginDispatch}>
+              {resolvedOriginDispatch}
             </span>
           </div>
           <div className="flex justify-between py-2 border-b border-slate-100">

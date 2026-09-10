@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Image Container */}
       <Link
         href={`/products/${product.id}`}
-        className="relative aspect-4/3 w-full overflow-hidden bg-slate-50 flex items-center justify-center border-b border-slate-100"
+        className="relative aspect-square w-full overflow-hidden bg-white p-0 m-0 flex items-center justify-center"
       >
         {/* Badges Overlay */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
@@ -81,12 +81,12 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Product Visual */}
-        <div className="w-full h-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+        <div className="w-full h-full p-0 m-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
           {displayImage.startsWith("http") || displayImage.startsWith("/") ? (
             <img
               src={displayImage}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover block m-0 p-0"
               onError={(e) => {
                 // Fallback SVG icon on image load failure
                 (e.currentTarget as HTMLElement).style.display = "none";

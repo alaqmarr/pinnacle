@@ -138,12 +138,12 @@ export function CartDrawer({ session }: { session?: any }) {
                 {items.map((item) => (
                   <div key={item.productId} className="py-4 flex gap-4 items-start">
                     {/* Thumbnail */}
-                    <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 p-1">
+                    <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 p-0 m-0">
                       {item.image ? (
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover block m-0 p-0"
                         />
                       ) : (
                         <svg className="w-6 h-6 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -52,12 +52,14 @@ export default async function EditProductPage({
           product={{
             id: product.id,
             name: product.name,
+            slug: product.slug,
             sku: product.sku || "",
             price: product.price,
             stock: product.inventory,
             categoryId: product.categoryId,
             description: product.description || "",
             image: imageList[0] || "",
+            originDispatch: product.originDispatch || "",
             featured: product.featured,
           }}
           categories={categories}

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import { generateSlug } from "@/lib/slug";
 
 export default function NewCategoryPage() {
   const router = useRouter();
@@ -17,18 +18,33 @@ export default function NewCategoryPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const handleNameChange = (val: string) => {
-    const generated = val
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
+    const generated = generateSlug(val);
     setFormData((prev) => ({
       ...prev,
       name: val,
-      slug: prev.slug === "" || prev.slug === generated ? generated : prev.slug,
+      slug: generated,
     }));
   };
+
+  React.useEffect(() => {
+    if (!formData.name) return;
+    const timer = setTimeout(async () => {
+      const base = generateSlug(formData.name);
+      if (!base) return;
+      try {
+        const res = await fetch(`/api/admin/check-slug?slug=${encodeURIComponent(base)}&type=category`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.slug) {
+            setFormData((prev) => ({ ...prev, slug: data.slug }));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [formData.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

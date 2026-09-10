@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatUSD, parseUSDToCents, centsToDollarString } from "@/lib/currency";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import { generateSlug } from "@/lib/slug";
 
 export interface ProductItem {
   id: string;
@@ -83,11 +84,7 @@ export default function ProductsClient({
     if (!isAddOpen && !editProduct) return;
     
     const delayDebounceFn = setTimeout(async () => {
-      const generatedSlug = formData.name
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+      const generatedSlug = generateSlug(formData.name);
 
       if (!generatedSlug) return;
 
@@ -171,6 +168,7 @@ export default function ProductsClient({
           stock: parseInt(formData.stock, 10) || 0,
           categoryId: formData.categoryId || null,
           description: formData.description.trim(),
+          originDispatch: formData.originDispatch.trim() || null,
           image: formData.image.trim(),
           featured: formData.featured,
         }),
@@ -191,6 +189,7 @@ export default function ProductsClient({
           slug: newProd.slug,
           sku: newProd.sku || "",
           description: newProd.description || "",
+          originDispatch: newProd.originDispatch || "",
           price: newProd.price,
           stock: newProd.stock ?? newProd.inventory,
           inventory: newProd.inventory ?? newProd.stock,
@@ -236,6 +235,7 @@ export default function ProductsClient({
           stock: parseInt(formData.stock, 10) || 0,
           categoryId: formData.categoryId || null,
           description: formData.description.trim(),
+          originDispatch: formData.originDispatch.trim() || null,
           image: formData.image.trim(),
           featured: formData.featured,
         }),
@@ -258,6 +258,7 @@ export default function ProductsClient({
                 slug: updated.slug,
                 sku: updated.sku || "",
                 description: updated.description || "",
+                originDispatch: updated.originDispatch || "",
                 price: updated.price,
                 stock: updated.stock ?? updated.inventory,
                 inventory: updated.inventory ?? updated.stock,
@@ -534,7 +535,14 @@ export default function ProductsClient({
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setFormData({
+                        ...formData,
+                        name: newName,
+                        slug: generateSlug(newName),
+                      });
+                    }}
                     placeholder="e.g. 200# Kraft Corrugated Box 16x16x16"
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   />
@@ -713,7 +721,14 @@ export default function ProductsClient({
                     type="text"
                     required
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setFormData({
+                        ...formData,
+                        name: newName,
+                        slug: generateSlug(newName),
+                      });
+                    }}
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
                   />
                 </div>
