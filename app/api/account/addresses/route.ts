@@ -21,6 +21,17 @@ export async function GET() {
       );
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    });
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "User account not found" },
+        { status: 401 }
+      );
+    }
+
     const addresses = await prisma.address.findMany({
       where: { userId: session.user.id },
       orderBy: [
@@ -45,6 +56,17 @@ export async function POST(req: NextRequest) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
         { error: "Unauthorized", message: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    });
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized", message: "User account not found" },
         { status: 401 }
       );
     }

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions, getAuthSession } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getAuthSession()) || (await getServerSession(authOptions));
     if (!session || (session.user?.role !== "ADMIN" && session.user?.role !== "MARKETING")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

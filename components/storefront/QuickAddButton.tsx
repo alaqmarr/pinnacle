@@ -14,7 +14,8 @@ export function QuickAddButton({
   className?: string;
 }) {
   const { addToCart } = useCart();
-  const { ecommerceMode, whatsappNumber } = useSettings();
+  const { ecommerceMode } = useSettings();
+  const { whatsappNumber } = useSettings();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const handleAdd = async (e: React.MouseEvent) => {
@@ -45,9 +46,7 @@ export function QuickAddButton({
   };
 
   let btnClass = "bg-slate-900 hover:bg-slate-800 text-white";
-  let btnText = ecommerceMode
-    ? `Add to Cart - ${formatUSD(product.price)}`
-    : "Add to Quote";
+  let btnText = ecommerceMode ? `Add to Cart - ${formatUSD(product.price)}` : "Add to Cart";
 
   if (status === "loading") {
     btnClass = "bg-slate-700 text-slate-200 cursor-wait";

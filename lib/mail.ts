@@ -364,7 +364,7 @@ export function generateQuoteNotificationEmailHtml(props: QuoteNotificationEmail
 
   const bodyContent = `
     <div style="background-color: #f1f5f9; border-left: 4px solid #0284c7; padding: 20px; border-radius: 0 8px 8px 0; margin: 0 0 32px 0;">
-      <h3 style="color: #0f172a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 16px 0;">Customer Details</h3>
+      <h3 style="color: #0f172a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 16px 0;">Customer Contact Information</h3>
       <table width="100%" border="0" cellspacing="0" cellpadding="0" style="font-size: 14px;">
         <tr><td width="130" style="padding: 4px 0; color: #64748b;"><strong>Contact Name:</strong></td><td style="padding: 4px 0; color: #0f172a;">${safeCustomerName}</td></tr>
         <tr><td width="130" style="padding: 4px 0; color: #64748b;"><strong>Email:</strong></td><td style="padding: 4px 0;"><a href="mailto:${safeCustomerEmail}" style="color: #0284c7; text-decoration: none;">${safeCustomerEmail || "N/A"}</a></td></tr>
@@ -396,7 +396,7 @@ export function generateQuoteNotificationEmailHtml(props: QuoteNotificationEmail
     </div>
   `;
 
-  return withProfessionalWrapper(`Quote Request Received: ${reference}`, "Action Required: Commercial Sales Desk", bodyContent);
+  return withProfessionalWrapper(`Commercial Quote Request: ${reference}`, "Action Required: Commercial Sales Desk", bodyContent);
 }
 
 export interface CustomerQuoteConfirmationEmailProps {

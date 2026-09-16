@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGlobalSettings, updateGlobalSettings } from "@/lib/settings";
+import { revalidatePath, revalidateTag } from "next/cache";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const settings = await getGlobalSettings();
-    return NextResponse.json({
-      ...settings,
-      businessHours: settings.hours,
-    });
+    return NextResponse.json(
+      {
+        ...settings,
+        businessHours: settings.hours,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (error: any) {
     console.error("[Admin API] Failed to fetch settings:", error);
     return NextResponse.json(
@@ -49,6 +59,21 @@ async function handleUpdate(req: NextRequest) {
     }
 
     const updated = await updateGlobalSettings(payload);
+
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath("/(storefront)", "layout");
+      revalidatePath("/products", "page");
+      revalidatePath("/products/[id]", "page");
+      revalidatePath("/categories", "page");
+      revalidatePath("/categories/[id]", "page");
+      revalidatePath("/cart", "page");
+      revalidatePath("/checkout", "page");
+      revalidatePath("/contact", "page");
+      revalidateTag("settings", { expire: 0 });
+    } catch {
+      // Ignore when running outside active server/request context
+    }
 
     return NextResponse.json({
       success: true,

@@ -161,7 +161,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
           ) : (
             <div className="mt-4">
               <span className="inline-block text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded">
-                Catalog Item &bull; Quote Required
+                Wholesale Catalog • Quote on Request
               </span>
             </div>
           )}

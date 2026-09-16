@@ -43,16 +43,41 @@ export async function middleware(req: NextRequest) {
   }
 
   // Extract session token
-  const rawCookieToken =
+  let rawCookieToken =
     req.cookies.get("next-auth.session-token")?.value ||
     req.cookies.get("__Secure-next-auth.session-token")?.value;
+
+  if (!rawCookieToken && req.cookies) {
+    const hasCookie = (name: string) =>
+      typeof req.cookies.has === "function"
+        ? req.cookies.has(name)
+        : Boolean(req.cookies.get(name));
+
+    const isSecure = Boolean(req.cookies.get("__Secure-next-auth.session-token.0"));
+    const baseName = isSecure ? "__Secure-next-auth.session-token" : "next-auth.session-token";
+    if (hasCookie(`${baseName}.0`)) {
+      let full = "";
+      let i = 0;
+      while (hasCookie(`${baseName}.${i}`)) {
+        full += req.cookies.get(`${baseName}.${i}`)?.value || "";
+        i++;
+      }
+      rawCookieToken = full || undefined;
+    }
+  }
 
   let token: any = null;
 
   if (rawCookieToken) {
     try {
+      let candidateToken = rawCookieToken;
+      try {
+        candidateToken = decodeURIComponent(rawCookieToken);
+      } catch {
+        // Keep candidateToken as rawCookieToken
+      }
       token = await decode({
-        token: rawCookieToken,
+        token: candidateToken,
         secret: NEXTAUTH_SECRET,
       });
     } catch {

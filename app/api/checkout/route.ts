@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions, getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   sendMail,
@@ -14,8 +14,21 @@ import { isQuoteOrder, processOrderInventory, US_ZIP_REGEX } from "@/lib/checkou
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = (session?.user as any)?.id || null;
+    const session = (await getAuthSession()) || (await getServerSession(authOptions));
+    let userId = (session?.user as any)?.id || null;
+    if (userId) {
+      try {
+        const userExists = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { id: true },
+        });
+        if (!userExists) {
+          userId = null;
+        }
+      } catch {
+        userId = null;
+      }
+    }
 
     let body: any;
     try {

@@ -119,6 +119,69 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
+import { cookies } from "next/headers";
+import { decode } from "next-auth/jwt";
+
 export async function getAuthSession() {
-  return getServerSession(authOptions);
+  try {
+    const session = await getServerSession(authOptions);
+    if (session?.user && (session.user as any).id) {
+      return session;
+    }
+  } catch {
+    // Continue to cookie-based extraction
+  }
+
+  try {
+    const cookieStore = await cookies();
+    let token =
+      cookieStore.get("next-auth.session-token")?.value ||
+      cookieStore.get("__Secure-next-auth.session-token")?.value;
+
+    if (!token && cookieStore) {
+      const hasCookie = (name: string) =>
+        typeof cookieStore.has === "function"
+          ? cookieStore.has(name)
+          : Boolean(cookieStore.get(name));
+
+      const isSecure = Boolean(cookieStore.get("__Secure-next-auth.session-token.0"));
+      const baseName = isSecure ? "__Secure-next-auth.session-token" : "next-auth.session-token";
+      if (hasCookie(`${baseName}.0`)) {
+        let full = "";
+        let i = 0;
+        while (hasCookie(`${baseName}.${i}`)) {
+          full += cookieStore.get(`${baseName}.${i}`)?.value || "";
+          i++;
+        }
+        token = full || undefined;
+      }
+    }
+
+    if (!token) return null;
+
+    try {
+      token = decodeURIComponent(token);
+    } catch {
+      // Keep as-is
+    }
+
+    const decoded = await decode({ token, secret: NEXTAUTH_SECRET });
+    if (!decoded || !decoded.email) return null;
+
+    const id = (decoded.id as string) || (decoded.sub as string) || "";
+    if (!id) return null;
+
+    return {
+      user: {
+        id,
+        name: (decoded.name as string) || "",
+        email: decoded.email as string,
+        role: ((decoded.role as string) || "CUSTOMER") as UserRole,
+        allowCredit: Boolean(decoded.allowCredit),
+        allowPickup: Boolean(decoded.allowPickup),
+      },
+    };
+  } catch (err) {
+    return null;
+  }
 }

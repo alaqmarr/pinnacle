@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions, getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getAuthSession()) || (await getServerSession(authOptions));
 
     if (!session || !session.user || !(session.user as any).id) {
       return NextResponse.json(
@@ -41,6 +41,16 @@ export async function POST(req: Request) {
     });
 
     if (!cart) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true },
+      });
+      if (!userExists) {
+        return NextResponse.json(
+          { success: false, error: "Unauthorized. User account not found." },
+          { status: 401 }
+        );
+      }
       cart = await prisma.cart.create({
         data: { userId },
       });
