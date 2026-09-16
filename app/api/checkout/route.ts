@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendMail } from "@/lib/mail";
+import {
+  sendMail,
+  generateQuoteNotificationEmailHtml,
+  generateCustomerQuoteConfirmationEmailHtml,
+  escapeHtml,
+} from "@/lib/mail";
+import { getGlobalSettings } from "@/lib/settings";
 import { formatUSD } from "@/lib/currency";
-
-const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/;
+import { isQuoteOrder, processOrderInventory, US_ZIP_REGEX } from "@/lib/checkout";
 
 export async function POST(req: Request) {
   try {
@@ -28,6 +33,9 @@ export async function POST(req: Request) {
       items,
       notes,
     } = body;
+
+    const settings = await getGlobalSettings();
+    const isQuote = String(paymentMethod).toUpperCase() === "QUOTE" || settings.ecommerceMode === false;
 
     // 1. Validate Cart Items
     if (!Array.isArray(items) || items.length === 0) {
@@ -63,7 +71,7 @@ export async function POST(req: Request) {
     }
 
     // 3. Validate Test Card Declines
-    if (paymentMethod === "CREDIT_CARD" && paymentDetails?.cardNumber === "4000000000000002") {
+    if (!isQuote && paymentMethod === "CREDIT_CARD" && paymentDetails?.cardNumber === "4000000000000002") {
       return NextResponse.json(
         {
           success: false,
@@ -110,7 +118,7 @@ export async function POST(req: Request) {
         );
       }
 
-      if (product.inventory < qty) {
+      if (!isQuote && product.inventory < qty) {
         return NextResponse.json(
           {
             success: false,
@@ -172,10 +180,13 @@ export async function POST(req: Request) {
     const orderNumber = `PIN-${new Date().getFullYear()}-${randomSuffix}`;
 
     // 8. Order Status and Payment Status
-    const isPurchaseOrder = normalizedMethod === "PURCHASE_ORDER" || String(paymentMethod).toUpperCase() === "PURCHASE_ORDER" || String(paymentMethod).toUpperCase() === "PO_NET30";
-    const paymentStatus = isPurchaseOrder ? "UNPAID" : "PAID";
-    const status = "PENDING";
-    const recordedPaymentMethod = isPurchaseOrder ? "PURCHASE_ORDER" : "CREDIT_CARD";
+    const isPurchaseOrder =
+      normalizedMethod === "PURCHASE_ORDER" ||
+      String(paymentMethod).toUpperCase() === "PURCHASE_ORDER" ||
+      String(paymentMethod).toUpperCase() === "PO_NET30";
+    const paymentStatus = isQuote ? "QUOTE" : (isPurchaseOrder ? "UNPAID" : "PAID");
+    const status = isQuote ? "QUOTE_REQUESTED" : "PENDING";
+    const recordedPaymentMethod = isQuote ? "QUOTE" : (isPurchaseOrder ? "PURCHASE_ORDER" : "CREDIT_CARD");
 
     // 9. Persist Order in database
     const order = await prisma.order.create({
@@ -212,15 +223,18 @@ export async function POST(req: Request) {
       },
     });
 
-    // 10. Deduct purchased units from product stock
-    for (const item of validatedItems) {
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: {
-          inventory: {
-            decrement: item.quantity,
-          },
-        },
+    // 10. Deduct purchased units from product stock (only for confirmed sales, not quotes)
+    if (!isQuote) {
+      await processOrderInventory(validatedItems, isQuote, {
+        decrement: (productId, quantity) =>
+          prisma.product.update({
+            where: { id: productId },
+            data: {
+              inventory: {
+                decrement: quantity,
+              },
+            },
+          }),
       });
     }
 
@@ -237,16 +251,70 @@ export async function POST(req: Request) {
     }
 
     // 12. Asynchronous email notification (fire & forget)
-    sendMail({
-      to: customerEmail.trim(),
-      subject: `Order Confirmation: ${order.orderNumber} - Pinnacle Distributing`,
-      html: `<p>Thank you for your order ${order.orderNumber}. Subtotal: ${formatUSD(subtotal)}, Total: ${formatUSD(total)}.</p>`,
-    }).catch(() => {});
+    if (isQuote) {
+      const adminEmail = settings.notificationEmail || settings.contactEmail || "admin@pinnacledistributing.com";
+      const formattedAddressText = `${address1.trim()}${address2 ? `, ${address2.trim()}` : ""}, ${city.trim()}, ${state.trim().toUpperCase()} ${trimmedZip}`;
+      const adminHtml = generateQuoteNotificationEmailHtml({
+        quoteNumber: order.orderNumber,
+        customerName: recipientName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customer?.phone ? String(customer.phone).trim() : null,
+        company: customer?.company ? String(customer.company).trim() : null,
+        shippingAddress: {
+          addressLine1: address1.trim(),
+          addressLine2: address2 ? address2.trim() : null,
+          city: city.trim(),
+          state: state.trim().toUpperCase(),
+          postalCode: trimmedZip,
+          country: shippingAddress?.country || "US",
+        },
+        items: validatedItems.map((item) => ({
+          name: item.name,
+          sku: item.sku,
+          quantity: item.quantity,
+        })),
+        notes: notes ? String(notes).trim() : null,
+      });
+
+      sendMail({
+        to: adminEmail,
+        subject: `New Commercial Quote Request: ${escapeHtml(order.orderNumber)} - ${escapeHtml(recipientName.trim()).replace(/[\r\n]+/g, " ")}`,
+        html: adminHtml,
+      }).catch((err) => console.warn("[CheckoutAPI] Failed to send admin quote notification:", err));
+
+      const customerHtml = generateCustomerQuoteConfirmationEmailHtml({
+        quoteNumber: order.orderNumber,
+        customerName: recipientName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customer?.phone ? String(customer.phone).trim() : null,
+        addressText: formattedAddressText,
+        notes: notes ? String(notes).trim() : null,
+        items: validatedItems.map((item) => ({
+          name: item.name,
+          sku: item.sku,
+          quantity: item.quantity,
+        })),
+      });
+
+      sendMail({
+        to: customerEmail.trim(),
+        subject: `Quote Request Received: ${escapeHtml(order.orderNumber)} - Pinnacle Distributing`,
+        html: customerHtml,
+      }).catch((err) => console.warn("[CheckoutAPI] Failed to send customer quote confirmation:", err));
+    } else {
+      const safeOrderNum = escapeHtml(order.orderNumber);
+      sendMail({
+        to: customerEmail.trim(),
+        subject: `Order Confirmation: ${order.orderNumber} - Pinnacle Distributing`,
+        html: `<p>Thank you for your order ${safeOrderNum}. Subtotal: ${formatUSD(subtotal)}, Total: ${formatUSD(total)}.</p>`,
+      }).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
+      isQuote: Boolean(isQuote),
       order: {
         id: order.id,
         orderNumber: order.orderNumber,

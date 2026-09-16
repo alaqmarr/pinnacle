@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { QuickAddButton } from "@/components/storefront/QuickAddButton";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/context/CartContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export interface ProductCardProps {
   product: {
@@ -27,6 +28,7 @@ export interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { ecommerceMode } = useSettings();
   // Parse images: either JSON array string or fallback
   let displayImage = "/images/placeholder-product.svg";
   if (product.images) {
@@ -130,9 +132,15 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-xs text-slate-500 ml-1 font-medium">(27)</span>
           </div>
 
-          <span className="text-xl sm:text-2xl font-black text-[#0B1E36] tracking-tight">
-            {formatUSD(product.price)}
-          </span>
+          {ecommerceMode ? (
+            <span className="text-xl sm:text-2xl font-black text-[#0B1E36] tracking-tight">
+              {formatUSD(product.price)}
+            </span>
+          ) : (
+            <span className="inline-block text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-1 rounded">
+              Catalog Item
+            </span>
+          )}
         </div>
 
         <QuickAddButton product={product} />

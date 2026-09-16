@@ -94,6 +94,8 @@ export default function OrdersClient({
 
   const getStatusBadge = (status: string) => {
     const colorMap: Record<string, string> = {
+      QUOTE_REQUESTED: "bg-purple-50 text-purple-700 border-purple-200",
+      QUOTE: "bg-purple-50 text-purple-700 border-purple-200",
       PENDING: "bg-amber-50 text-amber-700 border-amber-200",
       PROCESSING: "bg-blue-50 text-blue-700 border-blue-200",
       SHIPPED: "bg-indigo-50 text-indigo-700 border-indigo-200",
@@ -141,6 +143,7 @@ export default function OrdersClient({
             className="w-full sm:w-48 px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
             <option value="ALL">All Statuses</option>
+            <option value="QUOTE_REQUESTED">Quote Requested</option>
             <option value="PENDING">Pending</option>
             <option value="PROCESSING">Processing</option>
             <option value="SHIPPED">Shipped</option>
@@ -208,6 +211,7 @@ export default function OrdersClient({
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
                         className="text-xs font-semibold px-2 py-1 bg-slate-50 border border-slate-200 rounded focus:ring-1 focus:ring-sky-500 focus:outline-none"
                       >
+                        <option value="QUOTE_REQUESTED">QUOTE_REQUESTED</option>
                         <option value="PENDING">PENDING</option>
                         <option value="PROCESSING">PROCESSING</option>
                         <option value="SHIPPED">SHIPPED</option>
@@ -219,6 +223,8 @@ export default function OrdersClient({
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
                         order.paymentStatus === "PAID"
                           ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : order.paymentStatus === "QUOTE"
+                          ? "bg-purple-50 text-purple-700 border border-purple-200"
                           : "bg-slate-100 text-slate-600 border border-slate-200"
                       }`}>
                         {order.paymentStatus}
@@ -368,6 +374,7 @@ export default function OrdersClient({
                   onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
                   className="text-xs px-3 py-1.5 border border-slate-300 rounded-lg bg-white font-semibold"
                 >
+                  <option value="QUOTE_REQUESTED">QUOTE_REQUESTED</option>
                   <option value="PENDING">PENDING</option>
                   <option value="PROCESSING">PROCESSING</option>
                   <option value="SHIPPED">SHIPPED</option>

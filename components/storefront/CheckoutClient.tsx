@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useSettings } from "@/context/SettingsContext";
 import { formatUSD } from "@/lib/currency";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -78,6 +79,7 @@ function StripeReviewForm({
 export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddresses = [], freightMethods = [] }: { sessionUser: any, stripePublishableKey?: string, savedAddresses?: any[], freightMethods?: any[] }) {
   const router = useRouter();
   const { items, subtotal, totalItems, clearCart, isHydrated } = useCart();
+  const { ecommerceMode } = useSettings();
 
   const stripePromise = React.useMemo(() => stripePublishableKey ? loadStripe(stripePublishableKey.trim()) : null, [stripePublishableKey]);
   const [clientSecret, setClientSecret] = useState("");
@@ -179,7 +181,12 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
       }
       setStep(2);
     } else if (step === 2) {
-      setStep(3);
+      if (!ecommerceMode) {
+        // Bypass Step 3 (Payment) completely for Catalog/Quote Mode
+        setStep(4);
+      } else {
+        setStep(3);
+      }
     } else if (step === 3) {
       if (paymentMethod === "STRIPE") {
         if (!stripePromise) {
@@ -216,6 +223,14 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
     setIsSubmitting(true);
 
     try {
+      const isQuote = !ecommerceMode;
+      const finalPaymentMethod = isQuote ? "QUOTE" : paymentMethod;
+      const finalPaymentDetails = isQuote
+        ? { type: "QUOTE" }
+        : paymentIntentId
+        ? { paymentIntentId }
+        : { poNumber: "NET30-PENDING" };
+
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -223,8 +238,8 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
           customer,
           shippingAddress,
           shippingMethod,
-          paymentMethod,
-          paymentDetails: paymentIntentId ? { paymentIntentId } : { poNumber: "NET30-PENDING" },
+          paymentMethod: finalPaymentMethod,
+          paymentDetails: finalPaymentDetails,
           items,
           notes: orderNotes,
         }),
@@ -249,12 +264,20 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
       <div className="lg:col-span-8 space-y-6">
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
-          <div className="grid grid-cols-4 text-center text-xs font-bold">
-            <div className={`pb-2 border-b-2 ${step >= 1 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>1. Address</div>
-            <div className={`pb-2 border-b-2 ${step >= 2 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>2. Freight</div>
-            <div className={`pb-2 border-b-2 ${step >= 3 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>3. Payment</div>
-            <div className={`pb-2 border-b-2 ${step >= 4 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>4. Review</div>
-          </div>
+          {ecommerceMode ? (
+            <div className="grid grid-cols-4 text-center text-xs font-bold">
+              <div className={`pb-2 border-b-2 ${step >= 1 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>1. Address</div>
+              <div className={`pb-2 border-b-2 ${step >= 2 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>2. Freight</div>
+              <div className={`pb-2 border-b-2 ${step >= 3 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>3. Payment</div>
+              <div className={`pb-2 border-b-2 ${step >= 4 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>4. Review</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 text-center text-xs font-bold">
+              <div className={`pb-2 border-b-2 ${step >= 1 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>1. Address & Contact</div>
+              <div className={`pb-2 border-b-2 ${step >= 2 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>2. Freight Preference</div>
+              <div className={`pb-2 border-b-2 ${step >= 4 ? "border-sky-600 text-sky-600" : "border-slate-200 text-slate-400"}`}>3. Review Quote</div>
+            </div>
+          )}
         </div>
 
         {errorMessage && (
@@ -346,13 +369,19 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
                         {method.description && <span className="text-xs text-slate-500">{method.description}</span>}
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-slate-900">{formatUSD(method.cost)}</span>
+                    {ecommerceMode ? (
+                      <span className="text-sm font-bold text-slate-900">{formatUSD(method.cost)}</span>
+                    ) : (
+                      <span className="text-xs font-bold text-slate-500 uppercase bg-slate-100 px-2 py-1 rounded">Included in Quote</span>
+                    )}
                   </label>
                 ))}
               </div>
             <div className="pt-4 flex justify-between">
               <Button type="button" variant="outline" size="md" onClick={() => setStep(1)}>&larr; Back to Address</Button>
-              <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>Continue &rarr;</Button>
+              <Button type="button" variant="primary" size="lg" onClick={handleNextStep}>
+                {ecommerceMode ? "Continue →" : "Continue to Quote Review →"}
+              </Button>
             </div>
           </div>
         )}
@@ -414,7 +443,9 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
         {step === 4 && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
             <div className="border-b border-slate-100 pb-3">
-              <h2 className="text-lg font-bold text-slate-900">Step 4: Final Review & Confirmation</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                {ecommerceMode ? "Step 4: Final Review & Confirmation" : "Step 3: Review & Submit Quote Request"}
+              </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
@@ -428,7 +459,10 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                 <strong className="text-slate-900 font-bold uppercase tracking-wider block mb-2">Method & Billing</strong>
                 <p className="text-slate-800"><span className="font-medium">Freight:</span> {selectedFreight?.name}</p>
-                <p className="text-slate-800 mt-1"><span className="font-medium">Payment:</span> {paymentMethod}</p>
+                <p className="text-slate-800 mt-1">
+                  <span className="font-medium">{ecommerceMode ? "Payment:" : "Terms:"}</span>{" "}
+                  {ecommerceMode ? paymentMethod : "Commercial Wholesale Quote"}
+                </p>
               </div>
             </div>
 
@@ -437,7 +471,7 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
               <textarea rows={2} value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} className="w-full p-3 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:border-sky-500" />
             </div>
 
-            {paymentMethod === "STRIPE" && clientSecret && stripePromise ? (
+            {ecommerceMode && paymentMethod === "STRIPE" && clientSecret && stripePromise ? (
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <StripeReviewForm 
                   total={total}
@@ -450,8 +484,18 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
               </Elements>
             ) : (
               <div className="pt-4 flex justify-between items-center">
-                <Button type="button" variant="outline" size="md" onClick={() => setStep(3)}>← Back to Payment</Button>
-                <Button type="button" variant="accent" size="lg" isLoading={isSubmitting} onClick={() => handleFinalSubmit()}>Place Commercial Order ({formatUSD(total)})</Button>
+                <Button type="button" variant="outline" size="md" onClick={() => setStep(ecommerceMode ? 3 : 2)}>
+                  {ecommerceMode ? "← Back to Payment" : "← Back to Freight"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="accent"
+                  size="lg"
+                  isLoading={isSubmitting}
+                  onClick={() => handleFinalSubmit()}
+                >
+                  {ecommerceMode ? `Place Commercial Order (${formatUSD(total)})` : "Submit Quote Request"}
+                </Button>
               </div>
             )}
           </div>
@@ -460,24 +504,45 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
 
       <div className="lg:col-span-4">
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4 sticky top-24">
-          <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Order Review ({totalItems} items)</h3>
+          <h3 className="text-base font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">
+            {ecommerceMode ? `Order Review (${totalItems} items)` : `Quote Review (${totalItems} items)`}
+          </h3>
           <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto pr-1">
             {items.map((item) => (
               <div key={item.productId} className="py-3 flex justify-between text-xs gap-3">
                 <div className="min-w-0">
                   <strong className="text-slate-900 block truncate">{item.name}</strong>
-                  <span className="text-slate-400">Qty: {item.quantity} × {formatUSD(item.price)}</span>
+                  <span className="text-slate-400">
+                    Qty: {item.quantity}{ecommerceMode ? ` × ${formatUSD(item.price)}` : ""}
+                  </span>
                 </div>
-                <span className="font-bold text-slate-900 shrink-0">{formatUSD(item.price * item.quantity)}</span>
+                {ecommerceMode && (
+                  <span className="font-bold text-slate-900 shrink-0">{formatUSD(item.price * item.quantity)}</span>
+                )}
               </div>
             ))}
           </div>
-          <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-            <div className="flex justify-between text-slate-600"><span>Items Subtotal:</span><span className="font-semibold text-slate-900">{formatUSD(subtotal)}</span></div>
-            <div className="flex justify-between text-slate-600"><span>Freight Shipping:</span><span className="font-semibold text-slate-900">{formatUSD(shippingCost)}</span></div>
-            <div className="flex justify-between text-slate-600"><span>Estimated Tax:</span><span className="font-semibold text-slate-900">{formatUSD(tax)}</span></div>
-            <div className="pt-2 border-t border-slate-200 flex justify-between text-base font-extrabold text-slate-900"><span>Total:</span><span className="text-xl text-slate-900">{formatUSD(total)}</span></div>
-          </div>
+          {ecommerceMode ? (
+            <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-600"><span>Items Subtotal:</span><span className="font-semibold text-slate-900">{formatUSD(subtotal)}</span></div>
+              <div className="flex justify-between text-slate-600"><span>Freight Shipping:</span><span className="font-semibold text-slate-900">{formatUSD(shippingCost)}</span></div>
+              <div className="flex justify-between text-slate-600"><span>Estimated Tax:</span><span className="font-semibold text-slate-900">{formatUSD(tax)}</span></div>
+              <div className="pt-2 border-t border-slate-200 flex justify-between text-base font-extrabold text-slate-900"><span>Total:</span><span className="text-xl text-slate-900">{formatUSD(total)}</span></div>
+            </div>
+          ) : (
+            <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-600">
+                <span>Total Items in Quote:</span>
+                <span className="font-semibold text-slate-900">{totalItems} units</span>
+              </div>
+              <div className="p-3 bg-sky-50 border border-sky-100 rounded-lg text-xs text-slate-600 space-y-1 mt-2">
+                <p className="font-bold text-slate-900">No Payment Due Today</p>
+                <p className="text-slate-500 leading-relaxed">
+                  Our commercial sales team will review your quantities and contact you with a formal quote including freight and volume discounts.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

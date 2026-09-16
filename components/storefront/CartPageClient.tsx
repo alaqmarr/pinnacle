@@ -3,12 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useSettings } from "@/context/SettingsContext";
 import { formatUSD } from "@/lib/currency";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/storefront/EmptyState";
 
 export function CartPageClient() {
+  const { ecommerceMode } = useSettings();
   const {
     items,
     totalItems,
@@ -96,9 +98,11 @@ export function CartPageClient() {
                         SKU: {item.sku}
                       </p>
                     )}
-                    <p className="text-xs text-slate-500 mt-1 font-medium">
-                      {formatUSD(item.price)} each
-                    </p>
+                    {ecommerceMode && (
+                      <p className="text-xs text-slate-500 mt-1 font-medium">
+                        {formatUSD(item.price)} each
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -110,9 +114,11 @@ export function CartPageClient() {
                   />
 
                   <div className="text-right min-w-[80px]">
-                    <span className="text-base font-extrabold text-slate-900 block">
-                      {formatUSD(item.price * item.quantity)}
-                    </span>
+                    {ecommerceMode && (
+                      <span className="text-base font-extrabold text-slate-900 block">
+                        {formatUSD(item.price * item.quantity)}
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => removeFromCart(item.productId)}
@@ -137,44 +143,61 @@ export function CartPageClient() {
         </div>
       </div>
 
-      {/* Right Column: Order Summary */}
+      {/* Right Column: Order / Quote Summary */}
       <div className="lg:col-span-4">
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
           <h2 className="text-base font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">
-            Order Summary
+            {ecommerceMode ? "Order Summary" : "Quote Request Summary"}
           </h2>
 
-          <div className="space-y-3 text-xs sm:text-sm">
-            <div className="flex justify-between text-slate-600">
-              <span>Items Subtotal</span>
-              <span className="font-semibold text-slate-900">{formatUSD(subtotal)}</span>
-            </div>
+          {ecommerceMode ? (
+            <div className="space-y-3 text-xs sm:text-sm">
+              <div className="flex justify-between text-slate-600">
+                <span>Items Subtotal</span>
+                <span className="font-semibold text-slate-900">{formatUSD(subtotal)}</span>
+              </div>
 
-            <div className="flex justify-between text-slate-600">
-              <span>Estimated Freight Shipping</span>
-              <span className="font-semibold text-slate-900">{formatUSD(estimatedShipping)}</span>
-            </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Estimated Freight Shipping</span>
+                <span className="font-semibold text-slate-900">{formatUSD(estimatedShipping)}</span>
+              </div>
 
-            <div className="flex justify-between text-slate-600">
-              <span>Estimated Tax (8.25%)</span>
-              <span className="font-semibold text-slate-900">{formatUSD(estimatedTax)}</span>
-            </div>
+              <div className="flex justify-between text-slate-600">
+                <span>Estimated Tax (8.25%)</span>
+                <span className="font-semibold text-slate-900">{formatUSD(estimatedTax)}</span>
+              </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-between text-base font-extrabold text-slate-900">
-              <span>Estimated Total</span>
-              <span className="text-xl text-slate-900">{formatUSD(estimatedTotal)}</span>
+              <div className="pt-3 border-t border-slate-200 flex justify-between text-base font-extrabold text-slate-900">
+                <span>Estimated Total</span>
+                <span className="text-xl text-slate-900">{formatUSD(estimatedTotal)}</span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3 text-xs sm:text-sm">
+              <div className="flex justify-between text-slate-600">
+                <span>Total Items for Quotation</span>
+                <span className="font-semibold text-slate-900">{totalItems} units</span>
+              </div>
+              <div className="p-3 bg-sky-50 border border-sky-100 rounded-lg text-xs text-slate-600 space-y-1">
+                <p className="font-bold text-slate-900">Commercial Wholesale Guarantee</p>
+                <p className="text-slate-500 leading-relaxed">
+                  Formal quotation with volume pricing, applicable commercial discounts, and direct warehouse freight options will be provided upon submission.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3 pt-2">
             <Link href="/checkout" className="block w-full">
               <Button variant="accent" size="lg" fullWidth>
-                Proceed to Checkout
+                {ecommerceMode ? "Proceed to Checkout" : "Proceed to Quote Request"}
               </Button>
             </Link>
 
             <p className="text-[11px] text-slate-400 text-center leading-relaxed">
-              Wholesale pricing in strict USD ($). Secure checkout with address verification and instant confirmation.
+              {ecommerceMode
+                ? "Wholesale pricing in strict USD ($). Secure checkout with address verification and instant confirmation."
+                : "No credit card required. Our commercial sales desk will review your inquiry within 1 business day."}
             </p>
           </div>
         </div>

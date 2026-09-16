@@ -3,11 +3,13 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import { useSettings } from "@/context/SettingsContext";
 import { formatUSD } from "@/lib/currency";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { Button } from "@/components/ui/Button";
 
 export function CartDrawer({ session }: { session?: any }) {
+  const { ecommerceMode } = useSettings();
   const {
     items,
     totalItems,
@@ -166,9 +168,11 @@ export function CartDrawer({ session }: { session?: any }) {
                           SKU: {item.sku}
                         </p>
                       )}
-                      <p className="text-xs text-slate-600 mt-1 font-medium">
-                        {formatUSD(item.price)} each
-                      </p>
+                      {ecommerceMode && (
+                        <p className="text-xs text-slate-600 mt-1 font-medium">
+                          {formatUSD(item.price)} each
+                        </p>
+                      )}
 
                       <div className="mt-3 flex items-center justify-between">
                         <QuantitySelector
@@ -178,9 +182,11 @@ export function CartDrawer({ session }: { session?: any }) {
                         />
 
                         <div className="text-right">
-                          <span className="text-sm font-bold text-slate-900 block">
-                            {formatUSD(item.price * item.quantity)}
-                          </span>
+                          {ecommerceMode && (
+                            <span className="text-sm font-bold text-slate-900 block">
+                              {formatUSD(item.price * item.quantity)}
+                            </span>
+                          )}
                           <button
                             type="button"
                             onClick={() => removeFromCart(item.productId)}
@@ -200,22 +206,29 @@ export function CartDrawer({ session }: { session?: any }) {
           {/* Footer */}
           {items.length > 0 && (
             <div className="border-t border-slate-200 bg-slate-50 p-6 space-y-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-base font-bold text-slate-900">
-                  <span>Subtotal</span>
-                  <span className="text-xl font-extrabold text-slate-900">
-                    {formatUSD(subtotal)}
-                  </span>
+              {ecommerceMode ? (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-base font-bold text-slate-900">
+                    <span>Subtotal</span>
+                    <span className="text-xl font-extrabold text-slate-900">
+                      {formatUSD(subtotal)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Shipping, freight, and tax calculated at checkout.
+                  </p>
                 </div>
-                <p className="text-xs text-slate-500">
-                  Shipping, freight, and tax calculated at checkout.
-                </p>
-              </div>
+              ) : (
+                <div className="bg-sky-50 border border-sky-100 rounded-lg p-3 text-xs text-slate-600">
+                  <p className="font-bold text-slate-900 mb-0.5">Commercial Quote Request</p>
+                  <p className="text-slate-500">Pricing and freight provided via formal quote.</p>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Link href="/checkout" onClick={closeCart} className="block w-full">
                   <Button variant="accent" size="lg" fullWidth>
-                    Proceed to Checkout
+                    {ecommerceMode ? "Proceed to Checkout" : "Proceed to Quote Request"}
                   </Button>
                 </Link>
 

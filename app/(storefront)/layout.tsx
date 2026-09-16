@@ -2,6 +2,7 @@ import React from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { getGlobalSettings, getPublicSettings } from "@/lib/settings";
+import { SettingsProvider } from "@/context/SettingsContext";
 import { CartProvider } from "@/context/CartContext";
 import { Navbar } from "@/components/storefront/Navbar";
 import { Footer } from "@/components/storefront/Footer";
@@ -27,18 +28,20 @@ export default async function StorefrontLayout({
   });
 
   return (
-    <CartProvider>
-      <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans">
-        <Navbar
-          companyName={publicSettings.companyName}
-          phone={publicSettings.contactPhone}
-          categories={categories}
-          session={session}
-        />
-        <main className="flex-1">{children}</main>
-        <Footer settings={publicSettings} />
-        <CartDrawer session={session} />
-      </div>
-    </CartProvider>
+    <SettingsProvider settings={publicSettings}>
+      <CartProvider>
+        <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 font-sans">
+          <Navbar
+            companyName={publicSettings.companyName}
+            phone={publicSettings.contactPhone}
+            categories={categories}
+            session={session}
+          />
+          <main className="flex-1">{children}</main>
+          <Footer settings={publicSettings} />
+          <CartDrawer session={session} />
+        </div>
+      </CartProvider>
+    </SettingsProvider>
   );
 }

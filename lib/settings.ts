@@ -34,6 +34,8 @@ export interface GlobalSettingData {
   stripeSecretKey?: string | null;
   stripeWebhookSecret?: string | null;
   stripeEnabled?: boolean;
+  ecommerceMode?: boolean;
+  whatsappNumber?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -50,6 +52,8 @@ export interface PublicGlobalSettings {
   notificationEmail: string | null;
   headScripts?: string | null;
   bodyTopScripts?: string | null;
+  ecommerceMode: boolean;
+  whatsappNumber?: string | null;
 }
 
 export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "updatedAt"> = {
@@ -75,6 +79,8 @@ export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "upd
   stripeSecretKey: null,
   stripeWebhookSecret: null,
   stripeEnabled: false,
+  ecommerceMode: true,
+  whatsappNumber: "+18005550199",
 };
 
 /**
@@ -138,7 +144,18 @@ export type UpdateGlobalSettingsInput = Partial<{
   stripeSecretKey?: string | null;
   stripeWebhookSecret?: string | null;
   stripeEnabled?: boolean;
+  ecommerceMode?: boolean | string;
+  whatsappNumber?: string | null;
 }>;
+
+/**
+ * Normalizes user/form inputs to boolean for ecommerceMode.
+ * Accepts boolean, "true"/"false" strings, or 1/0 numbers.
+ */
+export function normalizeEcommerceMode(val: unknown): boolean | undefined {
+  if (val === undefined) return undefined;
+  return val === true || val === "true" || val === 1 || val === "1";
+}
 
 /**
  * Updates the global settings singleton record in the SQLite database.
@@ -178,6 +195,11 @@ export async function updateGlobalSettings(
     updateData.smtpSecure = updateData.smtpSecure === true || updateData.smtpSecure === "true";
   }
 
+  // Normalize ecommerceMode boolean
+  if (updateData.ecommerceMode !== undefined) {
+    updateData.ecommerceMode = normalizeEcommerceMode(updateData.ecommerceMode);
+  }
+
   // Trim text fields
   const stringFields = [
     "companyName",
@@ -192,6 +214,7 @@ export async function updateGlobalSettings(
     "smtpFrom",
     "smtpFromName",
     "notificationEmail",
+    "whatsappNumber",
   ];
   for (const field of stringFields) {
     if (typeof updateData[field] === "string") {
@@ -235,5 +258,7 @@ export function getPublicSettings(settings: GlobalSettingData): PublicGlobalSett
     notificationEmail: settings.notificationEmail,
     headScripts: settings.headScripts || null,
     bodyTopScripts: settings.bodyTopScripts || null,
+    ecommerceMode: settings.ecommerceMode !== undefined ? Boolean(settings.ecommerceMode) : true,
+    whatsappNumber: settings.whatsappNumber ?? null,
   };
 }

@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { getGlobalSettings } from "@/lib/settings";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { EmptyState } from "@/components/storefront/EmptyState";
 import { Button } from "@/components/ui/Button";
@@ -70,9 +71,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   let products: any[] = [];
   let categories: any[] = [];
   let totalProductsCount = 0;
+  let ecommerceMode = true;
 
   try {
-    const [fetchedProducts, fetchedCategories, count] = await Promise.all([
+    const [fetchedProducts, fetchedCategories, count, globalSettings] = await Promise.all([
       prisma.product.findMany({
         where,
         include: {
@@ -89,11 +91,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         },
       }),
       prisma.product.count(),
+      getGlobalSettings(),
     ]);
 
     products = fetchedProducts;
     categories = fetchedCategories;
     totalProductsCount = count;
+    ecommerceMode = globalSettings?.ecommerceMode !== false;
   } catch (err) {
     console.error("[ProductsPage] Error fetching catalog:", err);
   }
@@ -275,36 +279,40 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 >
                   Newest
                 </Link>
-                <Link
-                  href={`/products?${new URLSearchParams({
-                    ...(categoryParam ? { category: categoryParam } : {}),
-                    ...(search ? { search } : {}),
-                    ...(inStockOnly ? { inStock: "true" } : {}),
-                    sort: "price-asc",
-                  }).toString()}`}
-                  className={`px-2.5 py-1 rounded-md transition-colors ${
-                    sort === "price-asc"
-                      ? "bg-slate-900 text-white font-semibold"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  Price: Low-High
-                </Link>
-                <Link
-                  href={`/products?${new URLSearchParams({
-                    ...(categoryParam ? { category: categoryParam } : {}),
-                    ...(search ? { search } : {}),
-                    ...(inStockOnly ? { inStock: "true" } : {}),
-                    sort: "price-desc",
-                  }).toString()}`}
-                  className={`px-2.5 py-1 rounded-md transition-colors ${
-                    sort === "price-desc"
-                      ? "bg-slate-900 text-white font-semibold"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }`}
-                >
-                  Price: High-Low
-                </Link>
+                {ecommerceMode && (
+                  <>
+                    <Link
+                      href={`/products?${new URLSearchParams({
+                        ...(categoryParam ? { category: categoryParam } : {}),
+                        ...(search ? { search } : {}),
+                        ...(inStockOnly ? { inStock: "true" } : {}),
+                        sort: "price-asc",
+                      }).toString()}`}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        sort === "price-asc"
+                          ? "bg-slate-900 text-white font-semibold"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      Price: Low-High
+                    </Link>
+                    <Link
+                      href={`/products?${new URLSearchParams({
+                        ...(categoryParam ? { category: categoryParam } : {}),
+                        ...(search ? { search } : {}),
+                        ...(inStockOnly ? { inStock: "true" } : {}),
+                        sort: "price-desc",
+                      }).toString()}`}
+                      className={`px-2.5 py-1 rounded-md transition-colors ${
+                        sort === "price-desc"
+                          ? "bg-slate-900 text-white font-semibold"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      Price: High-Low
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
 

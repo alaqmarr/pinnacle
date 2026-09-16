@@ -267,6 +267,10 @@ model GlobalSetting {
   stripeWebhookSecret  String?
   stripeEnabled        Boolean  @default(false)
 
+  // Storefront Operation Mode & WhatsApp Contact (Milestone 4 - R1)
+  ecommerceMode        Boolean  @default(true)
+  whatsappNumber       String?  @default("+18005550199")
+
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }

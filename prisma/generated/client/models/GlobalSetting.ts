@@ -57,6 +57,8 @@ export type GlobalSettingMinAggregateOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean | null
+  ecommerceMode: boolean | null
+  whatsappNumber: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -84,6 +86,8 @@ export type GlobalSettingMaxAggregateOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean | null
+  ecommerceMode: boolean | null
+  whatsappNumber: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -111,6 +115,8 @@ export type GlobalSettingCountAggregateOutputType = {
   stripeSecretKey: number
   stripeWebhookSecret: number
   stripeEnabled: number
+  ecommerceMode: number
+  whatsappNumber: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -148,6 +154,8 @@ export type GlobalSettingMinAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  ecommerceMode?: true
+  whatsappNumber?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -175,6 +183,8 @@ export type GlobalSettingMaxAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  ecommerceMode?: true
+  whatsappNumber?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -202,6 +212,8 @@ export type GlobalSettingCountAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  ecommerceMode?: true
+  whatsappNumber?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -316,6 +328,8 @@ export type GlobalSettingGroupByOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean
+  ecommerceMode: boolean
+  whatsappNumber: string | null
   createdAt: Date
   updatedAt: Date
   _count: GlobalSettingCountAggregateOutputType | null
@@ -366,6 +380,8 @@ export type GlobalSettingWhereInput = {
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  ecommerceMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  whatsappNumber?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
 }
@@ -393,6 +409,8 @@ export type GlobalSettingOrderByWithRelationInput = {
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  ecommerceMode?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -423,6 +441,8 @@ export type GlobalSettingWhereUniqueInput = Prisma.AtLeast<{
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  ecommerceMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  whatsappNumber?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
 }, "id">
@@ -450,6 +470,8 @@ export type GlobalSettingOrderByWithAggregationInput = {
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  ecommerceMode?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.GlobalSettingCountOrderByAggregateInput
@@ -485,6 +507,8 @@ export type GlobalSettingScalarWhereWithAggregatesInput = {
   stripeSecretKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  ecommerceMode?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  whatsappNumber?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"GlobalSetting"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"GlobalSetting"> | Date | string
 }
@@ -512,6 +536,8 @@ export type GlobalSettingCreateInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -539,6 +565,8 @@ export type GlobalSettingUncheckedCreateInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -566,6 +594,8 @@ export type GlobalSettingUpdateInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -593,6 +623,8 @@ export type GlobalSettingUncheckedUpdateInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -620,6 +652,8 @@ export type GlobalSettingCreateManyInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -647,6 +681,8 @@ export type GlobalSettingUpdateManyMutationInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -674,6 +710,8 @@ export type GlobalSettingUncheckedUpdateManyInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -701,6 +739,8 @@ export type GlobalSettingCountOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  ecommerceMode?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -732,6 +772,8 @@ export type GlobalSettingMaxOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  ecommerceMode?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -759,6 +801,8 @@ export type GlobalSettingMinOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  ecommerceMode?: Prisma.SortOrder
+  whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -792,6 +836,8 @@ export type GlobalSettingSelect<ExtArgs extends runtime.Types.Extensions.Interna
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["globalSetting"]>
@@ -819,6 +865,8 @@ export type GlobalSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["globalSetting"]>
@@ -846,6 +894,8 @@ export type GlobalSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["globalSetting"]>
@@ -873,11 +923,13 @@ export type GlobalSettingSelectScalar = {
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  ecommerceMode?: boolean
+  whatsappNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
+export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "ecommerceMode" | "whatsappNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
 
 export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSetting"
@@ -905,6 +957,8 @@ export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.Inter
     stripeSecretKey: string | null
     stripeWebhookSecret: string | null
     stripeEnabled: boolean
+    ecommerceMode: boolean
+    whatsappNumber: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["globalSetting"]>
@@ -1352,6 +1406,8 @@ export interface GlobalSettingFieldRefs {
   readonly stripeSecretKey: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeWebhookSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly ecommerceMode: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly whatsappNumber: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly createdAt: Prisma.FieldRef<"GlobalSetting", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"GlobalSetting", 'DateTime'>
 }

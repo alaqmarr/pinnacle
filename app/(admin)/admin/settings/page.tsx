@@ -37,6 +37,8 @@ export default async function AdminSettingsPage() {
           smtpFrom: settings.smtpFrom || "",
           smtpFromName: settings.smtpFromName || "Pinnacle Distributing",
           notificationEmail: settings.notificationEmail || "",
+          ecommerceMode: settings.ecommerceMode !== undefined ? Boolean(settings.ecommerceMode) : true,
+          whatsappNumber: settings.whatsappNumber || "+18005550199",
         }}
       />
     </div>

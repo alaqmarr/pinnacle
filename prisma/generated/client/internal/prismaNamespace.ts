@@ -1707,6 +1707,8 @@ export const GlobalSettingScalarFieldEnum = {
   stripeSecretKey: 'stripeSecretKey',
   stripeWebhookSecret: 'stripeWebhookSecret',
   stripeEnabled: 'stripeEnabled',
+  ecommerceMode: 'ecommerceMode',
+  whatsappNumber: 'whatsappNumber',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

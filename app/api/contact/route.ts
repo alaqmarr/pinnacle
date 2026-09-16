@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getGlobalSettings } from "@/lib/settings";
-import { sendMail, generateInquiryEmailHtml } from "@/lib/mail";
+import { sendMail, generateInquiryEmailHtml, escapeHtml } from "@/lib/mail";
 
 export async function POST(req: Request) {
   try {
@@ -65,11 +65,12 @@ export async function POST(req: Request) {
       email: email.trim(),
       phone: phone ? phone.trim() : undefined,
       message: formattedMessage,
+      subject: subject ? subject.trim() : undefined,
     });
 
     sendMail({
       to: recipientEmail,
-      subject: `[New Inquiry] ${subject ? `${subject.trim()} - ` : ""}${name.trim()} - Pinnacle Distributing`,
+      subject: `[New Inquiry] ${subject ? `${escapeHtml(subject.trim()).replace(/[\r\n]+/g, " ")} - ` : ""}${escapeHtml(name.trim()).replace(/[\r\n]+/g, " ")} - Pinnacle Distributing`,
       html: emailHtml,
       replyTo: email.trim(),
     }).catch((err) => console.warn("[ContactAPI] Email send skipped/failed:", err));

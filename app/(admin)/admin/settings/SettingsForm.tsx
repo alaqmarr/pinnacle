@@ -20,6 +20,8 @@ export interface SettingsState {
   smtpFrom: string;
   smtpFromName: string;
   notificationEmail: string;
+  ecommerceMode: boolean;
+  whatsappNumber: string;
 }
 
 export default function SettingsForm({
@@ -169,6 +171,71 @@ export default function SettingsForm({
           </button>
         </div>
       )}
+
+      {/* SECTION: Storefront Operation Mode & WhatsApp Contact */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">
+              Storefront Operation Mode & WhatsApp Contact
+            </h2>
+            <p className="text-xs text-slate-500">
+              Control whether the storefront functions in transactional E-Commerce Mode or B2B Catalog Mode.
+            </p>
+          </div>
+          <span
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border self-start sm:self-auto ${
+              formData.ecommerceMode
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-amber-50 text-amber-700 border-amber-200"
+            }`}
+          >
+            {formData.ecommerceMode ? "● E-Commerce Mode Active" : "● Catalog / Quote Mode Active"}
+          </span>
+        </div>
+
+        {/* Mode Toggle Switch */}
+        <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+          <div className="pr-4">
+            <label htmlFor="ecommerceMode" className="block text-sm font-bold text-slate-900 cursor-pointer">
+              Enable E-Commerce Mode
+            </label>
+            <p className="text-xs text-slate-500 mt-0.5">
+              When checked, product prices are visible and customers can complete purchases online. When unchecked, all prices and checkout totals are hidden, and the site functions as a quote catalog with WhatsApp and email enquiries.
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+            <input
+              type="checkbox"
+              id="ecommerceMode"
+              name="ecommerceMode"
+              checked={formData.ecommerceMode}
+              onChange={handleChange}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+          </label>
+        </div>
+
+        {/* WhatsApp Business Number Input */}
+        <div>
+          <label htmlFor="whatsappNumber" className="block text-xs font-bold text-slate-700 uppercase mb-1">
+            Official WhatsApp Business Number
+          </label>
+          <input
+            type="tel"
+            id="whatsappNumber"
+            name="whatsappNumber"
+            value={formData.whatsappNumber || ""}
+            onChange={handleChange}
+            placeholder="+1 (800) 555-0199 or 18005550199"
+            className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Used for direct &ldquo;Enquire on WhatsApp&rdquo; product buttons when operating in Catalog Mode. Include country code (e.g. +1).
+          </p>
+        </div>
+      </div>
 
       {/* SECTION 1: Company & Warehouse Information */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">

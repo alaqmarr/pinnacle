@@ -43,9 +43,15 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   const title = `${product.name} | Pinnacle Distributing`;
+  const globalSettings = await prisma.globalSetting.findUnique({
+    where: { id: "singleton" },
+  });
+  const ecommerceMode = globalSettings?.ecommerceMode !== false;
   const description =
     product.description ||
-    `Order ${product.name} online from Pinnacle Distributing. Commercial B2B wholesale pricing at ${formatUSD(product.price)}. Fast regional freight.`;
+    (ecommerceMode
+      ? `Order ${product.name} online from Pinnacle Distributing. Commercial B2B wholesale pricing at ${formatUSD(product.price)}. Fast regional freight.`
+      : `Inquire about ${product.name} from Pinnacle Distributing. Commercial B2B wholesale catalog. Request a quote or WhatsApp inquiry.`);
 
   let parsedImage: string | undefined = undefined;
   if (product.images) {
@@ -187,7 +193,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
           <div className="flex justify-between py-2 border-b border-slate-100">
             <span className="font-medium text-slate-500">Pricing Basis:</span>
-            <span className="font-bold text-slate-900">Strict USD ({formatUSD(product.price)} / unit)</span>
+            <span className="font-bold text-slate-900">
+              {globalSettings?.ecommerceMode !== false
+                ? `Strict USD (${formatUSD(product.price)} / unit)`
+                : "Commercial Quote on Request"}
+            </span>
           </div>
         </div>
       </div>
