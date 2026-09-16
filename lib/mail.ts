@@ -227,18 +227,25 @@ function withProfessionalWrapper(title: string, subtitle: string, bodyContent: s
   <title>${title}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc; padding: 40px 20px;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f8fafc;">
+    <!-- Header (Edge to Edge) -->
     <tr>
-      <td align="center">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-          <!-- Header -->
+      <td align="center" style="background-color: #0f172a; border-bottom: 4px solid #0284c7;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px;">
           <tr>
-            <td align="center" style="background-color: #0f172a; padding: 40px 30px; border-bottom: 4px solid #0284c7;">
+            <td align="center" style="padding: 40px 30px;">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">PINNACLE</h1>
               <p style="color: #94a3b8; margin: 8px 0 0 0; font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px;">Packaging &amp; Janitorial</p>
             </td>
           </tr>
-          
+        </table>
+      </td>
+    </tr>
+    
+    <!-- Main Content Container -->
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
           <!-- Title Section -->
           <tr>
             <td style="padding: 30px 40px 10px 40px;">
@@ -253,10 +260,16 @@ function withProfessionalWrapper(title: string, subtitle: string, bodyContent: s
               ${bodyContent}
             </td>
           </tr>
+        </table>
+      </td>
+    </tr>
 
-          <!-- Footer -->
+    <!-- Footer (Edge to Edge) -->
+    <tr>
+      <td align="center" style="background-color: #f1f5f9; border-top: 1px solid #e2e8f0;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px;">
           <tr>
-            <td style="background-color: #f8fafc; padding: 30px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
+            <td align="center" style="padding: 40px 30px;">
               <p style="color: #64748b; margin: 0 0 8px 0; font-size: 13px;">&copy; ${new Date().getFullYear()} Pinnacle Distributing. All rights reserved.</p>
               <p style="color: #94a3b8; margin: 0; font-size: 12px;">Dallas Logistics Office &bull; <a href="tel:8005550199" style="color: #0284c7; text-decoration: none;">(800) 555-0199</a></p>
             </td>

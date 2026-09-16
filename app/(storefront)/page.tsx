@@ -4,15 +4,17 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { formatUSD } from "@/lib/currency";
 import { QuickAddButton } from "@/components/storefront/QuickAddButton";
+import { getGlobalSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function StorefrontHomePage() {
   let categories: any[] = [];
   let products: any[] = [];
+  let settings: any = { ecommerceMode: true };
 
   try {
-    const [cats, prods] = await Promise.all([
+    const [cats, prods, fetchedSettings] = await Promise.all([
       prisma.category.findMany({
         take: 10,
         orderBy: { createdAt: "asc" },
@@ -22,9 +24,11 @@ export default async function StorefrontHomePage() {
         orderBy: { createdAt: "desc" },
         include: { category: true },
       }),
+      getGlobalSettings(),
     ]);
     categories = cats;
     products = prods;
+    settings = fetchedSettings;
   } catch (err) {
     console.error("[StorefrontHomePage] Error loading dynamic homepage data:", err);
   }
@@ -313,7 +317,13 @@ export default async function StorefrontHomePage() {
 
                       <div className="mt-3">
                         <div className="text-lg font-black text-slate-900 mb-3">
-                          {formatUSD(prod.price)}
+                          {settings.ecommerceMode ? (
+                            formatUSD(prod.price)
+                          ) : (
+                            <span className="inline-block text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-1 rounded">
+                              Catalog Item
+                            </span>
+                          )}
                         </div>
 
                         <QuickAddButton 

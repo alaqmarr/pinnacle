@@ -155,13 +155,13 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
                 {formatUSD(product.price)}
               </span>
               <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                / Unit • Industrial Wholesale
+                / Unit &bull; Industrial Wholesale
               </span>
             </div>
           ) : (
-            <div className="mt-4 flex items-center gap-2">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
-                Wholesale Catalog • Quote on Request
+            <div className="mt-4">
+              <span className="inline-block text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-3 py-1.5 rounded">
+                Catalog Item &bull; Quote Required
               </span>
             </div>
           )}
