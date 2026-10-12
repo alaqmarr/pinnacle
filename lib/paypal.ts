@@ -184,7 +184,9 @@ export async function createPayPalOrder(params: {
   taxInCents: number;
   items?: Array<{ name: string; quantity: number; priceInCents: number }>;
   customId?: string;
-}): Promise<{ id: string; status: string; links: any[] }> {
+  returnUrl?: string;
+  cancelUrl?: string;
+}): Promise<{ id: string; status: string; links: any[]; approveUrl: string | null }> {
   const config = await getPayPalConfig();
 
   if (!config.enabled) {
@@ -236,6 +238,19 @@ export async function createPayPalOrder(params: {
     }));
   }
 
+  const applicationContext: any = {
+    brand_name: "Pinnacle Distributing",
+    landing_page: "NO_PREFERENCE",
+    user_action: "PAY_NOW",
+  };
+
+  if (params.returnUrl) {
+    applicationContext.return_url = params.returnUrl;
+  }
+  if (params.cancelUrl) {
+    applicationContext.cancel_url = params.cancelUrl;
+  }
+
   const response = await fetch(`${config.apiBaseUrl}/v2/checkout/orders`, {
     method: "POST",
     headers: {
@@ -246,11 +261,7 @@ export async function createPayPalOrder(params: {
     body: JSON.stringify({
       intent: "CAPTURE",
       purchase_units: [purchaseUnit],
-      application_context: {
-        brand_name: "Pinnacle Distributing",
-        landing_page: "NO_PREFERENCE",
-        user_action: "PAY_NOW",
-      },
+      application_context: applicationContext,
     }),
   });
 
@@ -262,11 +273,37 @@ export async function createPayPalOrder(params: {
     throw new Error(detailMsg);
   }
 
+  const links = orderData.links || [];
+  const approveLink = links.find((l: any) => l.rel === "approve");
+
   return {
     id: orderData.id,
     status: orderData.status,
-    links: orderData.links || [],
+    links,
+    approveUrl: approveLink ? approveLink.href : null,
   };
+}
+
+/**
+ * Fetches details of a PayPal v2 order.
+ */
+export async function getPayPalOrder(orderId: string): Promise<any> {
+  const config = await getPayPalConfig();
+  const accessToken = await getPayPalOAuthToken();
+
+  const response = await fetch(`${config.apiBaseUrl}/v2/checkout/orders/${orderId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const orderData = await response.json();
+  if (!response.ok) {
+    throw new Error(orderData.message || `Failed to fetch PayPal order: ${orderId}`);
+  }
+  return orderData;
 }
 
 /**
@@ -288,6 +325,14 @@ export async function capturePayPalPayment(orderId: string): Promise<any> {
   const captureData = await response.json();
 
   if (!response.ok || (captureData.status !== "COMPLETED" && captureData.status !== "APPROVED")) {
+    const issue = captureData.details?.[0]?.issue;
+    if (issue === "ORDER_ALREADY_CAPTURED") {
+      const order = await getPayPalOrder(orderId);
+      if (order.status === "COMPLETED") {
+        return order;
+      }
+    }
+
     console.error("[PayPal API] capturePayment error:", captureData);
     const detailMsg = captureData.details?.[0]?.description || captureData.message || `PayPal capture failed with status: ${captureData.status}`;
     throw new Error(detailMsg);
@@ -295,3 +340,4 @@ export async function capturePayPalPayment(orderId: string): Promise<any> {
 
   return captureData;
 }
+

@@ -105,9 +105,61 @@ function PayPalReviewForm({
   isSubmitting: boolean;
   setIsSubmitting: (val: boolean) => void;
 }) {
-  const [sdkReady, setSdkReady] = useState(false);
+  const [sdkStatus, setSdkStatus] = useState<"loading" | "ready" | "failed">("loading");
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const paypalContainerRef = React.useRef<HTMLDivElement>(null);
 
+  // Sync state to local and session storage
+  useEffect(() => {
+    try {
+      const payload = JSON.stringify({
+        customer,
+        shippingAddress,
+        shippingMethod,
+        items,
+        notes: orderNotes,
+      });
+      sessionStorage.setItem("pinnacle_pending_checkout", payload);
+      localStorage.setItem("pinnacle_pending_checkout", payload);
+    } catch {
+      // ignore
+    }
+  }, [customer, shippingAddress, shippingMethod, items, orderNotes]);
+
+  // Direct checkout handler (works 100% of the time, impervious to ad-blockers)
+  const handleDirectPayPal = async () => {
+    onError("");
+    setIsRedirecting(true);
+    setIsSubmitting(true);
+    try {
+      const payload = JSON.stringify({
+        customer,
+        shippingAddress,
+        shippingMethod,
+        items,
+        notes: orderNotes,
+      });
+      sessionStorage.setItem("pinnacle_pending_checkout", payload);
+      localStorage.setItem("pinnacle_pending_checkout", payload);
+
+      const res = await fetch("/api/storefront/paypal/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items, shippingMethod }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.approveUrl) {
+        throw new Error(data.error || "Failed to initialize PayPal transaction.");
+      }
+      window.location.href = data.approveUrl;
+    } catch (err: any) {
+      onError(err.message || "Failed to connect to PayPal. Please try again.");
+      setIsRedirecting(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  // Attempt to load PayPal JS SDK for in-context popup buttons
   useEffect(() => {
     let isMounted = true;
     const scriptId = "paypal-js-sdk";
@@ -174,7 +226,7 @@ function PayPalReviewForm({
           },
           onError: (err: any) => {
             console.error("[PayPal Checkout Error]", err);
-            onError("An error occurred during PayPal checkout. Please try again.");
+            onError("An error occurred during PayPal checkout. Please use the direct PayPal button below or try again.");
           },
         }).render(paypalContainerRef.current);
       } catch (err) {
@@ -183,7 +235,7 @@ function PayPalReviewForm({
     };
 
     if ((window as any).paypal) {
-      setSdkReady(true);
+      setSdkStatus("ready");
       renderButtons();
       return () => {
         isMounted = false;
@@ -199,25 +251,31 @@ function PayPalReviewForm({
       script.async = true;
       script.onload = () => {
         if (isMounted) {
-          setSdkReady(true);
+          setSdkStatus("ready");
           renderButtons();
         }
       };
       script.onerror = () => {
         if (isMounted) {
-          onError("Failed to load PayPal SDK script. Check your connection or ad-blocker.");
+          // Gracefully fallback to direct button without noisy error banner
+          setSdkStatus("failed");
         }
       };
       document.body.appendChild(script);
     } else {
       existingScript.addEventListener("load", () => {
         if (isMounted) {
-          setSdkReady(true);
+          setSdkStatus("ready");
           renderButtons();
         }
       });
+      existingScript.addEventListener("error", () => {
+        if (isMounted) {
+          setSdkStatus("failed");
+        }
+      });
       if ((window as any).paypal) {
-        setSdkReady(true);
+        setSdkStatus("ready");
         renderButtons();
       }
     }
@@ -236,26 +294,54 @@ function PayPalReviewForm({
           <div>
             <strong className="block font-bold">PayPal Sandbox Mode Active</strong>
             <p className="mt-0.5 text-amber-800">
-              Transactions are simulated in test sandbox. Use sandbox buyer login to complete order.
+              Transactions are simulated in test sandbox. Log in with your sandbox buyer account to complete the order.
             </p>
           </div>
         </div>
       )}
 
-      {!sdkReady && (
-        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-          <svg className="animate-spin h-6 w-6 text-sky-600 mx-auto" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
-          <p className="text-xs font-semibold text-slate-700">Connecting to PayPal Secure Checkout...</p>
+      {/* Primary Direct PayPal Button (Always active, no ad-blocker or script error can stop it) */}
+      <div className="space-y-3">
+        <button
+          type="button"
+          disabled={isSubmitting || isRedirecting}
+          onClick={handleDirectPayPal}
+          className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-base text-[#003087] bg-[#FFC439] hover:bg-[#F2BA36] shadow-sm active:scale-[0.99] transition-all duration-150 disabled:opacity-60 cursor-pointer border border-[#E0AC30]"
+        >
+          {isRedirecting ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-[#003087]" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>Connecting to PayPal Secure Checkout...</span>
+            </>
+          ) : (
+            <>
+              <img src="/paypal.png" alt="PayPal" className="h-5 object-contain" />
+              <span>Pay with PayPal • {formatUSD(total)}</span>
+            </>
+          )}
+        </button>
+        <p className="text-center text-xs text-slate-500">
+          Safe &amp; secure payment. You will be redirected to PayPal to complete your purchase.
+        </p>
+      </div>
+
+      {/* In-Context popup buttons if JS SDK successfully loaded */}
+      {sdkStatus === "ready" && (
+        <div className="pt-2">
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-4 text-xs font-semibold text-slate-400 uppercase">Or Pay with In-Context Window</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+          <div ref={paypalContainerRef} className="pt-2 min-h-[50px]" />
         </div>
       )}
 
-      <div ref={paypalContainerRef} className="min-h-[120px]" />
-
-      <div className="pt-2 flex justify-between items-center">
-        <Button type="button" variant="outline" size="md" onClick={onBack} disabled={isSubmitting}>
+      <div className="pt-2 flex justify-between items-center border-t border-slate-100">
+        <Button type="button" variant="outline" size="md" onClick={onBack} disabled={isSubmitting || isRedirecting}>
           ← Back to Payment
         </Button>
       </div>

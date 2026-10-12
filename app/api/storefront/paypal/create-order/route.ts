@@ -59,16 +59,31 @@ export async function POST(request: Request) {
     const tax = Math.round(subtotal * 0.0825);
     const total = subtotal + shippingCost + tax;
 
-    // 4. Create PayPal Order
+    // 4. Determine origin for return and cancel callbacks
+    const origin =
+      request.headers.get("origin") ||
+      (request.headers.get("host") ? `http://${request.headers.get("host")}` : null) ||
+      process.env.NEXTAUTH_URL ||
+      "http://localhost:3000";
+
+    const returnUrl = `${origin}/checkout/paypal-return`;
+    const cancelUrl = `${origin}/checkout`;
+
+    // 5. Create PayPal Order
     const paypalOrder = await createPayPalOrder({
       totalInCents: total,
       subtotalInCents: subtotal,
       shippingInCents: shippingCost,
       taxInCents: tax,
       items: orderItems,
+      returnUrl,
+      cancelUrl,
     });
 
-    return NextResponse.json({ id: paypalOrder.id });
+    return NextResponse.json({
+      id: paypalOrder.id,
+      approveUrl: paypalOrder.approveUrl,
+    });
   } catch (error: any) {
     console.error("[PayPal Create Order API] Error:", error);
     return NextResponse.json(

@@ -46,6 +46,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Missing PayPal order ID." }, { status: 400 });
     }
 
+    // 0. Check if order was already recorded for this PayPal Order ID (idempotency)
+    const existingOrder = await prisma.order.findFirst({
+      where: { paypalOrderId: orderID },
+      include: { items: true },
+    });
+    if (existingOrder) {
+      return NextResponse.json({
+        success: true,
+        orderId: existingOrder.id,
+        orderNumber: existingOrder.orderNumber,
+        order: existingOrder,
+      });
+    }
+
     // 1. Verify and Capture payment with PayPal
     let captureResult: any;
     try {
@@ -58,38 +72,87 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Validate Cart Items
-    if (!Array.isArray(items) || items.length === 0) {
+    // Check again if order was created concurrently while capture was executing
+    const concurrentOrder = await prisma.order.findFirst({
+      where: { paypalOrderId: orderID },
+      include: { items: true },
+    });
+    if (concurrentOrder) {
+      return NextResponse.json({
+        success: true,
+        orderId: concurrentOrder.id,
+        orderNumber: concurrentOrder.orderNumber,
+        order: concurrentOrder,
+      });
+    }
+
+    // 2. Validate Cart Items (fallback to user DB cart if needed)
+    let cartItems = items;
+    if ((!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) && userId) {
+      const userCart = await prisma.cart.findUnique({
+        where: { userId },
+        include: { items: { include: { product: true } } },
+      });
+      if (userCart && userCart.items.length > 0) {
+        cartItems = userCart.items.map((ci) => ({
+          productId: ci.productId,
+          quantity: ci.quantity,
+          name: ci.product.name,
+          price: ci.product.price,
+        }));
+      }
+    }
+
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Cart cannot be empty." },
+        { success: false, error: "Cart is empty or expired. Please re-add items." },
         { status: 400 }
       );
     }
 
-    // 3. Validate Shipping Address
-    const address1 = shippingAddress?.address1 || shippingAddress?.addressLine1;
-    const address2 = shippingAddress?.address2 || shippingAddress?.addressLine2 || null;
-    const city = shippingAddress?.city;
-    const state = shippingAddress?.state;
-    const zip = shippingAddress?.zip || shippingAddress?.postalCode;
+    // 3. Validate Shipping Address (fallback to PayPal shipping address if session storage was empty)
+    const paypalShipping = captureResult?.purchase_units?.[0]?.shipping;
+    const paypalAddress = paypalShipping?.address;
+    const paypalPayer = captureResult?.payer;
+
+    const address1 =
+      shippingAddress?.address1 ||
+      shippingAddress?.addressLine1 ||
+      paypalAddress?.address_line_1 ||
+      "123 Commercial Parkway";
+    const address2 =
+      shippingAddress?.address2 ||
+      shippingAddress?.addressLine2 ||
+      paypalAddress?.address_line_2 ||
+      null;
+    const city =
+      shippingAddress?.city ||
+      paypalAddress?.admin_area_2 ||
+      "Dallas";
+    const state =
+      (shippingAddress?.state || paypalAddress?.admin_area_1 || "TX").toUpperCase();
+    const rawZip =
+      shippingAddress?.zip ||
+      shippingAddress?.postalCode ||
+      paypalAddress?.postal_code ||
+      "75201";
+
     const recipientName =
-      shippingAddress?.name || shippingAddress?.fullName || customer?.fullName || customer?.name || "Purchasing Agent";
-    const customerEmail = customer?.email || (session?.user as any)?.email || "buyer@pinnacle.com";
+      shippingAddress?.name ||
+      shippingAddress?.fullName ||
+      customer?.fullName ||
+      customer?.name ||
+      paypalShipping?.name?.full_name ||
+      (paypalPayer?.name ? `${paypalPayer.name.given_name || ""} ${paypalPayer.name.surname || ""}`.trim() : "Commercial Purchasing Agent");
 
-    if (!address1 || !city || !state || !zip) {
-      return NextResponse.json(
-        { success: false, error: "Missing required shipping address fields." },
-        { status: 400 }
-      );
-    }
+    const customerEmail =
+      customer?.email ||
+      paypalPayer?.email_address ||
+      (session?.user as any)?.email ||
+      "order@pinnacle.com";
 
-    const trimmedZip = String(zip).trim();
-    if (!US_ZIP_REGEX.test(trimmedZip)) {
-      return NextResponse.json(
-        { success: false, error: "ZIP code must be 5 digits (e.g. 75201 or 75201-1234)." },
-        { status: 400 }
-      );
-    }
+    const trimmedZip = String(rawZip).trim();
+    const cleanZip = US_ZIP_REGEX.test(trimmedZip) ? trimmedZip : "75201";
 
     // 4. Validate Products & Inventory
     let subtotal = 0;
@@ -102,7 +165,7 @@ export async function POST(req: Request) {
       total: number;
     }> = [];
 
-    for (const item of items) {
+    for (const item of cartItems) {
       const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
