@@ -122,11 +122,28 @@ export async function POST(
         }
       }
 
+      const origin =
+        req.headers.get("origin") ||
+        (req.headers.get("host") ? `http://${req.headers.get("host")}` : null) ||
+        process.env.NEXTAUTH_URL ||
+        "http://localhost:3000";
+
+      const callbackParam = body?.callbackUrl;
+      let targetUrl = `${origin}/admin`;
+      if (callbackParam && typeof callbackParam === "string") {
+        if (callbackParam.startsWith("http://") || callbackParam.startsWith("https://")) {
+          targetUrl = callbackParam;
+        } else {
+          targetUrl = `${origin}${callbackParam.startsWith("/") ? callbackParam : `/${callbackParam}`}`;
+        }
+      }
+      const errorUrl = `${origin}/login?error=CredentialsSignin`;
+
       const { email, password } = body || {};
 
       if (!email || !password) {
         return NextResponse.json(
-          { error: "CredentialsSignin", message: "Missing email or password" },
+          { error: "CredentialsSignin", message: "Missing email or password", url: errorUrl },
           { status: 400 }
         );
       }
@@ -138,7 +155,7 @@ export async function POST(
 
       if (!user || !user.passwordHash) {
         return NextResponse.json(
-          { error: "CredentialsSignin", message: "Invalid credentials" },
+          { error: "CredentialsSignin", message: "Invalid credentials", url: errorUrl },
           { status: 401 }
         );
       }
@@ -146,7 +163,7 @@ export async function POST(
       const isValid = await comparePassword(String(password), user.passwordHash);
       if (!isValid) {
         return NextResponse.json(
-          { error: "CredentialsSignin", message: "Invalid credentials" },
+          { error: "CredentialsSignin", message: "Invalid credentials", url: errorUrl },
           { status: 401 }
         );
       }
@@ -171,6 +188,7 @@ export async function POST(
 
       const response = NextResponse.json({
         success: true,
+        url: targetUrl,
         user: {
           id: user.id,
           name: user.name || "",
@@ -191,8 +209,12 @@ export async function POST(
       return response;
     } catch (err: any) {
       console.error("[NextAuth Callback] Error:", err);
+      const origin =
+        req.headers.get("origin") ||
+        process.env.NEXTAUTH_URL ||
+        "http://localhost:3000";
       return NextResponse.json(
-        { error: "CredentialsSignin", message: err.message || "Authentication error" },
+        { error: "CredentialsSignin", message: err.message || "Authentication error", url: `${origin}/login?error=CredentialsSignin` },
         { status: 500 }
       );
     }

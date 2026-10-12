@@ -17,12 +17,13 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
     setError("");
     setLoading(true);
 
-    try {
-      const fallback = callbackUrl || "/admin";
-      const absoluteCallbackUrl = fallback.startsWith("http") 
-        ? fallback 
-        : `${window.location.origin}${fallback.startsWith("/") ? fallback : `/${fallback}`}`;
+    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+    const fallback = callbackUrl || "/admin";
+    const absoluteCallbackUrl = fallback.startsWith("http")
+      ? fallback
+      : `${origin}${fallback.startsWith("/") ? fallback : `/${fallback}`}`;
 
+    try {
       const res = await signIn("credentials", {
         redirect: false,
         email,
@@ -33,14 +34,41 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
       if (res?.error) {
         setError("Invalid email or password. Please verify your credentials and try again.");
         setLoading(false);
-      } else {
-        // Use full page reload to ensure auth state is completely synchronized
-        // and avoid any Next.js App Router client-side transition anomalies.
-        window.location.assign(absoluteCallbackUrl);
+        return;
       }
-    } catch (err) {
-      console.error("Login catch error:", err);
-      setError(`An unexpected error occurred: ${err instanceof Error ? err.message : String(err)}`);
+
+      if (res?.ok) {
+        window.location.assign(res.url || absoluteCallbackUrl);
+        return;
+      }
+    } catch (signInErr) {
+      console.warn("[LoginFormClient] signIn wrapper error, attempting direct API auth:", signInErr);
+    }
+
+    // Resilient fallback: direct authentication via credentials endpoint
+    try {
+      const directRes = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, callbackUrl: absoluteCallbackUrl }),
+      });
+
+      const directData = await directRes.json();
+
+      if (directRes.ok && directData.success) {
+        window.location.assign(directData.url || absoluteCallbackUrl);
+        return;
+      }
+
+      setError(
+        directData.message === "Invalid credentials" || directData.error === "CredentialsSignin"
+          ? "Invalid email or password. Please verify your credentials and try again."
+          : directData.message || "Failed to sign in. Please verify your credentials."
+      );
+    } catch (fallbackErr: any) {
+      console.error("[LoginFormClient] Direct auth failed:", fallbackErr);
+      setError("Network error connecting to authentication server. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
