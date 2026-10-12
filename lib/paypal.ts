@@ -22,7 +22,7 @@ export interface PayPalResolvedConfig {
 /**
  * Resolves the currently active PayPal configuration directly from SQLite GlobalSetting.
  */
-export async function getPayPalConfig(): Promise<PayPalResolvedConfig> {
+export async function getPayPalConfig(modeOverride?: boolean): Promise<PayPalResolvedConfig> {
   const settings = await prisma.globalSetting.findUnique({
     where: { id: "singleton" },
     select: {
@@ -37,7 +37,25 @@ export async function getPayPalConfig(): Promise<PayPalResolvedConfig> {
     },
   });
 
-  const sandboxMode = settings?.paypalSandboxMode !== false; // defaults to true
+  // If explicit mode override provided, honor it; otherwise read from database (defaults to true)
+  let sandboxMode = modeOverride !== undefined ? modeOverride : settings?.paypalSandboxMode !== false;
+
+  // Resilient safeguard: If Live mode is requested but Live keys are missing or placeholders,
+  // gracefully fall back to Sandbox mode so the app never crashes with "Client Authentication failed"
+  const liveClientId = settings?.paypalLiveClientId?.trim();
+  const liveSecret = settings?.paypalLiveClientSecret?.trim();
+  const hasLiveKeys =
+    Boolean(liveClientId && liveSecret) &&
+    !liveClientId?.includes("PLACEHOLDER") &&
+    !liveSecret?.includes("PLACEHOLDER");
+
+  if (!sandboxMode && !hasLiveKeys) {
+    console.warn(
+      "[PayPal] Live mode was active, but Live credentials are empty or placeholders. Falling back to Sandbox mode."
+    );
+    sandboxMode = true;
+  }
+
   const enabled = Boolean(settings?.paypalEnabled);
 
   const clientId = sandboxMode
@@ -82,22 +100,27 @@ export async function getPayPalOAuthToken(configOverride?: {
   let clientId: string | null = null;
   let clientSecret: string | null = null;
   let apiBaseUrl = "https://api-m.sandbox.paypal.com";
+  let activeSandboxMode = true;
 
   if (configOverride) {
     clientId = configOverride.clientId;
     clientSecret = configOverride.clientSecret;
-    apiBaseUrl = configOverride.sandboxMode
+    activeSandboxMode = configOverride.sandboxMode;
+    apiBaseUrl = activeSandboxMode
       ? "https://api-m.sandbox.paypal.com"
       : "https://api-m.paypal.com";
   } else {
     const config = await getPayPalConfig();
     clientId = config.clientId;
     clientSecret = config.clientSecret;
+    activeSandboxMode = config.sandboxMode;
     apiBaseUrl = config.apiBaseUrl;
   }
 
   if (!clientId || !clientSecret) {
-    throw new Error("PayPal Client ID and Secret are not configured in the database.");
+    throw new Error(
+      `PayPal ${activeSandboxMode ? "Sandbox" : "Live"} Client ID and Secret are not configured in the database.`
+    );
   }
 
   const basicAuth = Buffer.from(`${clientId.trim()}:${clientSecret.trim()}`).toString("base64");
@@ -114,7 +137,14 @@ export async function getPayPalOAuthToken(configOverride?: {
   const data = await response.json();
 
   if (!response.ok || !data.access_token) {
-    const errorMessage = data.error_description || data.error || `HTTP ${response.status} failed to obtain PayPal token`;
+    const modeLabel = activeSandboxMode ? "Sandbox" : "Live";
+    if (data.error === "invalid_client" || data.error_description === "Client Authentication failed") {
+      throw new Error(
+        `PayPal ${modeLabel} Authentication failed: The Client ID or Secret in the database was rejected by PayPal. Please verify your ${modeLabel} credentials in Admin Settings.`
+      );
+    }
+    const errorMessage =
+      data.error_description || data.error || `HTTP ${response.status} failed to obtain PayPal token`;
     throw new Error(errorMessage);
   }
 
@@ -186,14 +216,19 @@ export async function createPayPalOrder(params: {
   customId?: string;
   returnUrl?: string;
   cancelUrl?: string;
+  sandboxMode?: boolean;
 }): Promise<{ id: string; status: string; links: any[]; approveUrl: string | null }> {
-  const config = await getPayPalConfig();
+  const config = await getPayPalConfig(params.sandboxMode);
 
   if (!config.enabled) {
     throw new Error("PayPal payment gateway is currently disabled in database settings.");
   }
 
-  const accessToken = await getPayPalOAuthToken();
+  const accessToken = await getPayPalOAuthToken({
+    clientId: config.clientId!,
+    clientSecret: config.clientSecret!,
+    sandboxMode: config.sandboxMode,
+  });
 
   const totalValue = (params.totalInCents / 100).toFixed(2);
   const subtotalValue = (params.subtotalInCents / 100).toFixed(2);

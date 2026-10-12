@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items, shippingMethod } = body;
+    const { items, shippingMethod, sandboxMode } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -20,9 +23,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "PayPal is not configured or disabled by administrator" }, { status: 500 });
     }
 
-    // 2. Calculate subtotal safely on the server from DB products
+    // 2. Calculate subtotal safely on the server from DB products with item fallback
     let subtotal = 0;
-    const productIds = items.map((i: any) => i.productId);
+    const productIds = items.map((i: any) => i.productId).filter(Boolean);
     const dbProducts = await prisma.product.findMany({
       where: { id: { in: productIds } },
     });
@@ -31,16 +34,16 @@ export async function POST(request: Request) {
     const orderItems: Array<{ name: string; quantity: number; priceInCents: number }> = [];
 
     for (const item of items) {
-      const dbProduct = productMap.get(item.productId);
-      if (!dbProduct) {
-        return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 400 });
-      }
+      const dbProduct = item.productId ? productMap.get(item.productId) : null;
       const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
-      subtotal += dbProduct.price * qty;
+      const priceInCents = dbProduct ? dbProduct.price : Math.max(1, Math.round(Number(item.price) || 100));
+      const name = dbProduct ? dbProduct.name : String(item.name || "Commercial Supply Item");
+
+      subtotal += priceInCents * qty;
       orderItems.push({
-        name: dbProduct.name,
+        name,
         quantity: qty,
-        priceInCents: dbProduct.price,
+        priceInCents,
       });
     }
 
@@ -78,6 +81,7 @@ export async function POST(request: Request) {
       items: orderItems,
       returnUrl,
       cancelUrl,
+      sandboxMode: typeof sandboxMode === "boolean" ? sandboxMode : undefined,
     });
 
     return NextResponse.json({

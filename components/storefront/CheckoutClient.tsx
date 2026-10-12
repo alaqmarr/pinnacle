@@ -145,7 +145,7 @@ function PayPalReviewForm({
       const res = await fetch("/api/storefront/paypal/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, shippingMethod }),
+        body: JSON.stringify({ items, shippingMethod, sandboxMode: paypalSandboxMode }),
       });
       const data = await res.json();
       if (!res.ok || !data.approveUrl) {
@@ -182,7 +182,7 @@ function PayPalReviewForm({
               const res = await fetch("/api/storefront/paypal/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items, shippingMethod }),
+                body: JSON.stringify({ items, shippingMethod, sandboxMode: paypalSandboxMode }),
               });
               const data = await res.json();
               if (!res.ok || !data.id) {

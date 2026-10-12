@@ -7,6 +7,9 @@ import { processOrderInventory, US_ZIP_REGEX } from "@/lib/checkout";
 import { sendMail, escapeHtml } from "@/lib/mail";
 import { formatUSD } from "@/lib/currency";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function POST(req: Request) {
   try {
     const session = (await getAuthSession()) || (await getServerSession(authOptions));
