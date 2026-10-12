@@ -192,6 +192,7 @@ model Order {
   total             Int         // in USD cents
   shippingAddressId String?
   billingAddressId  String?
+  paypalOrderId     String?
   notes             String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
@@ -266,6 +267,16 @@ model GlobalSetting {
   stripeSecretKey      String?
   stripeWebhookSecret  String?
   stripeEnabled        Boolean  @default(false)
+
+  // PayPal Payment Gateway Configuration (Database-Driven with Sandbox & Live Modes)
+  paypalEnabled             Boolean  @default(false)
+  paypalSandboxMode         Boolean  @default(true)
+  paypalSandboxClientId     String?
+  paypalSandboxClientSecret String?
+  paypalSandboxAppId        String?  @default("WEBAPPTEST")
+  paypalLiveClientId        String?
+  paypalLiveClientSecret    String?
+  paypalLiveAppId           String?
 
   // Storefront Operation Mode & WhatsApp Contact (Milestone 4 - R1)
   ecommerceMode        Boolean  @default(true)

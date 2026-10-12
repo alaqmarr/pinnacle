@@ -165,7 +165,7 @@ export default function AdminSidebar({
       ),
     },
     {
-      label: "Stripe Credentials",
+      label: "Payment Gateways",
       href: "/admin/settings/payments",
       allowedRoles: ["ADMIN"],
       icon: (active) => (

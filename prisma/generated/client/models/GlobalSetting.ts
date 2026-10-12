@@ -57,6 +57,14 @@ export type GlobalSettingMinAggregateOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean | null
+  paypalEnabled: boolean | null
+  paypalSandboxMode: boolean | null
+  paypalSandboxClientId: string | null
+  paypalSandboxClientSecret: string | null
+  paypalSandboxAppId: string | null
+  paypalLiveClientId: string | null
+  paypalLiveClientSecret: string | null
+  paypalLiveAppId: string | null
   ecommerceMode: boolean | null
   whatsappNumber: string | null
   createdAt: Date | null
@@ -86,6 +94,14 @@ export type GlobalSettingMaxAggregateOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean | null
+  paypalEnabled: boolean | null
+  paypalSandboxMode: boolean | null
+  paypalSandboxClientId: string | null
+  paypalSandboxClientSecret: string | null
+  paypalSandboxAppId: string | null
+  paypalLiveClientId: string | null
+  paypalLiveClientSecret: string | null
+  paypalLiveAppId: string | null
   ecommerceMode: boolean | null
   whatsappNumber: string | null
   createdAt: Date | null
@@ -115,6 +131,14 @@ export type GlobalSettingCountAggregateOutputType = {
   stripeSecretKey: number
   stripeWebhookSecret: number
   stripeEnabled: number
+  paypalEnabled: number
+  paypalSandboxMode: number
+  paypalSandboxClientId: number
+  paypalSandboxClientSecret: number
+  paypalSandboxAppId: number
+  paypalLiveClientId: number
+  paypalLiveClientSecret: number
+  paypalLiveAppId: number
   ecommerceMode: number
   whatsappNumber: number
   createdAt: number
@@ -154,6 +178,14 @@ export type GlobalSettingMinAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  paypalEnabled?: true
+  paypalSandboxMode?: true
+  paypalSandboxClientId?: true
+  paypalSandboxClientSecret?: true
+  paypalSandboxAppId?: true
+  paypalLiveClientId?: true
+  paypalLiveClientSecret?: true
+  paypalLiveAppId?: true
   ecommerceMode?: true
   whatsappNumber?: true
   createdAt?: true
@@ -183,6 +215,14 @@ export type GlobalSettingMaxAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  paypalEnabled?: true
+  paypalSandboxMode?: true
+  paypalSandboxClientId?: true
+  paypalSandboxClientSecret?: true
+  paypalSandboxAppId?: true
+  paypalLiveClientId?: true
+  paypalLiveClientSecret?: true
+  paypalLiveAppId?: true
   ecommerceMode?: true
   whatsappNumber?: true
   createdAt?: true
@@ -212,6 +252,14 @@ export type GlobalSettingCountAggregateInputType = {
   stripeSecretKey?: true
   stripeWebhookSecret?: true
   stripeEnabled?: true
+  paypalEnabled?: true
+  paypalSandboxMode?: true
+  paypalSandboxClientId?: true
+  paypalSandboxClientSecret?: true
+  paypalSandboxAppId?: true
+  paypalLiveClientId?: true
+  paypalLiveClientSecret?: true
+  paypalLiveAppId?: true
   ecommerceMode?: true
   whatsappNumber?: true
   createdAt?: true
@@ -328,6 +376,14 @@ export type GlobalSettingGroupByOutputType = {
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
   stripeEnabled: boolean
+  paypalEnabled: boolean
+  paypalSandboxMode: boolean
+  paypalSandboxClientId: string | null
+  paypalSandboxClientSecret: string | null
+  paypalSandboxAppId: string | null
+  paypalLiveClientId: string | null
+  paypalLiveClientSecret: string | null
+  paypalLiveAppId: string | null
   ecommerceMode: boolean
   whatsappNumber: string | null
   createdAt: Date
@@ -380,6 +436,14 @@ export type GlobalSettingWhereInput = {
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalSandboxMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalSandboxClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalSandboxClientSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalSandboxAppId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveClientSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveAppId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   ecommerceMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   whatsappNumber?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
@@ -409,6 +473,14 @@ export type GlobalSettingOrderByWithRelationInput = {
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  paypalEnabled?: Prisma.SortOrder
+  paypalSandboxMode?: Prisma.SortOrder
+  paypalSandboxClientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalSandboxClientSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalSandboxAppId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveClientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveClientSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveAppId?: Prisma.SortOrderInput | Prisma.SortOrder
   ecommerceMode?: Prisma.SortOrder
   whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -441,6 +513,14 @@ export type GlobalSettingWhereUniqueInput = Prisma.AtLeast<{
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalSandboxMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  paypalSandboxClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalSandboxClientSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalSandboxAppId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveClientSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  paypalLiveAppId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   ecommerceMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   whatsappNumber?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"GlobalSetting"> | Date | string
@@ -470,6 +550,14 @@ export type GlobalSettingOrderByWithAggregationInput = {
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  paypalEnabled?: Prisma.SortOrder
+  paypalSandboxMode?: Prisma.SortOrder
+  paypalSandboxClientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalSandboxClientSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalSandboxAppId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveClientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveClientSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  paypalLiveAppId?: Prisma.SortOrderInput | Prisma.SortOrder
   ecommerceMode?: Prisma.SortOrder
   whatsappNumber?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -507,6 +595,14 @@ export type GlobalSettingScalarWhereWithAggregatesInput = {
   stripeSecretKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  paypalEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  paypalSandboxMode?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  paypalSandboxClientId?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  paypalSandboxClientSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  paypalSandboxAppId?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  paypalLiveClientId?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  paypalLiveClientSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  paypalLiveAppId?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   ecommerceMode?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
   whatsappNumber?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"GlobalSetting"> | Date | string
@@ -536,6 +632,14 @@ export type GlobalSettingCreateInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: string | null
+  paypalSandboxClientSecret?: string | null
+  paypalSandboxAppId?: string | null
+  paypalLiveClientId?: string | null
+  paypalLiveClientSecret?: string | null
+  paypalLiveAppId?: string | null
   ecommerceMode?: boolean
   whatsappNumber?: string | null
   createdAt?: Date | string
@@ -565,6 +669,14 @@ export type GlobalSettingUncheckedCreateInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: string | null
+  paypalSandboxClientSecret?: string | null
+  paypalSandboxAppId?: string | null
+  paypalLiveClientId?: string | null
+  paypalLiveClientSecret?: string | null
+  paypalLiveAppId?: string | null
   ecommerceMode?: boolean
   whatsappNumber?: string | null
   createdAt?: Date | string
@@ -594,6 +706,14 @@ export type GlobalSettingUpdateInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -623,6 +743,14 @@ export type GlobalSettingUncheckedUpdateInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -652,6 +780,14 @@ export type GlobalSettingCreateManyInput = {
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: string | null
+  paypalSandboxClientSecret?: string | null
+  paypalSandboxAppId?: string | null
+  paypalLiveClientId?: string | null
+  paypalLiveClientSecret?: string | null
+  paypalLiveAppId?: string | null
   ecommerceMode?: boolean
   whatsappNumber?: string | null
   createdAt?: Date | string
@@ -681,6 +817,14 @@ export type GlobalSettingUpdateManyMutationInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -710,6 +854,14 @@ export type GlobalSettingUncheckedUpdateManyInput = {
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalSandboxAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveClientSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paypalLiveAppId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ecommerceMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   whatsappNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -739,6 +891,14 @@ export type GlobalSettingCountOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  paypalEnabled?: Prisma.SortOrder
+  paypalSandboxMode?: Prisma.SortOrder
+  paypalSandboxClientId?: Prisma.SortOrder
+  paypalSandboxClientSecret?: Prisma.SortOrder
+  paypalSandboxAppId?: Prisma.SortOrder
+  paypalLiveClientId?: Prisma.SortOrder
+  paypalLiveClientSecret?: Prisma.SortOrder
+  paypalLiveAppId?: Prisma.SortOrder
   ecommerceMode?: Prisma.SortOrder
   whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -772,6 +932,14 @@ export type GlobalSettingMaxOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  paypalEnabled?: Prisma.SortOrder
+  paypalSandboxMode?: Prisma.SortOrder
+  paypalSandboxClientId?: Prisma.SortOrder
+  paypalSandboxClientSecret?: Prisma.SortOrder
+  paypalSandboxAppId?: Prisma.SortOrder
+  paypalLiveClientId?: Prisma.SortOrder
+  paypalLiveClientSecret?: Prisma.SortOrder
+  paypalLiveAppId?: Prisma.SortOrder
   ecommerceMode?: Prisma.SortOrder
   whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -801,6 +969,14 @@ export type GlobalSettingMinOrderByAggregateInput = {
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
   stripeEnabled?: Prisma.SortOrder
+  paypalEnabled?: Prisma.SortOrder
+  paypalSandboxMode?: Prisma.SortOrder
+  paypalSandboxClientId?: Prisma.SortOrder
+  paypalSandboxClientSecret?: Prisma.SortOrder
+  paypalSandboxAppId?: Prisma.SortOrder
+  paypalLiveClientId?: Prisma.SortOrder
+  paypalLiveClientSecret?: Prisma.SortOrder
+  paypalLiveAppId?: Prisma.SortOrder
   ecommerceMode?: Prisma.SortOrder
   whatsappNumber?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -836,6 +1012,14 @@ export type GlobalSettingSelect<ExtArgs extends runtime.Types.Extensions.Interna
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: boolean
+  paypalSandboxClientSecret?: boolean
+  paypalSandboxAppId?: boolean
+  paypalLiveClientId?: boolean
+  paypalLiveClientSecret?: boolean
+  paypalLiveAppId?: boolean
   ecommerceMode?: boolean
   whatsappNumber?: boolean
   createdAt?: boolean
@@ -865,6 +1049,14 @@ export type GlobalSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: boolean
+  paypalSandboxClientSecret?: boolean
+  paypalSandboxAppId?: boolean
+  paypalLiveClientId?: boolean
+  paypalLiveClientSecret?: boolean
+  paypalLiveAppId?: boolean
   ecommerceMode?: boolean
   whatsappNumber?: boolean
   createdAt?: boolean
@@ -894,6 +1086,14 @@ export type GlobalSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: boolean
+  paypalSandboxClientSecret?: boolean
+  paypalSandboxAppId?: boolean
+  paypalLiveClientId?: boolean
+  paypalLiveClientSecret?: boolean
+  paypalLiveAppId?: boolean
   ecommerceMode?: boolean
   whatsappNumber?: boolean
   createdAt?: boolean
@@ -923,13 +1123,21 @@ export type GlobalSettingSelectScalar = {
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
   stripeEnabled?: boolean
+  paypalEnabled?: boolean
+  paypalSandboxMode?: boolean
+  paypalSandboxClientId?: boolean
+  paypalSandboxClientSecret?: boolean
+  paypalSandboxAppId?: boolean
+  paypalLiveClientId?: boolean
+  paypalLiveClientSecret?: boolean
+  paypalLiveAppId?: boolean
   ecommerceMode?: boolean
   whatsappNumber?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "ecommerceMode" | "whatsappNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
+export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "paypalEnabled" | "paypalSandboxMode" | "paypalSandboxClientId" | "paypalSandboxClientSecret" | "paypalSandboxAppId" | "paypalLiveClientId" | "paypalLiveClientSecret" | "paypalLiveAppId" | "ecommerceMode" | "whatsappNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
 
 export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSetting"
@@ -957,6 +1165,14 @@ export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.Inter
     stripeSecretKey: string | null
     stripeWebhookSecret: string | null
     stripeEnabled: boolean
+    paypalEnabled: boolean
+    paypalSandboxMode: boolean
+    paypalSandboxClientId: string | null
+    paypalSandboxClientSecret: string | null
+    paypalSandboxAppId: string | null
+    paypalLiveClientId: string | null
+    paypalLiveClientSecret: string | null
+    paypalLiveAppId: string | null
     ecommerceMode: boolean
     whatsappNumber: string | null
     createdAt: Date
@@ -1406,6 +1622,14 @@ export interface GlobalSettingFieldRefs {
   readonly stripeSecretKey: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeWebhookSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly paypalEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly paypalSandboxMode: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly paypalSandboxClientId: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly paypalSandboxClientSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly paypalSandboxAppId: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly paypalLiveClientId: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly paypalLiveClientSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly paypalLiveAppId: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly ecommerceMode: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
   readonly whatsappNumber: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly createdAt: Prisma.FieldRef<"GlobalSetting", 'DateTime'>

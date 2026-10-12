@@ -34,6 +34,14 @@ export interface GlobalSettingData {
   stripeSecretKey?: string | null;
   stripeWebhookSecret?: string | null;
   stripeEnabled?: boolean;
+  paypalEnabled?: boolean;
+  paypalSandboxMode?: boolean;
+  paypalSandboxClientId?: string | null;
+  paypalSandboxClientSecret?: string | null;
+  paypalSandboxAppId?: string | null;
+  paypalLiveClientId?: string | null;
+  paypalLiveClientSecret?: string | null;
+  paypalLiveAppId?: string | null;
   ecommerceMode?: boolean;
   whatsappNumber?: string | null;
   createdAt?: Date;
@@ -54,6 +62,9 @@ export interface PublicGlobalSettings {
   bodyTopScripts?: string | null;
   ecommerceMode: boolean;
   whatsappNumber?: string | null;
+  paypalEnabled?: boolean;
+  paypalSandboxMode?: boolean;
+  paypalClientId?: string | null;
 }
 
 export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "updatedAt"> = {
@@ -79,6 +90,14 @@ export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "upd
   stripeSecretKey: null,
   stripeWebhookSecret: null,
   stripeEnabled: false,
+  paypalEnabled: false,
+  paypalSandboxMode: true,
+  paypalSandboxClientId: null,
+  paypalSandboxClientSecret: null,
+  paypalSandboxAppId: "WEBAPPTEST",
+  paypalLiveClientId: null,
+  paypalLiveClientSecret: null,
+  paypalLiveAppId: null,
   ecommerceMode: true,
   whatsappNumber: "+18005550199",
 };
@@ -144,6 +163,14 @@ export type UpdateGlobalSettingsInput = Partial<{
   stripeSecretKey?: string | null;
   stripeWebhookSecret?: string | null;
   stripeEnabled?: boolean;
+  paypalEnabled?: boolean;
+  paypalSandboxMode?: boolean;
+  paypalSandboxClientId?: string | null;
+  paypalSandboxClientSecret?: string | null;
+  paypalSandboxAppId?: string | null;
+  paypalLiveClientId?: string | null;
+  paypalLiveClientSecret?: string | null;
+  paypalLiveAppId?: string | null;
   ecommerceMode?: boolean | string;
   whatsappNumber?: string | null;
 }>;
@@ -260,5 +287,10 @@ export function getPublicSettings(settings: GlobalSettingData): PublicGlobalSett
     bodyTopScripts: settings.bodyTopScripts || null,
     ecommerceMode: settings.ecommerceMode !== undefined ? Boolean(settings.ecommerceMode) : true,
     whatsappNumber: settings.whatsappNumber ?? null,
+    paypalEnabled: Boolean(settings.paypalEnabled),
+    paypalSandboxMode: settings.paypalSandboxMode !== false,
+    paypalClientId: settings.paypalEnabled
+      ? (settings.paypalSandboxMode !== false ? settings.paypalSandboxClientId : settings.paypalLiveClientId)
+      : null,
   };
 }

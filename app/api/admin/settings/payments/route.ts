@@ -1,10 +1,11 @@
 /**
  * app/api/admin/settings/payments/route.ts
  * 
- * Stripe Payment Gateway Configuration API (Database-Driven)
+ * Payment Gateway Configuration API (Database-Driven: Stripe & PayPal)
  * - Strict requirement: Credentials stored in SQLite DB, never in .env
- * - GET: Retrieve publishable key, enablement status, and masked secret keys (Admin only)
- * - PUT: Save/update Stripe keys without overwriting masked/empty secrets (Admin only)
+ * - Supports PayPal Sandbox Mode toggle and separate Sandbox & Live credentials
+ * - GET: Retrieve Stripe & PayPal public keys, enablement status, mode, and masked secret keys (Admin only)
+ * - PUT: Save/update keys without overwriting masked/empty secrets (Admin only)
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -29,19 +30,42 @@ export async function GET() {
         stripeSecretKey: true,
         stripeWebhookSecret: true,
         stripeEnabled: true,
+        paypalEnabled: true,
+        paypalSandboxMode: true,
+        paypalSandboxClientId: true,
+        paypalSandboxClientSecret: true,
+        paypalSandboxAppId: true,
+        paypalLiveClientId: true,
+        paypalLiveClientSecret: true,
+        paypalLiveAppId: true,
       },
     });
 
-    const hasSecretKey = Boolean(settings?.stripeSecretKey);
-    const hasWebhookSecret = Boolean(settings?.stripeWebhookSecret);
+    const hasStripeSecretKey = Boolean(settings?.stripeSecretKey);
+    const hasStripeWebhookSecret = Boolean(settings?.stripeWebhookSecret);
+    const hasSandboxSecret = Boolean(settings?.paypalSandboxClientSecret);
+    const hasLiveSecret = Boolean(settings?.paypalLiveClientSecret);
 
     return NextResponse.json({
+      // Stripe settings
       stripePublishableKey: settings?.stripePublishableKey || null,
-      stripeSecretKeyMasked: hasSecretKey ? maskSensitiveString(settings!.stripeSecretKey, 4) : null,
-      hasSecretKey,
-      stripeWebhookSecretMasked: hasWebhookSecret ? maskSensitiveString(settings!.stripeWebhookSecret, 4) : null,
-      hasWebhookSecret,
+      stripeSecretKeyMasked: hasStripeSecretKey ? maskSensitiveString(settings!.stripeSecretKey, 4) : null,
+      hasSecretKey: hasStripeSecretKey,
+      stripeWebhookSecretMasked: hasStripeWebhookSecret ? maskSensitiveString(settings!.stripeWebhookSecret, 4) : null,
+      hasWebhookSecret: hasStripeWebhookSecret,
       stripeEnabled: Boolean(settings?.stripeEnabled),
+
+      // PayPal settings
+      paypalEnabled: Boolean(settings?.paypalEnabled),
+      paypalSandboxMode: settings?.paypalSandboxMode !== false,
+      paypalSandboxClientId: settings?.paypalSandboxClientId || null,
+      paypalSandboxClientSecretMasked: hasSandboxSecret ? maskSensitiveString(settings!.paypalSandboxClientSecret, 4) : null,
+      hasSandboxClientSecret: hasSandboxSecret,
+      paypalSandboxAppId: settings?.paypalSandboxAppId || "WEBAPPTEST",
+      paypalLiveClientId: settings?.paypalLiveClientId || null,
+      paypalLiveClientSecretMasked: hasLiveSecret ? maskSensitiveString(settings!.paypalLiveClientSecret, 4) : null,
+      hasLiveClientSecret: hasLiveSecret,
+      paypalLiveAppId: settings?.paypalLiveAppId || null,
     });
   } catch (error: any) {
     console.error("[Admin Payments API] GET error:", error);
@@ -64,10 +88,20 @@ export async function PUT(req: NextRequest) {
 
     const body = await req.json();
     const {
+      // Stripe
       stripePublishableKey,
       stripeSecretKey,
       stripeWebhookSecret,
       stripeEnabled,
+      // PayPal
+      paypalEnabled,
+      paypalSandboxMode,
+      paypalSandboxClientId,
+      paypalSandboxClientSecret,
+      paypalSandboxAppId,
+      paypalLiveClientId,
+      paypalLiveClientSecret,
+      paypalLiveAppId,
     } = body || {};
 
     const updateData: {
@@ -75,30 +109,66 @@ export async function PUT(req: NextRequest) {
       stripeSecretKey?: string;
       stripeWebhookSecret?: string;
       stripeEnabled?: boolean;
+      paypalEnabled?: boolean;
+      paypalSandboxMode?: boolean;
+      paypalSandboxClientId?: string | null;
+      paypalSandboxClientSecret?: string;
+      paypalSandboxAppId?: string | null;
+      paypalLiveClientId?: string | null;
+      paypalLiveClientSecret?: string;
+      paypalLiveAppId?: string | null;
     } = {};
 
+    // Stripe updates
     if (stripeEnabled !== undefined) {
       updateData.stripeEnabled = Boolean(stripeEnabled);
     }
-
     if (stripePublishableKey !== undefined) {
       updateData.stripePublishableKey = stripePublishableKey ? String(stripePublishableKey).trim() : null;
     }
-
-    // Protect secret key: If empty or containing bullet mask characters (•), preserve existing key in DB
     if (stripeSecretKey !== undefined && stripeSecretKey !== null) {
       const trimmedSecret = String(stripeSecretKey).trim();
       if (trimmedSecret && !trimmedSecret.includes("•")) {
         updateData.stripeSecretKey = trimmedSecret;
       }
     }
-
-    // Protect webhook secret: If empty or containing bullet mask characters (•), preserve existing key in DB
     if (stripeWebhookSecret !== undefined && stripeWebhookSecret !== null) {
       const trimmedWebhook = String(stripeWebhookSecret).trim();
       if (trimmedWebhook && !trimmedWebhook.includes("•")) {
         updateData.stripeWebhookSecret = trimmedWebhook;
       }
+    }
+
+    // PayPal updates
+    if (paypalEnabled !== undefined) {
+      updateData.paypalEnabled = Boolean(paypalEnabled);
+    }
+    if (paypalSandboxMode !== undefined) {
+      updateData.paypalSandboxMode = Boolean(paypalSandboxMode);
+    }
+    if (paypalSandboxClientId !== undefined) {
+      updateData.paypalSandboxClientId = paypalSandboxClientId ? String(paypalSandboxClientId).trim() : null;
+    }
+    if (paypalSandboxClientSecret !== undefined && paypalSandboxClientSecret !== null) {
+      const trimmed = String(paypalSandboxClientSecret).trim();
+      if (trimmed && !trimmed.includes("•")) {
+        updateData.paypalSandboxClientSecret = trimmed;
+      }
+    }
+    if (paypalSandboxAppId !== undefined) {
+      updateData.paypalSandboxAppId = paypalSandboxAppId ? String(paypalSandboxAppId).trim() : null;
+    }
+    if (paypalLiveClientId !== undefined) {
+      updateData.paypalLiveClientId = paypalLiveClientId ? String(paypalLiveClientId).trim() : null;
+    }
+    if (paypalLiveClientSecret !== undefined && paypalLiveClientSecret !== null) {
+      const trimmed = String(paypalLiveClientSecret).trim();
+      if (trimmed && !trimmed.includes("•")) {
+        updateData.paypalLiveClientSecret = trimmed;
+      }
+    }
+    if (paypalLiveAppId !== undefined) {
+      updateData.paypalLiveAppId = paypalLiveAppId ? String(paypalLiveAppId).trim() : null;
     }
 
     await prisma.globalSetting.upsert({
@@ -112,7 +182,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Stripe payment gateway configuration updated in database.",
+      message: "Payment gateway configuration updated successfully in database.",
     });
   } catch (error: any) {
     console.error("[Admin Payments API] PUT error:", error);

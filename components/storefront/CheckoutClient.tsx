@@ -76,7 +76,210 @@ function StripeReviewForm({
 }
 
 
-export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddresses = [], freightMethods = [] }: { sessionUser: any, stripePublishableKey?: string, savedAddresses?: any[], freightMethods?: any[] }) {
+function PayPalReviewForm({
+  total,
+  paypalClientId,
+  paypalSandboxMode,
+  items,
+  shippingMethod,
+  customer,
+  shippingAddress,
+  orderNotes,
+  onBack,
+  onSuccess,
+  onError,
+  isSubmitting,
+  setIsSubmitting,
+}: {
+  total: number;
+  paypalClientId: string;
+  paypalSandboxMode?: boolean;
+  items: any[];
+  shippingMethod: string;
+  customer: any;
+  shippingAddress: any;
+  orderNotes: string;
+  onBack: () => void;
+  onSuccess: (orderId: string) => void;
+  onError: (msg: string) => void;
+  isSubmitting: boolean;
+  setIsSubmitting: (val: boolean) => void;
+}) {
+  const [sdkReady, setSdkReady] = useState(false);
+  const paypalContainerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const scriptId = "paypal-js-sdk";
+
+    const renderButtons = () => {
+      if (!isMounted || !(window as any).paypal || !paypalContainerRef.current) return;
+      paypalContainerRef.current.innerHTML = "";
+
+      try {
+        (window as any).paypal.Buttons({
+          style: {
+            layout: "vertical",
+            color: "gold",
+            shape: "rect",
+            label: "paypal",
+          },
+          createOrder: async () => {
+            onError("");
+            try {
+              const res = await fetch("/api/storefront/paypal/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items, shippingMethod }),
+              });
+              const data = await res.json();
+              if (!res.ok || !data.id) {
+                throw new Error(data.error || "Failed to create PayPal order.");
+              }
+              return data.id;
+            } catch (err: any) {
+              onError(err.message || "Could not initiate PayPal checkout.");
+              throw err;
+            }
+          },
+          onApprove: async (data: { orderID: string }) => {
+            setIsSubmitting(true);
+            try {
+              const res = await fetch("/api/storefront/paypal/capture-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderID: data.orderID,
+                  customer,
+                  shippingAddress,
+                  shippingMethod,
+                  items,
+                  notes: orderNotes,
+                }),
+              });
+              const result = await res.json();
+              if (res.ok && result.success) {
+                onSuccess(result.orderId);
+              } else {
+                onError(result.error || "Failed to capture PayPal transaction.");
+                setIsSubmitting(false);
+              }
+            } catch (err: any) {
+              onError(err.message || "Network error while completing PayPal order.");
+              setIsSubmitting(false);
+            }
+          },
+          onCancel: () => {
+            onError("PayPal checkout was cancelled.");
+          },
+          onError: (err: any) => {
+            console.error("[PayPal Checkout Error]", err);
+            onError("An error occurred during PayPal checkout. Please try again.");
+          },
+        }).render(paypalContainerRef.current);
+      } catch (err) {
+        console.error("[PayPal Render Error]", err);
+      }
+    };
+
+    if ((window as any).paypal) {
+      setSdkReady(true);
+      renderButtons();
+      return () => {
+        isMounted = false;
+        if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
+      };
+    }
+
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId.trim())}&currency=USD&intent=capture`;
+      script.async = true;
+      script.onload = () => {
+        if (isMounted) {
+          setSdkReady(true);
+          renderButtons();
+        }
+      };
+      script.onerror = () => {
+        if (isMounted) {
+          onError("Failed to load PayPal SDK script. Check your connection or ad-blocker.");
+        }
+      };
+      document.body.appendChild(script);
+    } else {
+      existingScript.addEventListener("load", () => {
+        if (isMounted) {
+          setSdkReady(true);
+          renderButtons();
+        }
+      });
+      if ((window as any).paypal) {
+        setSdkReady(true);
+        renderButtons();
+      }
+    }
+
+    return () => {
+      isMounted = false;
+      if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
+    };
+  }, [paypalClientId, items, shippingMethod, customer, shippingAddress, orderNotes]);
+
+  return (
+    <div className="space-y-6">
+      {paypalSandboxMode && (
+        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2.5">
+          <span className="font-bold text-base leading-none mt-0.5">ℹ️</span>
+          <div>
+            <strong className="block font-bold">PayPal Sandbox Mode Active</strong>
+            <p className="mt-0.5 text-amber-800">
+              Transactions are simulated in test sandbox. Use sandbox buyer login to complete order.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!sdkReady && (
+        <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <svg className="animate-spin h-6 w-6 text-sky-600 mx-auto" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-xs font-semibold text-slate-700">Connecting to PayPal Secure Checkout...</p>
+        </div>
+      )}
+
+      <div ref={paypalContainerRef} className="min-h-[120px]" />
+
+      <div className="pt-2 flex justify-between items-center">
+        <Button type="button" variant="outline" size="md" onClick={onBack} disabled={isSubmitting}>
+          ← Back to Payment
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function CheckoutClient({
+  sessionUser,
+  stripePublishableKey,
+  paypalEnabled = false,
+  paypalClientId,
+  paypalSandboxMode = true,
+  savedAddresses = [],
+  freightMethods = [],
+}: {
+  sessionUser: any;
+  stripePublishableKey?: string;
+  paypalEnabled?: boolean;
+  paypalClientId?: string;
+  paypalSandboxMode?: boolean;
+  savedAddresses?: any[];
+  freightMethods?: any[];
+}) {
   const router = useRouter();
   const { items, subtotal, totalItems, clearCart, isHydrated } = useCart();
   const { ecommerceMode } = useSettings();
@@ -106,7 +309,11 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
   });
 
   const [shippingMethod, setShippingMethod] = useState<string>(freightMethods.length > 0 ? freightMethods[0].id : "standard");
-  const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "PAYPAL" | "PO_NET30">("STRIPE");
+  const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "PAYPAL" | "PO_NET30">(() => {
+    if (stripePublishableKey) return "STRIPE";
+    if (paypalEnabled && paypalClientId) return "PAYPAL";
+    return "STRIPE";
+  });
 
   const [orderNotes, setOrderNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -212,6 +419,12 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
         } finally {
           setIsSubmitting(false);
         }
+      } else if (paymentMethod === "PAYPAL") {
+        if (!paypalClientId) {
+          setErrorMessage("PayPal is not configured by the administrator.");
+          return;
+        }
+        setStep(4);
       } else {
         setStep(4);
       }
@@ -399,13 +612,33 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
                   </div>
                   <span className="text-[11px] text-slate-500 block">Secure, encrypted payment processing</span>
                 </button>
-                <button type="button" disabled className="flex-1 p-4 rounded-xl border border-slate-100 bg-slate-50 text-left opacity-60 cursor-not-allowed">
-                  <div className="flex items-center justify-between mb-2">
-                    <strong className="text-sm font-bold text-slate-500 block">PayPal</strong>
-                    <img src="/paypal.png" alt="PayPal" className="h-5 object-contain grayscale opacity-60" />
-                  </div>
-                  <span className="text-[11px] text-slate-400 block">Coming soon</span>
-                </button>
+                {paypalEnabled && paypalClientId ? (
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("PAYPAL")}
+                    className={`flex-1 p-4 rounded-xl border text-left transition-all ${
+                      paymentMethod === "PAYPAL"
+                        ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200"
+                        : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <strong className="text-sm font-bold text-slate-900 block">PayPal</strong>
+                      <img src="/paypal.png" alt="PayPal" className="h-5 object-contain" />
+                    </div>
+                    <span className="text-[11px] text-slate-500 block">
+                      {paypalSandboxMode ? "Sandbox Test Mode • PayPal, Cards" : "PayPal, Pay Later & Cards"}
+                    </span>
+                  </button>
+                ) : (
+                  <button type="button" disabled className="flex-1 p-4 rounded-xl border border-slate-100 bg-slate-50 text-left opacity-60 cursor-not-allowed">
+                    <div className="flex items-center justify-between mb-2">
+                      <strong className="text-sm font-bold text-slate-400 block">PayPal</strong>
+                      <img src="/paypal.png" alt="PayPal" className="h-5 object-contain grayscale opacity-60" />
+                    </div>
+                    <span className="text-[11px] text-slate-400 block">Disabled</span>
+                  </button>
+                )}
                 {allowCredit && (
                   <button type="button" onClick={() => setPaymentMethod("PO_NET30")} className={`flex-1 p-4 rounded-xl border text-left transition-all ${paymentMethod === "PO_NET30" ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200" : "border-slate-200 hover:border-slate-300"}`}>
                     <div className="flex items-center justify-between mb-2">
@@ -424,6 +657,16 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
                 <p className="text-sm font-semibold text-slate-900 mt-4">Stripe Processing Ready</p>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                   Click "Review Order Details" to enter your payment information securely on the next step.
+                </p>
+              </div>
+            ) : paymentMethod === "PAYPAL" ? (
+              <div className="space-y-4 p-6 rounded-xl bg-slate-50 border border-slate-200 text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 border border-amber-200 rounded-full text-xs font-bold text-amber-900">
+                  {paypalSandboxMode ? "🟡 PayPal Sandbox Test Active" : "🟢 PayPal Live Processing Active"}
+                </div>
+                <p className="text-sm font-semibold text-slate-900 mt-2">PayPal Checkout Ready</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Click "Review Order Details" to complete payment via PayPal on the final review step.
                 </p>
               </div>
             ) : (
@@ -482,6 +725,25 @@ export function CheckoutClient({ sessionUser, stripePublishableKey, savedAddress
                   setIsSubmitting={setIsSubmitting}
                 />
               </Elements>
+            ) : ecommerceMode && paymentMethod === "PAYPAL" && paypalClientId ? (
+              <PayPalReviewForm
+                total={total}
+                paypalClientId={paypalClientId}
+                paypalSandboxMode={paypalSandboxMode}
+                items={items}
+                shippingMethod={shippingMethod}
+                customer={customer}
+                shippingAddress={shippingAddress}
+                orderNotes={orderNotes}
+                onBack={() => setStep(3)}
+                onSuccess={(orderId) => {
+                  clearCart();
+                  router.push(`/checkout/success?orderId=${orderId}`);
+                }}
+                onError={(msg) => setErrorMessage(msg)}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
+              />
             ) : (
               <div className="pt-4 flex justify-between items-center">
                 <Button type="button" variant="outline" size="md" onClick={() => setStep(ecommerceMode ? 3 : 2)}>

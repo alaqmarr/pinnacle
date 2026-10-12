@@ -197,9 +197,16 @@ export async function POST(req: Request) {
       normalizedMethod === "PURCHASE_ORDER" ||
       String(paymentMethod).toUpperCase() === "PURCHASE_ORDER" ||
       String(paymentMethod).toUpperCase() === "PO_NET30";
+    const isPayPal = String(paymentMethod).toUpperCase() === "PAYPAL";
     const paymentStatus = isQuote ? "QUOTE" : (isPurchaseOrder ? "UNPAID" : "PAID");
     const status = isQuote ? "QUOTE_REQUESTED" : "PENDING";
-    const recordedPaymentMethod = isQuote ? "QUOTE" : (isPurchaseOrder ? "PURCHASE_ORDER" : "CREDIT_CARD");
+    const recordedPaymentMethod = isQuote
+      ? "QUOTE"
+      : isPurchaseOrder
+      ? "PURCHASE_ORDER"
+      : isPayPal
+      ? "PAYPAL"
+      : "CREDIT_CARD";
 
     // 9. Persist Order in database
     const order = await prisma.order.create({
@@ -212,6 +219,7 @@ export async function POST(req: Request) {
         status,
         paymentStatus,
         paymentMethod: recordedPaymentMethod,
+        paypalOrderId: paymentDetails?.paypalOrderId || (isPayPal ? paymentDetails?.id : null) || null,
         currency: "USD",
         subtotal,
         shipping: shippingFee,

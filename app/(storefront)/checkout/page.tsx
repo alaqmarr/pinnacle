@@ -67,6 +67,15 @@ export default async function CheckoutPage() {
         savedAddresses={savedAddresses}
         freightMethods={freightMethods}
         stripePublishableKey={settings?.stripeEnabled ? (settings?.stripePublishableKey || undefined) : undefined}
+        paypalEnabled={Boolean(settings?.paypalEnabled)}
+        paypalClientId={
+          settings?.paypalEnabled
+            ? (settings.paypalSandboxMode !== false
+                ? settings.paypalSandboxClientId
+                : settings.paypalLiveClientId) || undefined
+            : undefined
+        }
+        paypalSandboxMode={settings?.paypalSandboxMode !== false}
       />
     </div>
   );

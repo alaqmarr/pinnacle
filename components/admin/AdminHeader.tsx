@@ -25,7 +25,7 @@ export default function AdminHeader({ onOpenMobileSidebar, user }: AdminHeaderPr
     if (pathname.startsWith("/admin/inquiries")) return "Customer Inquiries";
     if (pathname.startsWith("/admin/users")) return "User Management & RBAC";
     if (pathname.startsWith("/admin/marketing")) return "Marketing & Script Injection";
-    if (pathname.startsWith("/admin/settings/payments")) return "Stripe Payment Gateway Configuration";
+    if (pathname.startsWith("/admin/settings/payments")) return "Payment Gateways (Stripe & PayPal)";
     if (pathname.startsWith("/admin/settings")) return "Global Settings & System";
     return user?.role === "MARKETING" ? "Marketing Portal" : "Admin Portal";
   };
