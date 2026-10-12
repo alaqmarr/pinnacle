@@ -169,12 +169,13 @@ function PayPalReviewForm({
       paypalContainerRef.current.innerHTML = "";
 
       try {
-        (window as any).paypal.Buttons({
+        const buttons = (window as any).paypal.Buttons({
           style: {
             layout: "vertical",
             color: "gold",
             shape: "rect",
             label: "paypal",
+            height: 48,
           },
           createOrder: async () => {
             onError("");
@@ -190,7 +191,7 @@ function PayPalReviewForm({
               }
               return data.id;
             } catch (err: any) {
-              onError(err.message || "Could not initiate PayPal checkout.");
+              onError(err.message || "Could not initiate PayPal in-context checkout.");
               throw err;
             }
           },
@@ -222,15 +223,28 @@ function PayPalReviewForm({
             }
           },
           onCancel: () => {
-            onError("PayPal checkout was cancelled.");
+            onError("PayPal in-context window was closed without completing the payment.");
           },
           onError: (err: any) => {
             console.error("[PayPal Checkout Error]", err);
-            onError("An error occurred during PayPal checkout. Please use the direct PayPal button below or try again.");
+            onError("PayPal encountered an error. If using Sandbox, please ensure you are logged in with a Personal Buyer account (not your Business Merchant account).");
           },
-        }).render(paypalContainerRef.current);
+        });
+
+        if (buttons.isEligible()) {
+          const promise = buttons.render(paypalContainerRef.current);
+          if (promise && typeof promise.catch === "function") {
+            promise.catch((err: any) => {
+              console.warn("[PayPal Buttons render rejection]:", err);
+              if (isMounted) setSdkStatus("failed");
+            });
+          }
+        } else {
+          if (isMounted) setSdkStatus("failed");
+        }
       } catch (err) {
         console.error("[PayPal Render Error]", err);
+        if (isMounted) setSdkStatus("failed");
       }
     };
 
@@ -243,102 +257,121 @@ function PayPalReviewForm({
       };
     }
 
-    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId.trim())}&currency=USD&intent=capture`;
-      script.async = true;
-      script.onload = () => {
-        if (isMounted) {
-          setSdkStatus("ready");
-          renderButtons();
-        }
-      };
-      script.onerror = () => {
-        if (isMounted) {
-          // Gracefully fallback to direct button without noisy error banner
-          setSdkStatus("failed");
-        }
-      };
-      document.body.appendChild(script);
-    } else {
-      existingScript.addEventListener("load", () => {
-        if (isMounted) {
-          setSdkStatus("ready");
-          renderButtons();
-        }
-      });
-      existingScript.addEventListener("error", () => {
-        if (isMounted) {
-          setSdkStatus("failed");
-        }
-      });
-      if ((window as any).paypal) {
+    const existingScript = document.getElementById(scriptId);
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalClientId.trim())}&currency=USD&intent=capture`;
+    script.async = true;
+    script.onload = () => {
+      if (isMounted) {
         setSdkStatus("ready");
         renderButtons();
       }
-    }
+    };
+    script.onerror = (err) => {
+      console.warn("[PayPal JS SDK load error]:", err);
+      if (isMounted) {
+        setSdkStatus("failed");
+      }
+    };
+    document.body.appendChild(script);
 
     return () => {
       isMounted = false;
       if (paypalContainerRef.current) paypalContainerRef.current.innerHTML = "";
     };
-  }, [paypalClientId, items, shippingMethod, customer, shippingAddress, orderNotes]);
+  }, [paypalClientId, items, shippingMethod, customer, shippingAddress, orderNotes, paypalSandboxMode]);
 
   return (
     <div className="space-y-6">
+      {/* Sandbox Test Mode Notice with Merchant Account Warning */}
       {paypalSandboxMode && (
-        <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2.5">
-          <span className="font-bold text-base leading-none mt-0.5">ℹ️</span>
-          <div>
-            <strong className="block font-bold">PayPal Sandbox Mode Active</strong>
-            <p className="mt-0.5 text-amber-800">
-              Transactions are simulated in test sandbox. Log in with your sandbox buyer account to complete the order.
+        <div className="p-4 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-2.5">
+          <div className="flex items-center gap-2 font-bold text-sm text-amber-950">
+            <span>🟡</span>
+            <span>PayPal Sandbox Active (In-Context Modal Checkout)</span>
+          </div>
+          <p className="text-amber-800 leading-relaxed">
+            Transactions run in PayPal's simulation sandbox. Clicking PayPal will open a secure In-Context modal window right over this page.
+          </p>
+          <div className="p-3 bg-white/90 border border-amber-200 rounded-lg text-slate-700 space-y-1.5 shadow-2xs">
+            <div className="flex items-center gap-1.5 font-bold text-slate-900 text-[11px] uppercase tracking-wider">
+              <span className="text-amber-600">ℹ️</span>
+              <span>Sandbox Testing: Use a Buyer / Personal Test Account</span>
+            </div>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              If PayPal displays: <em className="text-amber-900 font-semibold">"You are logging in with the merchant account for this transaction"</em>, click <em>"Account Logout"</em> on PayPal's window and log in with a Sandbox <strong>Personal / Buyer</strong> account.
+            </p>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              In PayPal Sandbox, the Merchant account (<code className="font-mono text-amber-900">sb-eqyhr53028913@business.example.com</code>) cannot buy from itself. Get your Personal Buyer test credentials from PayPal Developer Dashboard &gt; <strong>Testing Tools &gt; Sandbox Accounts</strong>.
             </p>
           </div>
         </div>
       )}
 
-      {/* Primary Direct PayPal Button (Always active, no ad-blocker or script error can stop it) */}
+      {/* Primary In-Context PayPal Checkout Buttons */}
       <div className="space-y-3">
-        <button
-          type="button"
-          disabled={isSubmitting || isRedirecting}
-          onClick={handleDirectPayPal}
-          className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-base text-[#003087] bg-[#FFC439] hover:bg-[#F2BA36] shadow-sm active:scale-[0.99] transition-all duration-150 disabled:opacity-60 cursor-pointer border border-[#E0AC30]"
-        >
-          {isRedirecting ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-[#003087]" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span>Connecting to PayPal Secure Checkout...</span>
-            </>
-          ) : (
-            <>
-              <img src="/paypal.png" alt="PayPal" className="h-5 object-contain" />
-              <span>Pay with PayPal • {formatUSD(total)}</span>
-            </>
-          )}
-        </button>
-        <p className="text-center text-xs text-slate-500">
-          Safe &amp; secure payment. You will be redirected to PayPal to complete your purchase.
-        </p>
-      </div>
-
-      {/* In-Context popup buttons if JS SDK successfully loaded */}
-      {sdkStatus === "ready" && (
-        <div className="pt-2">
-          <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-4 text-xs font-semibold text-slate-400 uppercase">Or Pay with In-Context Window</span>
-            <div className="flex-grow border-t border-slate-200"></div>
+        {sdkStatus === "loading" && (
+          <div className="p-8 text-center bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <svg className="animate-spin h-6 w-6 text-sky-600 mx-auto" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            <p className="text-xs font-semibold text-slate-700">Connecting to PayPal In-Context Checkout...</p>
           </div>
-          <div ref={paypalContainerRef} className="pt-2 min-h-[50px]" />
-        </div>
-      )}
+        )}
+
+        {/* The official PayPal in-context smart button container */}
+        <div ref={paypalContainerRef} className={sdkStatus === "ready" ? "min-h-[100px]" : "hidden"} />
+
+        {/* Direct Button if In-Context script is blocked or fails */}
+        {sdkStatus === "failed" && (
+          <div className="space-y-2">
+            <button
+              type="button"
+              disabled={isSubmitting || isRedirecting}
+              onClick={handleDirectPayPal}
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-xl font-bold text-base text-[#003087] bg-[#FFC439] hover:bg-[#F2BA36] shadow-sm active:scale-[0.99] transition-all duration-150 disabled:opacity-60 cursor-pointer border border-[#E0AC30]"
+            >
+              {isRedirecting ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-[#003087]" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Redirecting to PayPal Secure Checkout...</span>
+                </>
+              ) : (
+                <>
+                  <img src="/paypal.png" alt="PayPal" className="h-5 object-contain" />
+                  <span>Pay with PayPal • {formatUSD(total)}</span>
+                </>
+              )}
+            </button>
+            <p className="text-center text-xs text-slate-500">
+              In-context window was blocked. You will be redirected to PayPal's full checkout page to complete payment.
+            </p>
+          </div>
+        )}
+
+        {/* Optional Full-page redirect toggle */}
+        {sdkStatus === "ready" && (
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              disabled={isSubmitting || isRedirecting}
+              onClick={handleDirectPayPal}
+              className="text-xs text-slate-500 hover:text-slate-800 underline transition cursor-pointer"
+            >
+              {isRedirecting ? "Connecting to PayPal..." : "Prefer full-page redirect checkout instead? Click here to pay on PayPal.com"}
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="pt-2 flex justify-between items-center border-t border-slate-100">
         <Button type="button" variant="outline" size="md" onClick={onBack} disabled={isSubmitting || isRedirecting}>
