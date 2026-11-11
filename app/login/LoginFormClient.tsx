@@ -2,11 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
-export default function LoginFormClient({ callbackUrl, errorParam }: { callbackUrl: string, errorParam: string }) {
-  const router = useRouter();
+export default function LoginFormClient({
+  callbackUrl,
+  errorParam,
+  setupAvailable = false,
+}: {
+  callbackUrl: string;
+  errorParam: string;
+  setupAvailable?: boolean;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,69 +22,55 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
     setError("");
     setLoading(true);
 
-    const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-    const fallback = callbackUrl || "/admin";
-    const absoluteCallbackUrl = fallback.startsWith("http")
-      ? fallback
-      : `${origin}${fallback.startsWith("/") ? fallback : `/${fallback}`}`;
-
-    try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-        callbackUrl: absoluteCallbackUrl,
-      });
-
-      if (res?.error) {
-        setError("Invalid email or password. Please verify your credentials and try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (res?.ok) {
-        window.location.assign(res.url || absoluteCallbackUrl);
-        return;
-      }
-    } catch (signInErr) {
-      console.warn("[LoginFormClient] signIn wrapper error, attempting direct API auth:", signInErr);
-    }
-
-    // Resilient fallback: direct authentication via credentials endpoint
     try {
       const directRes = await fetch("/api/auth/callback/credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, callbackUrl: absoluteCallbackUrl }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          ...(callbackUrl ? { callbackUrl } : {}),
+        }),
       });
 
       const directData = await directRes.json();
 
       if (directRes.ok && directData.success) {
-        window.location.assign(directData.url || absoluteCallbackUrl);
+        const fallbackDest =
+          directData.user?.role === "ADMIN"
+            ? "/admin"
+            : directData.user?.role === "MARKETING"
+            ? "/admin/marketing"
+            : "/account";
+        window.location.assign(directData.url || fallbackDest);
         return;
       }
 
       setError(
-        directData.message === "Invalid credentials" || directData.error === "CredentialsSignin"
+        directData.message === "Invalid credentials" ||
+          directData.error === "CredentialsSignin"
           ? "Invalid email or password. Please verify your credentials and try again."
           : directData.message || "Failed to sign in. Please verify your credentials."
       );
-    } catch (fallbackErr: any) {
-      console.error("[LoginFormClient] Direct auth failed:", fallbackErr);
+    } catch (err) {
+      console.error("[LoginFormClient] Sign in failed:", err);
       setError("Network error connecting to authentication server. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const registerHref = callbackUrl
+    ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/register";
+
   return (
     <>
       {errorParam && !error && (
         <div className="mb-6 p-4 rounded-lg bg-red-950/80 border border-red-800/80 text-red-200 text-sm font-medium">
-          {errorParam === 'CredentialsSignin'
-            ? 'Invalid email or password. Please verify your credentials and try again.'
-            : 'Authentication failed. Please check your details and try again.'}
+          {errorParam === "CredentialsSignin"
+            ? "Invalid email or password. Please verify your credentials and try again."
+            : "Authentication failed. Please check your details and try again."}
         </div>
       )}
 
@@ -105,7 +96,7 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            placeholder="user@pinnacle.com"
+            placeholder="purchasing@company.com"
             className="block w-full rounded-lg border-slate-600 bg-slate-950 text-white placeholder-slate-500 shadow-sm focus:border-sky-500 focus:ring-sky-500 sm:text-sm px-4 py-3 border transition"
           />
         </div>
@@ -136,25 +127,27 @@ export default function LoginFormClient({ callbackUrl, errorParam }: { callbackU
             disabled={loading}
             className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-sky-600 hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition cursor-pointer disabled:opacity-50"
           >
-            {loading ? "Verifying Credentials..." : "Sign In"}
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </div>
       </form>
 
       <div className="mt-6 border-t border-slate-700 pt-4 flex flex-col space-y-3 text-xs">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-3">
           <Link
-            href="/register"
+            href={registerHref}
             className="text-sky-400 hover:text-sky-300 font-medium transition"
           >
-            Need an account? Register as Customer →
+            Need a wholesale account? Register →
           </Link>
-          <Link
-            href="/setup"
-            className="text-amber-400 hover:text-amber-300 font-medium transition"
-          >
-            System Setup
-          </Link>
+          {setupAvailable && (
+            <Link
+              href="/setup"
+              className="text-amber-400 hover:text-amber-300 font-medium transition"
+            >
+              System Setup
+            </Link>
+          )}
         </div>
         <div className="text-center pt-2">
           <Link

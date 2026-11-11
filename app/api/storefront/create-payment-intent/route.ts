@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(request: Request) {
   try {
@@ -11,18 +11,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
-    // 1. Fetch GlobalSettings for Stripe keys
-    const settings = await prisma.globalSetting.findUnique({
-      where: { id: "singleton" }
-    });
-
-    if (!settings || !settings.stripeSecretKey || !settings.stripeEnabled) {
-      return NextResponse.json({ error: 'Stripe is not configured or disabled' }, { status: 500 });
-    }
-
-    const stripe = new Stripe(settings.stripeSecretKey.trim(), {
-      apiVersion: "2026-08-26.dahlia" as any, // Latest API version
-    });
+    // 1. Fetch dynamic database-driven Stripe client (Test vs Live mode)
+    const { stripe, config } = await getStripeClient();
 
     // 2. Calculate subtotal safely on the server
     let subtotal = 0;
@@ -49,6 +39,11 @@ export async function POST(request: Request) {
       });
       if (freightMethod) {
         shippingCost = freightMethod.cost;
+      } else {
+        const code = String(shippingMethod).toUpperCase();
+        if (code === 'STANDARD_GROUND') shippingCost = 1500;
+        else if (code === 'EXPEDITED') shippingCost = 4500;
+        else if (code === 'FREIGHT_LTL') shippingCost = 6500;
       }
     }
     
@@ -64,11 +59,15 @@ export async function POST(request: Request) {
         enabled: true,
       },
       metadata: {
-        shippingMethod
+        shippingMethod: shippingMethod || '',
+        testMode: config.testMode ? 'true' : 'false',
       }
     });
 
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret });
+    return NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
+      testMode: config.testMode,
+    });
 
   } catch (error: any) {
     console.error('Error creating PaymentIntent:', error);

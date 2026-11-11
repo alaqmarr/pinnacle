@@ -152,6 +152,28 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
                 <span>Freight Shipping:</span>
                 <span className="font-medium font-mono">{formatUSD(order.shipping)}</span>
               </div>
+              {order.tax > 0 && (
+                <div className="flex justify-between text-slate-600">
+                  <span>Estimated Sales Tax:</span>
+                  <span className="font-medium font-mono">{formatUSD(order.tax)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-600">
+                <span>Payment Method:</span>
+                <span className="font-medium">{order.paymentMethod}</span>
+              </div>
+              {order.stripePaymentIntentId && (
+                <div className="flex justify-between text-slate-600">
+                  <span>Stripe Reference:</span>
+                  <span className="font-medium font-mono text-[11px]">{order.stripePaymentIntentId}</span>
+                </div>
+              )}
+              {order.paypalOrderId && (
+                <div className="flex justify-between text-slate-600">
+                  <span>PayPal Reference:</span>
+                  <span className="font-medium font-mono text-[11px]">{order.paypalOrderId}</span>
+                </div>
+              )}
               <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-extrabold text-slate-900">
                 <span>Grand Total (USD):</span>
                 <span className="text-base text-slate-900 font-mono">{formatUSD(order.total)}</span>

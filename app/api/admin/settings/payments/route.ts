@@ -26,10 +26,17 @@ export async function GET() {
     const settings = await prisma.globalSetting.findUnique({
       where: { id: "singleton" },
       select: {
+        stripeEnabled: true,
+        stripeTestMode: true,
+        stripeTestPublishableKey: true,
+        stripeTestSecretKey: true,
+        stripeTestWebhookSecret: true,
+        stripeLivePublishableKey: true,
+        stripeLiveSecretKey: true,
+        stripeLiveWebhookSecret: true,
         stripePublishableKey: true,
         stripeSecretKey: true,
         stripeWebhookSecret: true,
-        stripeEnabled: true,
         paypalEnabled: true,
         paypalSandboxMode: true,
         paypalSandboxClientId: true,
@@ -41,19 +48,28 @@ export async function GET() {
       },
     });
 
-    const hasStripeSecretKey = Boolean(settings?.stripeSecretKey);
-    const hasStripeWebhookSecret = Boolean(settings?.stripeWebhookSecret);
+    const hasTestSecret = Boolean(settings?.stripeTestSecretKey || settings?.stripeSecretKey);
+    const hasTestWebhook = Boolean(settings?.stripeTestWebhookSecret || settings?.stripeWebhookSecret);
+    const hasLiveSecret = Boolean(settings?.stripeLiveSecretKey);
+    const hasLiveWebhook = Boolean(settings?.stripeLiveWebhookSecret);
     const hasSandboxSecret = Boolean(settings?.paypalSandboxClientSecret);
-    const hasLiveSecret = Boolean(settings?.paypalLiveClientSecret);
+    const hasPayPalLiveSecret = Boolean(settings?.paypalLiveClientSecret);
 
     return NextResponse.json({
       // Stripe settings
-      stripePublishableKey: settings?.stripePublishableKey || null,
-      stripeSecretKeyMasked: hasStripeSecretKey ? maskSensitiveString(settings!.stripeSecretKey, 4) : null,
-      hasSecretKey: hasStripeSecretKey,
-      stripeWebhookSecretMasked: hasStripeWebhookSecret ? maskSensitiveString(settings!.stripeWebhookSecret, 4) : null,
-      hasWebhookSecret: hasStripeWebhookSecret,
       stripeEnabled: Boolean(settings?.stripeEnabled),
+      stripeTestMode: settings?.stripeTestMode !== false,
+      stripeTestPublishableKey: settings?.stripeTestPublishableKey || settings?.stripePublishableKey || null,
+      stripeTestSecretKeyMasked: hasTestSecret ? maskSensitiveString((settings!.stripeTestSecretKey || settings!.stripeSecretKey)!, 4) : null,
+      hasTestSecretKey: hasTestSecret,
+      stripeTestWebhookSecretMasked: hasTestWebhook ? maskSensitiveString((settings!.stripeTestWebhookSecret || settings!.stripeWebhookSecret)!, 4) : null,
+      hasTestWebhookSecret: hasTestWebhook,
+      stripeLivePublishableKey: settings?.stripeLivePublishableKey || null,
+      stripeLiveSecretKeyMasked: hasLiveSecret ? maskSensitiveString(settings!.stripeLiveSecretKey!, 4) : null,
+      hasLiveSecretKey: hasLiveSecret,
+      stripeLiveWebhookSecretMasked: hasLiveWebhook ? maskSensitiveString(settings!.stripeLiveWebhookSecret!, 4) : null,
+      hasLiveWebhookSecret: hasLiveWebhook,
+      stripePublishableKey: settings?.stripePublishableKey || null,
 
       // PayPal settings
       paypalEnabled: Boolean(settings?.paypalEnabled),
@@ -63,8 +79,8 @@ export async function GET() {
       hasSandboxClientSecret: hasSandboxSecret,
       paypalSandboxAppId: settings?.paypalSandboxAppId || "WEBAPPTEST",
       paypalLiveClientId: settings?.paypalLiveClientId || null,
-      paypalLiveClientSecretMasked: hasLiveSecret ? maskSensitiveString(settings!.paypalLiveClientSecret, 4) : null,
-      hasLiveClientSecret: hasLiveSecret,
+      paypalLiveClientSecretMasked: hasPayPalLiveSecret ? maskSensitiveString(settings!.paypalLiveClientSecret, 4) : null,
+      hasLiveClientSecret: hasPayPalLiveSecret,
       paypalLiveAppId: settings?.paypalLiveAppId || null,
     });
   } catch (error: any) {
@@ -89,10 +105,17 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const {
       // Stripe
+      stripeEnabled,
+      stripeTestMode,
+      stripeTestPublishableKey,
+      stripeTestSecretKey,
+      stripeTestWebhookSecret,
+      stripeLivePublishableKey,
+      stripeLiveSecretKey,
+      stripeLiveWebhookSecret,
       stripePublishableKey,
       stripeSecretKey,
       stripeWebhookSecret,
-      stripeEnabled,
       // PayPal
       paypalEnabled,
       paypalSandboxMode,
@@ -105,10 +128,17 @@ export async function PUT(req: NextRequest) {
     } = body || {};
 
     const updateData: {
+      stripeEnabled?: boolean;
+      stripeTestMode?: boolean;
+      stripeTestPublishableKey?: string | null;
+      stripeTestSecretKey?: string;
+      stripeTestWebhookSecret?: string;
+      stripeLivePublishableKey?: string | null;
+      stripeLiveSecretKey?: string;
+      stripeLiveWebhookSecret?: string;
       stripePublishableKey?: string | null;
       stripeSecretKey?: string;
       stripeWebhookSecret?: string;
-      stripeEnabled?: boolean;
       paypalEnabled?: boolean;
       paypalSandboxMode?: boolean;
       paypalSandboxClientId?: string | null;
@@ -123,19 +153,41 @@ export async function PUT(req: NextRequest) {
     if (stripeEnabled !== undefined) {
       updateData.stripeEnabled = Boolean(stripeEnabled);
     }
-    if (stripePublishableKey !== undefined) {
-      updateData.stripePublishableKey = stripePublishableKey ? String(stripePublishableKey).trim() : null;
+    if (stripeTestMode !== undefined) {
+      updateData.stripeTestMode = Boolean(stripeTestMode);
     }
-    if (stripeSecretKey !== undefined && stripeSecretKey !== null) {
-      const trimmedSecret = String(stripeSecretKey).trim();
+    if (stripeTestPublishableKey !== undefined) {
+      const val = stripeTestPublishableKey ? String(stripeTestPublishableKey).trim() : null;
+      updateData.stripeTestPublishableKey = val;
+      updateData.stripePublishableKey = val;
+    }
+    if (stripeTestSecretKey !== undefined && stripeTestSecretKey !== null) {
+      const trimmedSecret = String(stripeTestSecretKey).trim();
       if (trimmedSecret && !trimmedSecret.includes("•")) {
+        updateData.stripeTestSecretKey = trimmedSecret;
         updateData.stripeSecretKey = trimmedSecret;
       }
     }
-    if (stripeWebhookSecret !== undefined && stripeWebhookSecret !== null) {
-      const trimmedWebhook = String(stripeWebhookSecret).trim();
+    if (stripeTestWebhookSecret !== undefined && stripeTestWebhookSecret !== null) {
+      const trimmedWebhook = String(stripeTestWebhookSecret).trim();
       if (trimmedWebhook && !trimmedWebhook.includes("•")) {
+        updateData.stripeTestWebhookSecret = trimmedWebhook;
         updateData.stripeWebhookSecret = trimmedWebhook;
+      }
+    }
+    if (stripeLivePublishableKey !== undefined) {
+      updateData.stripeLivePublishableKey = stripeLivePublishableKey ? String(stripeLivePublishableKey).trim() : null;
+    }
+    if (stripeLiveSecretKey !== undefined && stripeLiveSecretKey !== null) {
+      const trimmedSecret = String(stripeLiveSecretKey).trim();
+      if (trimmedSecret && !trimmedSecret.includes("•")) {
+        updateData.stripeLiveSecretKey = trimmedSecret;
+      }
+    }
+    if (stripeLiveWebhookSecret !== undefined && stripeLiveWebhookSecret !== null) {
+      const trimmedWebhook = String(stripeLiveWebhookSecret).trim();
+      if (trimmedWebhook && !trimmedWebhook.includes("•")) {
+        updateData.stripeLiveWebhookSecret = trimmedWebhook;
       }
     }
 

@@ -21,10 +21,17 @@ export default async function AdminPaymentSettingsPage() {
   const settings = await prisma.globalSetting.findUnique({
     where: { id: "singleton" },
     select: {
+      stripeEnabled: true,
+      stripeTestMode: true,
+      stripeTestPublishableKey: true,
+      stripeTestSecretKey: true,
+      stripeTestWebhookSecret: true,
+      stripeLivePublishableKey: true,
+      stripeLiveSecretKey: true,
+      stripeLiveWebhookSecret: true,
       stripePublishableKey: true,
       stripeSecretKey: true,
       stripeWebhookSecret: true,
-      stripeEnabled: true,
       paypalEnabled: true,
       paypalSandboxMode: true,
       paypalSandboxClientId: true,
@@ -36,19 +43,29 @@ export default async function AdminPaymentSettingsPage() {
     },
   });
 
-  const hasSecretKey = Boolean(settings?.stripeSecretKey);
-  const hasWebhookSecret = Boolean(settings?.stripeWebhookSecret);
+  const hasTestSecret = Boolean(settings?.stripeTestSecretKey || settings?.stripeSecretKey);
+  const hasTestWebhook = Boolean(settings?.stripeTestWebhookSecret || settings?.stripeWebhookSecret);
+  const hasLiveSecret = Boolean(settings?.stripeLiveSecretKey);
+  const hasLiveWebhook = Boolean(settings?.stripeLiveWebhookSecret);
+
   const hasSandboxSecret = Boolean(settings?.paypalSandboxClientSecret);
-  const hasLiveSecret = Boolean(settings?.paypalLiveClientSecret);
+  const hasPayPalLiveSecret = Boolean(settings?.paypalLiveClientSecret);
 
   const initialData = {
     // Stripe
-    stripePublishableKey: settings?.stripePublishableKey || "",
-    stripeSecretKeyMasked: hasSecretKey ? maskSensitiveString(settings!.stripeSecretKey, 4) : "",
-    hasSecretKey,
-    stripeWebhookSecretMasked: hasWebhookSecret ? maskSensitiveString(settings!.stripeWebhookSecret, 4) : "",
-    hasWebhookSecret,
     stripeEnabled: Boolean(settings?.stripeEnabled),
+    stripeTestMode: settings?.stripeTestMode !== false,
+    stripeTestPublishableKey: settings?.stripeTestPublishableKey || settings?.stripePublishableKey || "",
+    stripeTestSecretKeyMasked: hasTestSecret ? maskSensitiveString((settings!.stripeTestSecretKey || settings!.stripeSecretKey)!, 4) : "",
+    hasTestSecretKey: hasTestSecret,
+    stripeTestWebhookSecretMasked: hasTestWebhook ? maskSensitiveString((settings!.stripeTestWebhookSecret || settings!.stripeWebhookSecret)!, 4) : "",
+    hasTestWebhookSecret: hasTestWebhook,
+
+    stripeLivePublishableKey: settings?.stripeLivePublishableKey || "",
+    stripeLiveSecretKeyMasked: hasLiveSecret ? maskSensitiveString(settings!.stripeLiveSecretKey!, 4) : "",
+    hasLiveSecretKey: hasLiveSecret,
+    stripeLiveWebhookSecretMasked: hasLiveWebhook ? maskSensitiveString(settings!.stripeLiveWebhookSecret!, 4) : "",
+    hasLiveWebhookSecret: hasLiveWebhook,
 
     // PayPal
     paypalEnabled: Boolean(settings?.paypalEnabled),
@@ -58,13 +75,13 @@ export default async function AdminPaymentSettingsPage() {
     hasSandboxClientSecret: hasSandboxSecret,
     paypalSandboxAppId: settings?.paypalSandboxAppId || "WEBAPPTEST",
     paypalLiveClientId: settings?.paypalLiveClientId || "",
-    paypalLiveClientSecretMasked: hasLiveSecret ? maskSensitiveString(settings!.paypalLiveClientSecret, 4) : "",
-    hasLiveClientSecret: hasLiveSecret,
+    paypalLiveClientSecretMasked: hasPayPalLiveSecret ? maskSensitiveString(settings!.paypalLiveClientSecret, 4) : "",
+    hasLiveClientSecret: hasPayPalLiveSecret,
     paypalLiveAppId: settings?.paypalLiveAppId || "",
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 w-full">
       {/* Header & Tabs */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">

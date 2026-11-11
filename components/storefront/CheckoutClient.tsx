@@ -16,6 +16,7 @@ const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/;
 
 function StripeReviewForm({
   total,
+  stripeTestMode = true,
   onBack,
   onSuccess,
   onError,
@@ -23,6 +24,7 @@ function StripeReviewForm({
   setIsSubmitting
 }: {
   total: number;
+  stripeTestMode?: boolean;
   onBack: () => void;
   onSuccess: (paymentIntentId: string) => void;
   onError: (msg: string) => void;
@@ -62,6 +64,32 @@ function StripeReviewForm({
 
   return (
     <div className="space-y-6">
+      {stripeTestMode && (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-950 text-xs space-y-2 shadow-xs">
+          <div className="flex items-center gap-2 font-bold text-amber-900">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span>Stripe Sandbox / Test Mode Active</span>
+          </div>
+          <p className="text-[11px] text-amber-800 leading-relaxed">
+            No real credit card will be charged. Use standard Stripe test cards:
+          </p>
+          <div className="flex flex-wrap gap-2 text-[11px] font-mono pt-1">
+            <span className="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300">
+              Card: <strong>4242 4242 4242 4242</strong>
+            </span>
+            <span className="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300">
+              Exp: <strong>Any future date (e.g. 12/28)</strong>
+            </span>
+            <span className="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300">
+              CVC: <strong>123</strong>
+            </span>
+            <span className="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300">
+              ZIP: <strong>75201</strong>
+            </span>
+          </div>
+        </div>
+      )}
+
       <PaymentElement />
       <div className="pt-4 flex justify-between items-center">
         <Button type="button" variant="outline" size="md" onClick={onBack} disabled={isSubmitting}>
@@ -307,7 +335,7 @@ function PayPalReviewForm({
               If PayPal displays: <em className="text-amber-900 font-semibold">"You are logging in with the merchant account for this transaction"</em>, click <em>"Account Logout"</em> on PayPal's window and log in with a Sandbox <strong>Personal / Buyer</strong> account.
             </p>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              In PayPal Sandbox, the Merchant account (<code className="font-mono text-amber-900">sb-eqyhr53028913@business.example.com</code>) cannot buy from itself. Get your Personal Buyer test credentials from PayPal Developer Dashboard &gt; <strong>Testing Tools &gt; Sandbox Accounts</strong>.
+              In PayPal Sandbox, the Merchant account cannot purchase from itself. Use Personal Buyer test credentials from PayPal Developer Dashboard &gt; <strong>Testing Tools &gt; Sandbox Accounts</strong>.
             </p>
           </div>
         </div>
@@ -385,6 +413,7 @@ function PayPalReviewForm({
 export function CheckoutClient({
   sessionUser,
   stripePublishableKey,
+  stripeTestMode = true,
   paypalEnabled = false,
   paypalClientId,
   paypalSandboxMode = true,
@@ -393,6 +422,7 @@ export function CheckoutClient({
 }: {
   sessionUser: any;
   stripePublishableKey?: string;
+  stripeTestMode?: boolean;
   paypalEnabled?: boolean;
   paypalClientId?: string;
   paypalSandboxMode?: boolean;
@@ -409,6 +439,43 @@ export function CheckoutClient({
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const allowCredit = sessionUser?.allowCredit ?? false;
+  const allowPickup = sessionUser?.allowPickup ?? false;
+
+  const effectiveFreightMethods = React.useMemo(() => {
+    const base =
+      freightMethods && freightMethods.length > 0
+        ? [...freightMethods]
+        : [
+            {
+              id: "STANDARD_GROUND",
+              name: "Standard Commercial Ground",
+              description: "Regional ground parcel & carton delivery (2-5 business days)",
+              cost: 1500,
+            },
+            {
+              id: "EXPEDITED",
+              name: "Expedited Commercial Priority",
+              description: "Priority warehouse dispatch (1-2 business days)",
+              cost: 4500,
+            },
+            {
+              id: "FREIGHT_LTL",
+              name: "Commercial LTL Pallet Freight",
+              description: "Scheduled dock-to-dock pallet carrier delivery",
+              cost: 6500,
+            },
+          ];
+
+    if (allowPickup && !base.some((m: any) => m.id === "PICKUP")) {
+      base.unshift({
+        id: "PICKUP",
+        name: "Warehouse Dock Will-Call Pickup",
+        description: "Authorized customer dock pickup at our distribution facility",
+        cost: 0,
+      });
+    }
+    return base;
+  }, [freightMethods, allowPickup]);
 
   const defaultAddress = savedAddresses.find((a: any) => a.isDefault) || savedAddresses[0];
 
@@ -427,10 +494,13 @@ export function CheckoutClient({
     postalCode: defaultAddress?.postalCode || "",
   });
 
-  const [shippingMethod, setShippingMethod] = useState<string>(freightMethods.length > 0 ? freightMethods[0].id : "standard");
+  const [shippingMethod, setShippingMethod] = useState<string>(
+    effectiveFreightMethods[0]?.id || "STANDARD_GROUND"
+  );
   const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "PAYPAL" | "PO_NET30">(() => {
     if (stripePublishableKey) return "STRIPE";
     if (paypalEnabled && paypalClientId) return "PAYPAL";
+    if (allowCredit) return "PO_NET30";
     return "STRIPE";
   });
 
@@ -438,10 +508,10 @@ export function CheckoutClient({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const selectedFreight = freightMethods.find((m: any) => m.id === shippingMethod);
-  const shippingCost = selectedFreight ? selectedFreight.cost : 0;
-  const tax = Math.round(subtotal * 0.0825);
-  const total = subtotal + shippingCost + tax;
+  const selectedFreight = effectiveFreightMethods.find((m: any) => m.id === shippingMethod);
+  const shippingCost = isHydrated && ecommerceMode ? (selectedFreight ? selectedFreight.cost : 0) : (selectedFreight ? selectedFreight.cost : 0);
+  const tax = ecommerceMode ? Math.round(subtotal * 0.0825) : 0;
+  const total = subtotal + (ecommerceMode ? shippingCost : 0) + tax;
 
   const validateStep1 = () => {
     if (!customer.fullName.trim()) return "Full name is required.";
@@ -574,6 +644,7 @@ export function CheckoutClient({
           paymentDetails: finalPaymentDetails,
           items,
           notes: orderNotes,
+          includeTax: !isQuote,
         }),
       });
 
@@ -591,6 +662,27 @@ export function CheckoutClient({
       setIsSubmitting(false);
     }
   };
+
+  if (isHydrated && items.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-4 shadow-xs">
+        <div className="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-slate-900">Your Cart Is Empty</h2>
+        <p className="text-sm text-slate-500 max-w-md mx-auto">
+          Add commercial packaging or janitorial supplies to your cart before proceeding to checkout.
+        </p>
+        <div className="pt-2">
+          <Button type="button" variant="primary" size="md" onClick={() => router.push("/products")}>
+            Browse Products Catalog →
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -669,12 +761,25 @@ export function CheckoutClient({
                     <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">State</label>
                     <select required className="w-full p-3 rounded-lg border border-slate-300 text-sm bg-white focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500" value={shippingAddress.state} onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}>
                       <option value="">Select State</option>
-                      <option value="TX">Texas (TX)</option>
-                      <option value="CA">California (CA)</option>
-                      <option value="NY">New York (NY)</option>
-                      <option value="FL">Florida (FL)</option>
-                      <option value="IL">Illinois (IL)</option>
-                      <option value="PA">Pennsylvania (PA)</option>
+                      {[
+                        ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
+                        ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
+                        ["DC", "District of Columbia"], ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"],
+                        ["ID", "Idaho"], ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"],
+                        ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"], ["ME", "Maine"],
+                        ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"],
+                        ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"],
+                        ["NV", "Nevada"], ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"],
+                        ["NY", "New York"], ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"],
+                        ["OK", "Oklahoma"], ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"],
+                        ["SC", "South Carolina"], ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"],
+                        ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"],
+                        ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"],
+                      ].map(([abbr, label]) => (
+                        <option key={abbr} value={abbr}>
+                          {label} ({abbr})
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <Input label="ZIP Code" required name="postalCode" placeholder="75201" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({ ...shippingAddress, postalCode: e.target.value })} onBlur={handleZipCodeBlur} />
@@ -692,7 +797,7 @@ export function CheckoutClient({
               <h2 className="text-lg font-bold text-slate-900">Step 2: Select Freight Shipping Method</h2>
             </div>
               <div className="space-y-3">
-                {freightMethods.map((method: any) => (
+                {effectiveFreightMethods.map((method: any) => (
                   <label key={method.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${shippingMethod === method.id ? "border-sky-600 bg-sky-50/50 ring-2 ring-sky-200" : "border-slate-200 hover:border-slate-300"}`}>
                     <div className="flex items-center gap-4">
                       <input type="radio" name="shipping" value={method.id} checked={shippingMethod === method.id} onChange={() => setShippingMethod(method.id)} className="text-sky-600 focus:ring-sky-500" />
@@ -729,7 +834,9 @@ export function CheckoutClient({
                     <strong className="text-sm font-bold text-slate-900 block">Credit Card</strong>
                     <img src="/stripe.png" alt="Stripe" className="h-6 object-contain" />
                   </div>
-                  <span className="text-[11px] text-slate-500 block">Secure, encrypted payment processing</span>
+                  <span className="text-[11px] text-slate-500 block">
+                    {stripeTestMode ? "Sandbox Test Mode • Cards" : "Secure, encrypted card processing"}
+                  </span>
                 </button>
                 {paypalEnabled && paypalClientId ? (
                   <button
@@ -773,7 +880,12 @@ export function CheckoutClient({
 
             {paymentMethod === "STRIPE" ? (
               <div className="space-y-4 p-6 rounded-xl bg-slate-50 border border-slate-200 text-center">
-                <p className="text-sm font-semibold text-slate-900 mt-4">Stripe Processing Ready</p>
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold ${
+                  stripeTestMode ? "bg-amber-100 border border-amber-200 text-amber-900" : "bg-emerald-100 border border-emerald-200 text-emerald-900"
+                }`}>
+                  {stripeTestMode ? "🟡 Stripe Test Mode Active (Sandbox)" : "🟢 Stripe Live Processing Active"}
+                </div>
+                <p className="text-sm font-semibold text-slate-900 mt-2">Stripe Processing Ready</p>
                 <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                   Click "Review Order Details" to enter your payment information securely on the next step.
                 </p>
@@ -837,6 +949,7 @@ export function CheckoutClient({
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <StripeReviewForm 
                   total={total}
+                  stripeTestMode={stripeTestMode}
                   onBack={() => setStep(3)}
                   onSuccess={(paymentIntentId) => handleFinalSubmit(paymentIntentId)}
                   onError={(msg) => setErrorMessage(msg)}

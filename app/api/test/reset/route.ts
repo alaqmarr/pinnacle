@@ -5,6 +5,13 @@ import { DEFAULT_GLOBAL_SETTINGS, SETTINGS_SINGLETON_ID } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 export async function POST() {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_TEST_ENDPOINTS !== "true"
+  ) {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
+
   try {
     // Delete in dependency order
     await prisma.orderItem.deleteMany({});

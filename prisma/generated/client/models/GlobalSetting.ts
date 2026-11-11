@@ -53,10 +53,17 @@ export type GlobalSettingMinAggregateOutputType = {
   notificationEmail: string | null
   headScripts: string | null
   bodyTopScripts: string | null
+  stripeEnabled: boolean | null
+  stripeTestMode: boolean | null
+  stripeTestPublishableKey: string | null
+  stripeTestSecretKey: string | null
+  stripeTestWebhookSecret: string | null
+  stripeLivePublishableKey: string | null
+  stripeLiveSecretKey: string | null
+  stripeLiveWebhookSecret: string | null
   stripePublishableKey: string | null
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
-  stripeEnabled: boolean | null
   paypalEnabled: boolean | null
   paypalSandboxMode: boolean | null
   paypalSandboxClientId: string | null
@@ -90,10 +97,17 @@ export type GlobalSettingMaxAggregateOutputType = {
   notificationEmail: string | null
   headScripts: string | null
   bodyTopScripts: string | null
+  stripeEnabled: boolean | null
+  stripeTestMode: boolean | null
+  stripeTestPublishableKey: string | null
+  stripeTestSecretKey: string | null
+  stripeTestWebhookSecret: string | null
+  stripeLivePublishableKey: string | null
+  stripeLiveSecretKey: string | null
+  stripeLiveWebhookSecret: string | null
   stripePublishableKey: string | null
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
-  stripeEnabled: boolean | null
   paypalEnabled: boolean | null
   paypalSandboxMode: boolean | null
   paypalSandboxClientId: string | null
@@ -127,10 +141,17 @@ export type GlobalSettingCountAggregateOutputType = {
   notificationEmail: number
   headScripts: number
   bodyTopScripts: number
+  stripeEnabled: number
+  stripeTestMode: number
+  stripeTestPublishableKey: number
+  stripeTestSecretKey: number
+  stripeTestWebhookSecret: number
+  stripeLivePublishableKey: number
+  stripeLiveSecretKey: number
+  stripeLiveWebhookSecret: number
   stripePublishableKey: number
   stripeSecretKey: number
   stripeWebhookSecret: number
-  stripeEnabled: number
   paypalEnabled: number
   paypalSandboxMode: number
   paypalSandboxClientId: number
@@ -174,10 +195,17 @@ export type GlobalSettingMinAggregateInputType = {
   notificationEmail?: true
   headScripts?: true
   bodyTopScripts?: true
+  stripeEnabled?: true
+  stripeTestMode?: true
+  stripeTestPublishableKey?: true
+  stripeTestSecretKey?: true
+  stripeTestWebhookSecret?: true
+  stripeLivePublishableKey?: true
+  stripeLiveSecretKey?: true
+  stripeLiveWebhookSecret?: true
   stripePublishableKey?: true
   stripeSecretKey?: true
   stripeWebhookSecret?: true
-  stripeEnabled?: true
   paypalEnabled?: true
   paypalSandboxMode?: true
   paypalSandboxClientId?: true
@@ -211,10 +239,17 @@ export type GlobalSettingMaxAggregateInputType = {
   notificationEmail?: true
   headScripts?: true
   bodyTopScripts?: true
+  stripeEnabled?: true
+  stripeTestMode?: true
+  stripeTestPublishableKey?: true
+  stripeTestSecretKey?: true
+  stripeTestWebhookSecret?: true
+  stripeLivePublishableKey?: true
+  stripeLiveSecretKey?: true
+  stripeLiveWebhookSecret?: true
   stripePublishableKey?: true
   stripeSecretKey?: true
   stripeWebhookSecret?: true
-  stripeEnabled?: true
   paypalEnabled?: true
   paypalSandboxMode?: true
   paypalSandboxClientId?: true
@@ -248,10 +283,17 @@ export type GlobalSettingCountAggregateInputType = {
   notificationEmail?: true
   headScripts?: true
   bodyTopScripts?: true
+  stripeEnabled?: true
+  stripeTestMode?: true
+  stripeTestPublishableKey?: true
+  stripeTestSecretKey?: true
+  stripeTestWebhookSecret?: true
+  stripeLivePublishableKey?: true
+  stripeLiveSecretKey?: true
+  stripeLiveWebhookSecret?: true
   stripePublishableKey?: true
   stripeSecretKey?: true
   stripeWebhookSecret?: true
-  stripeEnabled?: true
   paypalEnabled?: true
   paypalSandboxMode?: true
   paypalSandboxClientId?: true
@@ -372,10 +414,17 @@ export type GlobalSettingGroupByOutputType = {
   notificationEmail: string | null
   headScripts: string | null
   bodyTopScripts: string | null
+  stripeEnabled: boolean
+  stripeTestMode: boolean
+  stripeTestPublishableKey: string | null
+  stripeTestSecretKey: string | null
+  stripeTestWebhookSecret: string | null
+  stripeLivePublishableKey: string | null
+  stripeLiveSecretKey: string | null
+  stripeLiveWebhookSecret: string | null
   stripePublishableKey: string | null
   stripeSecretKey: string | null
   stripeWebhookSecret: string | null
-  stripeEnabled: boolean
   paypalEnabled: boolean
   paypalSandboxMode: boolean
   paypalSandboxClientId: string | null
@@ -432,10 +481,17 @@ export type GlobalSettingWhereInput = {
   notificationEmail?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   headScripts?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   bodyTopScripts?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  stripeTestMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  stripeTestPublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeTestSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeTestWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLivePublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLiveSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLiveWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripePublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
-  stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalSandboxMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalSandboxClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
@@ -469,10 +525,17 @@ export type GlobalSettingOrderByWithRelationInput = {
   notificationEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headScripts?: Prisma.SortOrderInput | Prisma.SortOrder
   bodyTopScripts?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeEnabled?: Prisma.SortOrder
+  stripeTestMode?: Prisma.SortOrder
+  stripeTestPublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeTestSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeTestWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLivePublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLiveSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLiveWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
-  stripeEnabled?: Prisma.SortOrder
   paypalEnabled?: Prisma.SortOrder
   paypalSandboxMode?: Prisma.SortOrder
   paypalSandboxClientId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -509,10 +572,17 @@ export type GlobalSettingWhereUniqueInput = Prisma.AtLeast<{
   notificationEmail?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   headScripts?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   bodyTopScripts?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  stripeTestMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
+  stripeTestPublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeTestSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeTestWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLivePublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLiveSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
+  stripeLiveWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripePublishableKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeSecretKey?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
-  stripeEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalEnabled?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalSandboxMode?: Prisma.BoolFilter<"GlobalSetting"> | boolean
   paypalSandboxClientId?: Prisma.StringNullableFilter<"GlobalSetting"> | string | null
@@ -546,10 +616,17 @@ export type GlobalSettingOrderByWithAggregationInput = {
   notificationEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   headScripts?: Prisma.SortOrderInput | Prisma.SortOrder
   bodyTopScripts?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeEnabled?: Prisma.SortOrder
+  stripeTestMode?: Prisma.SortOrder
+  stripeTestPublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeTestSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeTestWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLivePublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLiveSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  stripeLiveWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePublishableKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeSecretKey?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrderInput | Prisma.SortOrder
-  stripeEnabled?: Prisma.SortOrder
   paypalEnabled?: Prisma.SortOrder
   paypalSandboxMode?: Prisma.SortOrder
   paypalSandboxClientId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -591,10 +668,17 @@ export type GlobalSettingScalarWhereWithAggregatesInput = {
   notificationEmail?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   headScripts?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   bodyTopScripts?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  stripeTestMode?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
+  stripeTestPublishableKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeTestSecretKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeTestWebhookSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeLivePublishableKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeLiveSecretKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
+  stripeLiveWebhookSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripePublishableKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeSecretKey?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
   stripeWebhookSecret?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
-  stripeEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
   paypalEnabled?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
   paypalSandboxMode?: Prisma.BoolWithAggregatesFilter<"GlobalSetting"> | boolean
   paypalSandboxClientId?: Prisma.StringNullableWithAggregatesFilter<"GlobalSetting"> | string | null
@@ -628,10 +712,17 @@ export type GlobalSettingCreateInput = {
   notificationEmail?: string | null
   headScripts?: string | null
   bodyTopScripts?: string | null
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: string | null
+  stripeTestSecretKey?: string | null
+  stripeTestWebhookSecret?: string | null
+  stripeLivePublishableKey?: string | null
+  stripeLiveSecretKey?: string | null
+  stripeLiveWebhookSecret?: string | null
   stripePublishableKey?: string | null
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: string | null
@@ -665,10 +756,17 @@ export type GlobalSettingUncheckedCreateInput = {
   notificationEmail?: string | null
   headScripts?: string | null
   bodyTopScripts?: string | null
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: string | null
+  stripeTestSecretKey?: string | null
+  stripeTestWebhookSecret?: string | null
+  stripeLivePublishableKey?: string | null
+  stripeLiveSecretKey?: string | null
+  stripeLiveWebhookSecret?: string | null
   stripePublishableKey?: string | null
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: string | null
@@ -702,10 +800,17 @@ export type GlobalSettingUpdateInput = {
   notificationEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bodyTopScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestPublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLivePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -739,10 +844,17 @@ export type GlobalSettingUncheckedUpdateInput = {
   notificationEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bodyTopScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestPublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLivePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -776,10 +888,17 @@ export type GlobalSettingCreateManyInput = {
   notificationEmail?: string | null
   headScripts?: string | null
   bodyTopScripts?: string | null
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: string | null
+  stripeTestSecretKey?: string | null
+  stripeTestWebhookSecret?: string | null
+  stripeLivePublishableKey?: string | null
+  stripeLiveSecretKey?: string | null
+  stripeLiveWebhookSecret?: string | null
   stripePublishableKey?: string | null
   stripeSecretKey?: string | null
   stripeWebhookSecret?: string | null
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: string | null
@@ -813,10 +932,17 @@ export type GlobalSettingUpdateManyMutationInput = {
   notificationEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bodyTopScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestPublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLivePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -850,10 +976,17 @@ export type GlobalSettingUncheckedUpdateManyInput = {
   notificationEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bodyTopScripts?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeTestPublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeTestWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLivePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeLiveWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePublishableKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSecretKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeWebhookSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  stripeEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paypalSandboxClientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -887,10 +1020,17 @@ export type GlobalSettingCountOrderByAggregateInput = {
   notificationEmail?: Prisma.SortOrder
   headScripts?: Prisma.SortOrder
   bodyTopScripts?: Prisma.SortOrder
+  stripeEnabled?: Prisma.SortOrder
+  stripeTestMode?: Prisma.SortOrder
+  stripeTestPublishableKey?: Prisma.SortOrder
+  stripeTestSecretKey?: Prisma.SortOrder
+  stripeTestWebhookSecret?: Prisma.SortOrder
+  stripeLivePublishableKey?: Prisma.SortOrder
+  stripeLiveSecretKey?: Prisma.SortOrder
+  stripeLiveWebhookSecret?: Prisma.SortOrder
   stripePublishableKey?: Prisma.SortOrder
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
-  stripeEnabled?: Prisma.SortOrder
   paypalEnabled?: Prisma.SortOrder
   paypalSandboxMode?: Prisma.SortOrder
   paypalSandboxClientId?: Prisma.SortOrder
@@ -928,10 +1068,17 @@ export type GlobalSettingMaxOrderByAggregateInput = {
   notificationEmail?: Prisma.SortOrder
   headScripts?: Prisma.SortOrder
   bodyTopScripts?: Prisma.SortOrder
+  stripeEnabled?: Prisma.SortOrder
+  stripeTestMode?: Prisma.SortOrder
+  stripeTestPublishableKey?: Prisma.SortOrder
+  stripeTestSecretKey?: Prisma.SortOrder
+  stripeTestWebhookSecret?: Prisma.SortOrder
+  stripeLivePublishableKey?: Prisma.SortOrder
+  stripeLiveSecretKey?: Prisma.SortOrder
+  stripeLiveWebhookSecret?: Prisma.SortOrder
   stripePublishableKey?: Prisma.SortOrder
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
-  stripeEnabled?: Prisma.SortOrder
   paypalEnabled?: Prisma.SortOrder
   paypalSandboxMode?: Prisma.SortOrder
   paypalSandboxClientId?: Prisma.SortOrder
@@ -965,10 +1112,17 @@ export type GlobalSettingMinOrderByAggregateInput = {
   notificationEmail?: Prisma.SortOrder
   headScripts?: Prisma.SortOrder
   bodyTopScripts?: Prisma.SortOrder
+  stripeEnabled?: Prisma.SortOrder
+  stripeTestMode?: Prisma.SortOrder
+  stripeTestPublishableKey?: Prisma.SortOrder
+  stripeTestSecretKey?: Prisma.SortOrder
+  stripeTestWebhookSecret?: Prisma.SortOrder
+  stripeLivePublishableKey?: Prisma.SortOrder
+  stripeLiveSecretKey?: Prisma.SortOrder
+  stripeLiveWebhookSecret?: Prisma.SortOrder
   stripePublishableKey?: Prisma.SortOrder
   stripeSecretKey?: Prisma.SortOrder
   stripeWebhookSecret?: Prisma.SortOrder
-  stripeEnabled?: Prisma.SortOrder
   paypalEnabled?: Prisma.SortOrder
   paypalSandboxMode?: Prisma.SortOrder
   paypalSandboxClientId?: Prisma.SortOrder
@@ -1008,10 +1162,17 @@ export type GlobalSettingSelect<ExtArgs extends runtime.Types.Extensions.Interna
   notificationEmail?: boolean
   headScripts?: boolean
   bodyTopScripts?: boolean
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: boolean
+  stripeTestSecretKey?: boolean
+  stripeTestWebhookSecret?: boolean
+  stripeLivePublishableKey?: boolean
+  stripeLiveSecretKey?: boolean
+  stripeLiveWebhookSecret?: boolean
   stripePublishableKey?: boolean
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: boolean
@@ -1045,10 +1206,17 @@ export type GlobalSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   notificationEmail?: boolean
   headScripts?: boolean
   bodyTopScripts?: boolean
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: boolean
+  stripeTestSecretKey?: boolean
+  stripeTestWebhookSecret?: boolean
+  stripeLivePublishableKey?: boolean
+  stripeLiveSecretKey?: boolean
+  stripeLiveWebhookSecret?: boolean
   stripePublishableKey?: boolean
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: boolean
@@ -1082,10 +1250,17 @@ export type GlobalSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   notificationEmail?: boolean
   headScripts?: boolean
   bodyTopScripts?: boolean
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: boolean
+  stripeTestSecretKey?: boolean
+  stripeTestWebhookSecret?: boolean
+  stripeLivePublishableKey?: boolean
+  stripeLiveSecretKey?: boolean
+  stripeLiveWebhookSecret?: boolean
   stripePublishableKey?: boolean
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: boolean
@@ -1119,10 +1294,17 @@ export type GlobalSettingSelectScalar = {
   notificationEmail?: boolean
   headScripts?: boolean
   bodyTopScripts?: boolean
+  stripeEnabled?: boolean
+  stripeTestMode?: boolean
+  stripeTestPublishableKey?: boolean
+  stripeTestSecretKey?: boolean
+  stripeTestWebhookSecret?: boolean
+  stripeLivePublishableKey?: boolean
+  stripeLiveSecretKey?: boolean
+  stripeLiveWebhookSecret?: boolean
   stripePublishableKey?: boolean
   stripeSecretKey?: boolean
   stripeWebhookSecret?: boolean
-  stripeEnabled?: boolean
   paypalEnabled?: boolean
   paypalSandboxMode?: boolean
   paypalSandboxClientId?: boolean
@@ -1137,7 +1319,7 @@ export type GlobalSettingSelectScalar = {
   updatedAt?: boolean
 }
 
-export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "stripeEnabled" | "paypalEnabled" | "paypalSandboxMode" | "paypalSandboxClientId" | "paypalSandboxClientSecret" | "paypalSandboxAppId" | "paypalLiveClientId" | "paypalLiveClientSecret" | "paypalLiveAppId" | "ecommerceMode" | "whatsappNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
+export type GlobalSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "companyName" | "contactEmail" | "contactPhone" | "address" | "warehouseAddress" | "hours" | "mapEmbedUrl" | "smtpHost" | "smtpPort" | "smtpSecure" | "smtpUser" | "smtpPass" | "smtpFrom" | "smtpFromName" | "notificationEmail" | "headScripts" | "bodyTopScripts" | "stripeEnabled" | "stripeTestMode" | "stripeTestPublishableKey" | "stripeTestSecretKey" | "stripeTestWebhookSecret" | "stripeLivePublishableKey" | "stripeLiveSecretKey" | "stripeLiveWebhookSecret" | "stripePublishableKey" | "stripeSecretKey" | "stripeWebhookSecret" | "paypalEnabled" | "paypalSandboxMode" | "paypalSandboxClientId" | "paypalSandboxClientSecret" | "paypalSandboxAppId" | "paypalLiveClientId" | "paypalLiveClientSecret" | "paypalLiveAppId" | "ecommerceMode" | "whatsappNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["globalSetting"]>
 
 export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "GlobalSetting"
@@ -1161,10 +1343,17 @@ export type $GlobalSettingPayload<ExtArgs extends runtime.Types.Extensions.Inter
     notificationEmail: string | null
     headScripts: string | null
     bodyTopScripts: string | null
+    stripeEnabled: boolean
+    stripeTestMode: boolean
+    stripeTestPublishableKey: string | null
+    stripeTestSecretKey: string | null
+    stripeTestWebhookSecret: string | null
+    stripeLivePublishableKey: string | null
+    stripeLiveSecretKey: string | null
+    stripeLiveWebhookSecret: string | null
     stripePublishableKey: string | null
     stripeSecretKey: string | null
     stripeWebhookSecret: string | null
-    stripeEnabled: boolean
     paypalEnabled: boolean
     paypalSandboxMode: boolean
     paypalSandboxClientId: string | null
@@ -1618,10 +1807,17 @@ export interface GlobalSettingFieldRefs {
   readonly notificationEmail: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly headScripts: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly bodyTopScripts: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly stripeTestMode: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
+  readonly stripeTestPublishableKey: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeTestSecretKey: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeTestWebhookSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeLivePublishableKey: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeLiveSecretKey: Prisma.FieldRef<"GlobalSetting", 'String'>
+  readonly stripeLiveWebhookSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripePublishableKey: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeSecretKey: Prisma.FieldRef<"GlobalSetting", 'String'>
   readonly stripeWebhookSecret: Prisma.FieldRef<"GlobalSetting", 'String'>
-  readonly stripeEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
   readonly paypalEnabled: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
   readonly paypalSandboxMode: Prisma.FieldRef<"GlobalSetting", 'Boolean'>
   readonly paypalSandboxClientId: Prisma.FieldRef<"GlobalSetting", 'String'>

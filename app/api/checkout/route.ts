@@ -156,21 +156,33 @@ export async function POST(req: Request) {
       });
     }
 
-    // 5. Calculate Shipping Fee in Cents
+    // 5. Calculate Shipping Fee & Tax in Cents
     let shippingFee = 1500; // $15.00 default for STANDARD_GROUND / standard
-    const normalizedMethod = String(shippingMethod).toUpperCase();
+    let matchedDbFreight = false;
+    const normalizedMethod = String(shippingMethod || "").toUpperCase();
 
-    if (normalizedMethod === "FREIGHT_LTL") {
-      shippingFee = 6500; // $65.00
-    } else if (normalizedMethod === "EXPEDITED") {
-      shippingFee = 4500; // $45.00
-    } else if (normalizedMethod === "FREE_COMMERCIAL" || normalizedMethod === "PICKUP") {
+    if (isQuote) {
       shippingFee = 0;
-    } else if (subtotal >= 25000 && normalizedMethod === "FREE_COMMERCIAL") {
-      shippingFee = 0;
+    } else if (shippingMethod) {
+      const dbFreight = await prisma.freightMethod
+        .findUnique({ where: { id: String(shippingMethod) } })
+        .catch(() => null);
+
+      if (dbFreight) {
+        shippingFee = dbFreight.cost;
+        matchedDbFreight = true;
+      } else if (normalizedMethod === "FREIGHT_LTL") {
+        shippingFee = 6500; // $65.00
+      } else if (normalizedMethod === "EXPEDITED") {
+        shippingFee = 4500; // $45.00
+      } else if (normalizedMethod === "FREE_COMMERCIAL" || normalizedMethod === "PICKUP") {
+        shippingFee = 0;
+      }
     }
 
-    const total = subtotal + shippingFee;
+    const shouldApplyTax = !isQuote && (matchedDbFreight || body?.includeTax === true);
+    const tax = shouldApplyTax ? Math.round(subtotal * 0.0825) : 0;
+    const total = isQuote ? 0 : subtotal + shippingFee + tax;
 
     // 6. Create Address record
     const address = await prisma.address.create({
@@ -220,10 +232,11 @@ export async function POST(req: Request) {
         paymentStatus,
         paymentMethod: recordedPaymentMethod,
         paypalOrderId: paymentDetails?.paypalOrderId || (isPayPal ? paymentDetails?.id : null) || null,
+        stripePaymentIntentId: paymentDetails?.paymentIntentId || (!isPayPal && !isPurchaseOrder ? paymentDetails?.id : null) || null,
         currency: "USD",
-        subtotal,
+        subtotal: isQuote ? 0 : subtotal,
         shipping: shippingFee,
-        tax: 0,
+        tax,
         total,
         shippingAddressId: address.id,
         billingAddressId: address.id,

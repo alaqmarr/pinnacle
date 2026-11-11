@@ -55,6 +55,11 @@ export async function POST(request: Request) {
       });
       if (freightMethod) {
         shippingCost = freightMethod.cost;
+      } else {
+        const code = String(shippingMethod).toUpperCase();
+        if (code === "STANDARD_GROUND") shippingCost = 1500;
+        else if (code === "EXPEDITED") shippingCost = 4500;
+        else if (code === "FREIGHT_LTL") shippingCost = 6500;
       }
     }
 

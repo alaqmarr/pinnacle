@@ -5,6 +5,13 @@ import { getGlobalSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_TEST_ENDPOINTS !== "true"
+  ) {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
+
   try {
     const [users, categories, products, orders, contactInquiries, rawGlobalSettings] = await Promise.all([
       prisma.user.findMany({ select: { id: true, email: true, role: true, name: true } }),

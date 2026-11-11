@@ -117,7 +117,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         categoryId: product.categoryId,
         id: { not: product.id },
       },
-      take: 4,
+      take: 6,
       include: {
         category: true,
       },
@@ -125,7 +125,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   }
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-16">
+    <div className="py-10 px-4 sm:px-6 lg:px-10 xl:px-12 w-full space-y-16">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs text-slate-500">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -139,7 +139,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <>
             <span>/</span>
             <Link
-              href={`/categories/${product.category.id}`}
+              href={`/categories/${product.category.slug || product.category.id}`}
               className="hover:text-slate-900 transition-colors"
             >
               {product.category.name}
@@ -214,7 +214,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {relatedProducts.map((rel) => (
               <ProductCard key={rel.id} product={rel} />
             ))}

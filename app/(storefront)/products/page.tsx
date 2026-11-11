@@ -36,23 +36,32 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const sort = resolvedParams.sort || "newest";
   const inStockOnly = resolvedParams.inStock === "true";
 
-  // Build Prisma query filter
+  // Build Prisma query filter (combine category + search via AND so neither overwrites the other)
   const where: any = {};
+  const andConditions: any[] = [];
 
   if (categoryParam) {
-    where.OR = [
-      { categoryId: categoryParam },
-      { category: { slug: categoryParam } },
-      { category: { name: { contains: categoryParam } } },
-    ];
+    andConditions.push({
+      OR: [
+        { categoryId: categoryParam },
+        { category: { slug: categoryParam } },
+        { category: { name: { contains: categoryParam } } },
+      ],
+    });
   }
 
   if (search) {
-    where.OR = [
-      { name: { contains: search } },
-      { description: { contains: search } },
-      { sku: { contains: search } },
-    ];
+    andConditions.push({
+      OR: [
+        { name: { contains: search } },
+        { description: { contains: search } },
+        { sku: { contains: search } },
+      ],
+    });
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions;
   }
 
   if (inStockOnly) {
@@ -105,7 +114,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const isCatalogCompletelyEmpty = totalProductsCount === 0;
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="py-10 px-4 sm:px-6 lg:px-10 xl:px-12 w-full">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -134,17 +143,17 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {isCatalogCompletelyEmpty ? (
         <EmptyState
           icon="box"
-          title="Catalog stocking in progress"
-          description="Pinnacle Distributing has zero dummy seed data. Log in to the administrator portal to add products and categories."
-          actionText="Add Products in Admin"
-          actionHref="/admin/products"
-          secondaryActionText="System Setup (/setup)"
-          secondaryActionHref="/setup"
+          title="Catalog Stocking in Progress"
+          description="Our wholesale catalog is currently being updated with new corrugated packaging and facility maintenance inventory. Contact our dispatch desk directly for immediate pricing."
+          actionText="Request Commercial Quote"
+          actionHref="/contact"
+          secondaryActionText="Return to Homepage"
+          secondaryActionHref="/"
         />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Sidebar Filter Panel */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
+          <div className="lg:col-span-3 xl:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
                 Filter Catalog
@@ -248,7 +257,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </div>
 
           {/* Right Main Content Area */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-9 xl:col-span-10 space-y-6">
             {/* Toolbar: Count & Sort */}
             <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-slate-500 font-medium">
@@ -328,7 +337,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 secondaryActionHref="/categories"
               />
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

@@ -208,10 +208,20 @@ export default function AdminSidebar({
 
   const handleSignOut = async () => {
     try {
-      await signOut({ callbackUrl: "/login" });
+      await fetch("/api/auth/signout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callbackUrl: "/login?signedOut=true" }),
+      });
     } catch {
-      window.location.href = "/login";
+      // Ignore network error
     }
+    try {
+      await signOut({ redirect: false });
+    } catch {
+      // Ignore client state error
+    }
+    window.location.assign("/login?signedOut=true");
   };
 
   return (

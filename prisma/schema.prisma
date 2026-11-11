@@ -192,8 +192,9 @@ model Order {
   total             Int         // in USD cents
   shippingAddressId String?
   billingAddressId  String?
-  paypalOrderId     String?
-  notes             String?
+  paypalOrderId         String?
+  stripePaymentIntentId String?
+  notes                 String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
@@ -262,11 +263,19 @@ model GlobalSetting {
   headScripts          String?
   bodyTopScripts       String?
 
-  // Stripe Payment Gateway Configuration (R4 - DB Driven)
-  stripePublishableKey String?
-  stripeSecretKey      String?
-  stripeWebhookSecret  String?
-  stripeEnabled        Boolean  @default(false)
+  // Stripe Payment Gateway Configuration (Database-Driven with Test & Live Modes)
+  stripeEnabled            Boolean  @default(false)
+  stripeTestMode           Boolean  @default(true)
+  stripeTestPublishableKey String?
+  stripeTestSecretKey      String?
+  stripeTestWebhookSecret  String?
+  stripeLivePublishableKey String?
+  stripeLiveSecretKey      String?
+  stripeLiveWebhookSecret  String?
+  // Legacy backward compatibility
+  stripePublishableKey     String?
+  stripeSecretKey          String?
+  stripeWebhookSecret      String?
 
   // PayPal Payment Gateway Configuration (Database-Driven with Sandbox & Live Modes)
   paypalEnabled             Boolean  @default(false)

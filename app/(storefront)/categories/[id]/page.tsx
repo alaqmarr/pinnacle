@@ -84,7 +84,7 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
   }
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="py-10 px-4 sm:px-6 lg:px-10 xl:px-12 w-full">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -138,7 +138,7 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
           secondaryActionHref="/categories"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
           {category.products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

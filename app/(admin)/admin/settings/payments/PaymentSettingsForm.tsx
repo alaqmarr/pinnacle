@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 
 export interface PaymentSettingsData {
   // Stripe
-  stripePublishableKey: string;
-  stripeSecretKeyMasked: string;
-  hasSecretKey: boolean;
-  stripeWebhookSecretMasked: string;
-  hasWebhookSecret: boolean;
   stripeEnabled: boolean;
+  stripeTestMode: boolean;
+  stripeTestPublishableKey: string;
+  stripeTestSecretKeyMasked: string;
+  hasTestSecretKey: boolean;
+  stripeTestWebhookSecretMasked: string;
+  hasTestWebhookSecret: boolean;
+  stripeLivePublishableKey: string;
+  stripeLiveSecretKeyMasked: string;
+  hasLiveSecretKey: boolean;
+  stripeLiveWebhookSecretMasked: string;
+  hasLiveWebhookSecret: boolean;
 
   // PayPal
   paypalEnabled: boolean;
@@ -37,15 +43,29 @@ export default function PaymentSettingsForm({
 
   // Stripe state
   const [stripeEnabled, setStripeEnabled] = useState(initialData.stripeEnabled);
-  const [publishableKey, setPublishableKey] = useState(initialData.stripePublishableKey);
-  const [stripeSecretKey, setStripeSecretKey] = useState("");
-  const [webhookSecret, setWebhookSecret] = useState("");
-  const [showStripeSecret, setShowStripeSecret] = useState(false);
-  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
-  const [hasStripeSecret, setHasStripeSecret] = useState(initialData.hasSecretKey);
-  const [stripeSecretMasked, setStripeSecretMasked] = useState(initialData.stripeSecretKeyMasked);
-  const [hasWebhookSecretState, setHasWebhookSecretState] = useState(initialData.hasWebhookSecret);
-  const [webhookSecretMasked, setWebhookSecretMasked] = useState(initialData.stripeWebhookSecretMasked);
+  const [stripeTestMode, setStripeTestMode] = useState(initialData.stripeTestMode);
+
+  // Stripe Test Mode credentials
+  const [stripeTestPublishableKey, setStripeTestPublishableKey] = useState(initialData.stripeTestPublishableKey);
+  const [stripeTestSecretKey, setStripeTestSecretKey] = useState("");
+  const [showStripeTestSecret, setShowStripeTestSecret] = useState(false);
+  const [hasStripeTestSecret, setHasStripeTestSecret] = useState(initialData.hasTestSecretKey);
+  const [stripeTestSecretMasked, setStripeTestSecretMasked] = useState(initialData.stripeTestSecretKeyMasked);
+  const [stripeTestWebhookSecret, setStripeTestWebhookSecret] = useState("");
+  const [showStripeTestWebhook, setShowStripeTestWebhook] = useState(false);
+  const [hasStripeTestWebhook, setHasStripeTestWebhook] = useState(initialData.hasTestWebhookSecret);
+  const [stripeTestWebhookMasked, setStripeTestWebhookMasked] = useState(initialData.stripeTestWebhookSecretMasked);
+
+  // Stripe Live Mode credentials
+  const [stripeLivePublishableKey, setStripeLivePublishableKey] = useState(initialData.stripeLivePublishableKey);
+  const [stripeLiveSecretKey, setStripeLiveSecretKey] = useState("");
+  const [showStripeLiveSecret, setShowStripeLiveSecret] = useState(false);
+  const [hasStripeLiveSecret, setHasStripeLiveSecret] = useState(initialData.hasLiveSecretKey);
+  const [stripeLiveSecretMasked, setStripeLiveSecretMasked] = useState(initialData.stripeLiveSecretKeyMasked);
+  const [stripeLiveWebhookSecret, setStripeLiveWebhookSecret] = useState("");
+  const [showStripeLiveWebhook, setShowStripeLiveWebhook] = useState(false);
+  const [hasStripeLiveWebhook, setHasStripeLiveWebhook] = useState(initialData.hasLiveWebhookSecret);
+  const [stripeLiveWebhookMasked, setStripeLiveWebhookMasked] = useState(initialData.stripeLiveWebhookSecretMasked);
 
   // PayPal state
   const [paypalEnabled, setPaypalEnabled] = useState(initialData.paypalEnabled);
@@ -70,11 +90,16 @@ export default function PaymentSettingsForm({
   // Status & loading states
   const [isSaving, setIsSaving] = useState(false);
   const [isTestingPayPal, setIsTestingPayPal] = useState(false);
+  const [isTestingStripe, setIsTestingStripe] = useState(false);
   const [status, setStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
   const [paypalTestStatus, setPaypalTestStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+  const [stripeTestStatus, setStripeTestStatus] = useState<{
     type: "success" | "error" | null;
     message: string;
   }>({ type: null, message: "" });
@@ -123,6 +148,47 @@ export default function PaymentSettingsForm({
     }
   };
 
+  const handleTestStripe = async () => {
+    setIsTestingStripe(true);
+    setStripeTestStatus({ type: null, message: "" });
+
+    try {
+      const payload: any = {
+        testMode: stripeTestMode,
+      };
+
+      if (stripeTestMode) {
+        if (stripeTestSecretKey.trim()) payload.secretKey = stripeTestSecretKey.trim();
+      } else {
+        if (stripeLiveSecretKey.trim()) payload.secretKey = stripeLiveSecretKey.trim();
+      }
+
+      const res = await fetch("/api/admin/settings/payments/test-stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Stripe connection test failed.");
+      }
+
+      setStripeTestStatus({
+        type: "success",
+        message: data.message || `Successfully connected to Stripe in ${stripeTestMode ? "Test" : "Live"} Mode!`,
+      });
+    } catch (err: any) {
+      setStripeTestStatus({
+        type: "error",
+        message: err.message || "Failed to communicate with Stripe.",
+      });
+    } finally {
+      setIsTestingStripe(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -132,7 +198,9 @@ export default function PaymentSettingsForm({
       const payload: any = {
         // Stripe
         stripeEnabled,
-        stripePublishableKey: publishableKey.trim() || null,
+        stripeTestMode,
+        stripeTestPublishableKey: stripeTestPublishableKey.trim() || null,
+        stripeLivePublishableKey: stripeLivePublishableKey.trim() || null,
 
         // PayPal
         paypalEnabled,
@@ -144,11 +212,17 @@ export default function PaymentSettingsForm({
       };
 
       // Only update secrets if non-empty
-      if (stripeSecretKey.trim()) {
-        payload.stripeSecretKey = stripeSecretKey.trim();
+      if (stripeTestSecretKey.trim()) {
+        payload.stripeTestSecretKey = stripeTestSecretKey.trim();
       }
-      if (webhookSecret.trim()) {
-        payload.stripeWebhookSecret = webhookSecret.trim();
+      if (stripeTestWebhookSecret.trim()) {
+        payload.stripeTestWebhookSecret = stripeTestWebhookSecret.trim();
+      }
+      if (stripeLiveSecretKey.trim()) {
+        payload.stripeLiveSecretKey = stripeLiveSecretKey.trim();
+      }
+      if (stripeLiveWebhookSecret.trim()) {
+        payload.stripeLiveWebhookSecret = stripeLiveWebhookSecret.trim();
       }
       if (sandboxClientSecret.trim()) {
         payload.paypalSandboxClientSecret = sandboxClientSecret.trim();
@@ -175,17 +249,29 @@ export default function PaymentSettingsForm({
       });
 
       // Update masked values locally if new secrets provided
-      if (stripeSecretKey.trim()) {
-        const visibleEnd = stripeSecretKey.trim().slice(-4);
-        setStripeSecretMasked(`••••••••••••${visibleEnd}`);
-        setHasStripeSecret(true);
-        setStripeSecretKey("");
+      if (stripeTestSecretKey.trim()) {
+        const visibleEnd = stripeTestSecretKey.trim().slice(-4);
+        setStripeTestSecretMasked(`••••••••••••${visibleEnd}`);
+        setHasStripeTestSecret(true);
+        setStripeTestSecretKey("");
       }
-      if (webhookSecret.trim()) {
-        const visibleEnd = webhookSecret.trim().slice(-4);
-        setWebhookSecretMasked(`••••••••••••${visibleEnd}`);
-        setHasWebhookSecretState(true);
-        setWebhookSecret("");
+      if (stripeTestWebhookSecret.trim()) {
+        const visibleEnd = stripeTestWebhookSecret.trim().slice(-4);
+        setStripeTestWebhookMasked(`••••••••••••${visibleEnd}`);
+        setHasStripeTestWebhook(true);
+        setStripeTestWebhookSecret("");
+      }
+      if (stripeLiveSecretKey.trim()) {
+        const visibleEnd = stripeLiveSecretKey.trim().slice(-4);
+        setStripeLiveSecretMasked(`••••••••••••${visibleEnd}`);
+        setHasStripeLiveSecret(true);
+        setStripeLiveSecretKey("");
+      }
+      if (stripeLiveWebhookSecret.trim()) {
+        const visibleEnd = stripeLiveWebhookSecret.trim().slice(-4);
+        setStripeLiveWebhookMasked(`••••••••••••${visibleEnd}`);
+        setHasStripeLiveWebhook(true);
+        setStripeLiveWebhookSecret("");
       }
       if (sandboxClientSecret.trim()) {
         const visibleEnd = sandboxClientSecret.trim().slice(-4);
@@ -651,118 +737,385 @@ export default function PaymentSettingsForm({
       {/* ======================================================== */}
       {activeTab === "stripe" && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-xs divide-y divide-slate-100">
+          {/* Header & Enablement Toggle */}
           <div className="p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <label htmlFor="stripe-toggle" className="text-base font-bold text-slate-900 cursor-pointer">
-                  Enable Stripe Gateway
-                </label>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  When enabled, customers can select credit card checkout at checkout in addition to commercial Net-30 invoicing.
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Stripe Payment Gateway
+                  </h2>
+                  <span
+                    className={`text-xs px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      stripeTestMode
+                        ? "bg-amber-100 text-amber-900 border border-amber-200"
+                        : "bg-emerald-100 text-emerald-900 border border-emerald-200"
+                    }`}
+                  >
+                    {stripeTestMode ? "🟡 Test Mode Active" : "🟢 Live Mode Active"}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  Enables direct credit and debit card payments via Stripe Elements on the storefront checkout.
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  id="stripe-toggle"
-                  type="checkbox"
-                  checked={stripeEnabled}
-                  onChange={(e) => setStripeEnabled(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-slate-700">
+                  {stripeEnabled ? "Enabled" : "Disabled"}
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={stripeEnabled}
+                    onChange={(e) => setStripeEnabled(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Database Environment Mode Switcher */}
+          <div className="p-6 bg-slate-50/60">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-800 mb-2">
+              Stripe Operation Mode (Stored in Database)
+            </label>
+            <p className="text-xs text-slate-600 mb-4">
+              Select which credential set the storefront and checkout PaymentIntent processor should actively use.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  stripeTestMode
+                    ? "bg-white border-amber-500 ring-2 ring-amber-100 shadow-xs"
+                    : "bg-white/60 border-slate-200 hover:border-slate-300 text-slate-600"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="stripeMode"
+                    checked={stripeTestMode === true}
+                    onChange={() => setStripeTestMode(true)}
+                    className="mt-1 text-amber-600 focus:ring-amber-500"
+                  />
+                  <div>
+                    <strong className="text-sm font-bold text-slate-900 block flex items-center gap-2">
+                      🟡 Test Mode (Sandbox / Testing & QA)
+                      {stripeTestMode && (
+                        <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">
+                          ACTIVE
+                        </span>
+                      )}
+                    </strong>
+                    <span className="text-xs text-slate-500 block mt-1">
+                      Uses Test credentials (<code className="font-mono text-[11px] text-slate-700">pk_test_...</code> / <code className="font-mono text-[11px] text-slate-700">sk_test_...</code>). Supports Stripe test card numbers like <code className="font-mono text-[11px] text-slate-700">4242...</code> with zero real charges.
+                    </span>
+                  </div>
+                </div>
+              </label>
+
+              <label
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  !stripeTestMode
+                    ? "bg-white border-emerald-500 ring-2 ring-emerald-100 shadow-xs"
+                    : "bg-white/60 border-slate-200 hover:border-slate-300 text-slate-600"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <input
+                    type="radio"
+                    name="stripeMode"
+                    checked={stripeTestMode === false}
+                    onChange={() => setStripeTestMode(false)}
+                    className="mt-1 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <strong className="text-sm font-bold text-slate-900 block flex items-center gap-2">
+                      🟢 Live Mode (Production)
+                      {!stripeTestMode && (
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
+                          ACTIVE
+                        </span>
+                      )}
+                    </strong>
+                    <span className="text-xs text-slate-500 block mt-1">
+                      Uses Live credentials (<code className="font-mono text-[11px] text-slate-700">pk_live_...</code> / <code className="font-mono text-[11px] text-slate-700">sk_live_...</code>) for live customer credit card payment processing.
+                    </span>
+                  </div>
+                </div>
               </label>
             </div>
           </div>
 
-          <div className="p-6 space-y-5">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
-              Stripe API Keys & Secrets
-            </h2>
+          {/* Test Stripe Connection Action Banner */}
+          <div className="p-6 bg-slate-50 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <strong className="text-sm font-bold text-slate-900 block">
+                  Verify Credentials with Stripe API
+                </strong>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Tests active Secret Key verification and balance query with Stripe {stripeTestMode ? "Test" : "Live"} servers.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleTestStripe}
+                disabled={isTestingStripe}
+                className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-white hover:bg-slate-100 transition-colors shadow-xs disabled:opacity-50"
+              >
+                {isTestingStripe ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-3.5 w-3.5 text-slate-600" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Testing Connection...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-1.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Test {stripeTestMode ? "Test" : "Live"} Connection
+                  </>
+                )}
+              </button>
+            </div>
 
-            <div>
-              <label htmlFor="stripe-publishable-key" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                Stripe Publishable Key
-              </label>
-              <div className="mt-1.5">
+            {stripeTestStatus.type && (
+              <div
+                className={`mt-4 p-3.5 rounded-lg border text-xs font-medium flex items-center justify-between ${
+                  stripeTestStatus.type === "success"
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                    : "bg-red-50 border-red-200 text-red-900"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {stripeTestStatus.type === "success" ? (
+                    <span className="text-emerald-600 font-bold">✓</span>
+                  ) : (
+                    <span className="text-red-600 font-bold">✕</span>
+                  )}
+                  <span>{stripeTestStatus.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStripeTestStatus({ type: null, message: "" })}
+                  className="font-bold underline ml-2 hover:opacity-75"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Section 1: Test Mode Credentials */}
+          <div className={`p-6 space-y-5 transition-opacity ${stripeTestMode ? "opacity-100" : "opacity-85"}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  Test Mode Credentials (Sandbox)
+                  {stripeTestMode && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                      CURRENTLY IN USE
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Developer test credentials generated in the <a href="https://dashboard.stripe.com/test/apikeys" target="_blank" rel="noreferrer" className="text-sky-600 underline">Stripe Dashboard (Test Mode)</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Test Publishable Key
+                </label>
                 <input
-                  id="stripe-publishable-key"
                   type="text"
-                  placeholder="pk_test_... or pk_live_..."
-                  value={publishableKey}
-                  onChange={(e) => setPublishableKey(e.target.value)}
-                  className="w-full text-sm font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="pk_test_..."
+                  value={stripeTestPublishableKey}
+                  onChange={(e) => setStripeTestPublishableKey(e.target.value)}
+                  className="mt-1.5 w-full text-sm font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Used by Stripe Elements on the checkout page during test mode.
+                </p>
               </div>
-              <p className="mt-1 text-[11px] text-slate-500">
-                Public client-side key for initializing Stripe.js in storefront checkout.
-              </p>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Test Webhook Signing Secret
+                  </label>
+                  {hasStripeTestWebhook && (
+                    <span className="text-xs font-semibold text-emerald-600 flex items-center">
+                      <span className="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full" />
+                      Stored: <code className="font-mono ml-1">{stripeTestWebhookMasked}</code>
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 relative">
+                  <input
+                    type={showStripeTestWebhook ? "text" : "password"}
+                    placeholder={hasStripeTestWebhook ? "Leave blank to preserve stored secret" : "whsec_..."}
+                    value={stripeTestWebhookSecret}
+                    onChange={(e) => setStripeTestWebhookSecret(e.target.value)}
+                    className="w-full text-sm font-mono border border-slate-300 rounded-lg pl-3.5 pr-20 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowStripeTestWebhook(!showStripeTestWebhook)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
+                  >
+                    {showStripeTestWebhook ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Secret used to verify test webhook events.
+                </p>
+              </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="stripe-secret-key" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Stripe Secret Key
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Test Secret Key
                 </label>
-                {hasStripeSecret && (
+                {hasStripeTestSecret && (
                   <span className="text-xs font-semibold text-emerald-600 flex items-center">
                     <span className="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full" />
-                    Stored: <code className="font-mono ml-1">{stripeSecretMasked}</code>
+                    Stored: <code className="font-mono ml-1">{stripeTestSecretMasked}</code>
                   </span>
                 )}
               </div>
               <div className="mt-1.5 relative">
                 <input
-                  id="stripe-secret-key"
-                  type={showStripeSecret ? "text" : "password"}
-                  placeholder={hasStripeSecret ? "Leave blank to preserve currently stored key" : "sk_test_... or sk_live_..."}
-                  value={stripeSecretKey}
-                  onChange={(e) => setStripeSecretKey(e.target.value)}
+                  type={showStripeTestSecret ? "text" : "password"}
+                  placeholder={hasStripeTestSecret ? "Leave blank to preserve stored key" : "sk_test_..."}
+                  value={stripeTestSecretKey}
+                  onChange={(e) => setStripeTestSecretKey(e.target.value)}
                   className="w-full text-sm font-mono border border-slate-300 rounded-lg pl-3.5 pr-20 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowStripeSecret(!showStripeSecret)}
+                  onClick={() => setShowStripeTestSecret(!showStripeTestSecret)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
                 >
-                  {showStripeSecret ? "Hide" : "Show"}
+                  {showStripeTestSecret ? "Hide" : "Show"}
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-slate-500">
-                Secret API key used on the server to create payment intents.
+                Server-side test secret key used to create test PaymentIntents. Never exposed to browser clients.
               </p>
+            </div>
+          </div>
+
+          {/* Section 2: Live Credentials */}
+          <div className={`p-6 space-y-5 transition-opacity ${!stripeTestMode ? "opacity-100" : "opacity-85"}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                  Live Production Credentials
+                  {!stripeTestMode && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                      CURRENTLY IN USE
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Production credentials generated in your <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noreferrer" className="text-sky-600 underline">Stripe Dashboard (Live Mode)</a>
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Live Publishable Key
+                </label>
+                <input
+                  type="text"
+                  placeholder="pk_live_..."
+                  value={stripeLivePublishableKey}
+                  onChange={(e) => setStripeLivePublishableKey(e.target.value)}
+                  className="mt-1.5 w-full text-sm font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Public client-side key for initializing Stripe.js in production storefront checkout.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Live Webhook Signing Secret
+                  </label>
+                  {hasStripeLiveWebhook && (
+                    <span className="text-xs font-semibold text-emerald-600 flex items-center">
+                      <span className="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full" />
+                      Stored: <code className="font-mono ml-1">{stripeLiveWebhookMasked}</code>
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1.5 relative">
+                  <input
+                    type={showStripeLiveWebhook ? "text" : "password"}
+                    placeholder={hasStripeLiveWebhook ? "Leave blank to preserve stored secret" : "whsec_..."}
+                    value={stripeLiveWebhookSecret}
+                    onChange={(e) => setStripeLiveWebhookSecret(e.target.value)}
+                    className="w-full text-sm font-mono border border-slate-300 rounded-lg pl-3.5 pr-20 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowStripeLiveWebhook(!showStripeLiveWebhook)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
+                  >
+                    {showStripeLiveWebhook ? "Hide" : "Show"}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Production webhook secret for real charge callbacks.
+                </p>
+              </div>
             </div>
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="stripe-webhook-secret" className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Stripe Webhook Signing Secret
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Live Secret Key
                 </label>
-                {hasWebhookSecretState && (
+                {hasStripeLiveSecret && (
                   <span className="text-xs font-semibold text-emerald-600 flex items-center">
                     <span className="w-1.5 h-1.5 mr-1 bg-emerald-500 rounded-full" />
-                    Stored: <code className="font-mono ml-1">{webhookSecretMasked}</code>
+                    Stored: <code className="font-mono ml-1">{stripeLiveSecretMasked}</code>
                   </span>
                 )}
               </div>
               <div className="mt-1.5 relative">
                 <input
-                  id="stripe-webhook-secret"
-                  type={showWebhookSecret ? "text" : "password"}
-                  placeholder={hasWebhookSecretState ? "Leave blank to preserve currently stored secret" : "whsec_..."}
-                  value={webhookSecret}
-                  onChange={(e) => setWebhookSecret(e.target.value)}
+                  type={showStripeLiveSecret ? "text" : "password"}
+                  placeholder={hasStripeLiveSecret ? "Leave blank to preserve stored key" : "sk_live_..."}
+                  value={stripeLiveSecretKey}
+                  onChange={(e) => setStripeLiveSecretKey(e.target.value)}
                   className="w-full text-sm font-mono border border-slate-300 rounded-lg pl-3.5 pr-20 py-2.5 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                  onClick={() => setShowStripeLiveSecret(!showStripeLiveSecret)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-xs text-slate-500 hover:text-slate-800 font-semibold"
                 >
-                  {showWebhookSecret ? "Hide" : "Show"}
+                  {showStripeLiveSecret ? "Hide" : "Show"}
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-slate-500">
-                Used to cryptographically verify Stripe webhook event payloads.
+                Production secret key for live card payments. Never exposed to browser clients.
               </p>
             </div>
           </div>

@@ -152,9 +152,10 @@ export async function middleware(req: NextRequest) {
       <body style="font-family: system-ui, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
         <div style="text-align: center; max-width: 480px; padding: 2rem; background: #1e293b; border-radius: 1rem; border: 1px solid #334155;">
           <h1 style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;">403 Forbidden</h1>
-          <p style="color: #94a3b8; margin-bottom: 1.5rem;">Administrator privileges are required to access this area. Your account is registered as marketing (${encodeURIComponent(token.email)}).</p>
-          <a href="/admin/marketing" style="display: inline-block; background: #0284c7; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin-right: 0.5rem;">Marketing Portal</a>
-          <a href="/" style="display: inline-block; background: #334155; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600;">Storefront</a>
+          <p style="color: #94a3b8; margin-bottom: 1.5rem;">Administrator privileges are required to access this area. Signed in as marketing account (${String(token.email).replace(/[<>&"']/g, "")}).</p>
+          <a href="/admin/marketing" style="display: inline-block; background: #0284c7; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">Marketing Portal</a>
+          <a href="/" style="display: inline-block; background: #334155; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">Storefront</a>
+          <a href="/logout" style="display: inline-block; background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">Switch Account</a>
         </div>
       </body>
       </html>`,
@@ -184,8 +185,10 @@ export async function middleware(req: NextRequest) {
     <body style="font-family: system-ui, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
       <div style="text-align: center; max-width: 480px; padding: 2rem; background: #1e293b; border-radius: 1rem; border: 1px solid #334155;">
         <h1 style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;">403 Forbidden</h1>
-        <p style="color: #94a3b8; margin-bottom: 1.5rem;">Administrator privileges are required to access this area. Your account is registered as a customer (${encodeURIComponent(token.email)}).</p>
-        <a href="/" style="display: inline-block; background: #0284c7; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600;">Return to Storefront</a>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem;">Administrator privileges are required to access this area. Signed in as customer account (${String(token.email).replace(/[<>&"']/g, "")}).</p>
+        <a href="/account" style="display: inline-block; background: #0284c7; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">My Account</a>
+        <a href="/" style="display: inline-block; background: #334155; color: white; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">Storefront</a>
+        <a href="/logout" style="display: inline-block; background: transparent; border: 1px solid #475569; color: #cbd5e1; padding: 0.75rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; margin: 0.25rem;">Switch Account</a>
       </div>
     </body>
     </html>`,

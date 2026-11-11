@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
   let categories: any[] = [];
@@ -34,7 +34,7 @@ export default async function CategoriesPage() {
   }
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div className="py-10 px-4 sm:px-6 lg:px-10 xl:px-12 w-full">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -56,15 +56,15 @@ export default async function CategoriesPage() {
       {categories.length === 0 ? (
         <EmptyState
           icon="box"
-          title="No Categories Available"
-          description="The catalog has not been initialized with product categories yet. You can create your first category via the admin portal."
-          actionText="Create Category in Admin"
-          actionHref="/admin/categories"
-          secondaryActionText="System Setup (/setup)"
-          secondaryActionHref="/setup"
+          title="Categories Coming Soon"
+          description="Our commercial packaging and janitorial product categories are currently being organized. Reach out to our sales team for direct pricing and availability."
+          actionText="Contact Commercial Sales"
+          actionHref="/contact"
+          secondaryActionText="Return Home"
+          secondaryActionHref="/"
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {categories.map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}

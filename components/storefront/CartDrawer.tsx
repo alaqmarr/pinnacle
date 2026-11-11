@@ -107,11 +107,11 @@ export function CartDrawer({ session }: { session?: any }) {
                 Signed in as {session.user?.name || "Customer"}
               </span>
               <Link
-                href={session.user?.role === "ADMIN" || session.user?.role === "MARKETING" ? "/admin" : "/account"}
+                href="/account"
                 onClick={closeCart}
                 className="font-bold underline hover:text-sky-900 ml-2 shrink-0"
               >
-                Account
+                My Account
               </Link>
             </div>
           )}

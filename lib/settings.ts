@@ -34,6 +34,13 @@ export interface GlobalSettingData {
   stripeSecretKey?: string | null;
   stripeWebhookSecret?: string | null;
   stripeEnabled?: boolean;
+  stripeTestMode?: boolean;
+  stripeTestPublishableKey?: string | null;
+  stripeTestSecretKey?: string | null;
+  stripeTestWebhookSecret?: string | null;
+  stripeLivePublishableKey?: string | null;
+  stripeLiveSecretKey?: string | null;
+  stripeLiveWebhookSecret?: string | null;
   paypalEnabled?: boolean;
   paypalSandboxMode?: boolean;
   paypalSandboxClientId?: string | null;
@@ -62,6 +69,9 @@ export interface PublicGlobalSettings {
   bodyTopScripts?: string | null;
   ecommerceMode: boolean;
   whatsappNumber?: string | null;
+  stripeEnabled?: boolean;
+  stripeTestMode?: boolean;
+  stripePublishableKey?: string | null;
   paypalEnabled?: boolean;
   paypalSandboxMode?: boolean;
   paypalClientId?: string | null;
@@ -90,6 +100,13 @@ export const DEFAULT_GLOBAL_SETTINGS: Omit<GlobalSettingData, "createdAt" | "upd
   stripeSecretKey: null,
   stripeWebhookSecret: null,
   stripeEnabled: false,
+  stripeTestMode: true,
+  stripeTestPublishableKey: null,
+  stripeTestSecretKey: null,
+  stripeTestWebhookSecret: null,
+  stripeLivePublishableKey: null,
+  stripeLiveSecretKey: null,
+  stripeLiveWebhookSecret: null,
   paypalEnabled: false,
   paypalSandboxMode: true,
   paypalSandboxClientId: null,
@@ -287,6 +304,13 @@ export function getPublicSettings(settings: GlobalSettingData): PublicGlobalSett
     bodyTopScripts: settings.bodyTopScripts || null,
     ecommerceMode: settings.ecommerceMode !== undefined ? Boolean(settings.ecommerceMode) : true,
     whatsappNumber: settings.whatsappNumber ?? null,
+    stripeEnabled: Boolean(settings.stripeEnabled),
+    stripeTestMode: settings.stripeTestMode !== false,
+    stripePublishableKey: settings.stripeEnabled
+      ? (settings.stripeTestMode !== false
+          ? settings.stripeTestPublishableKey || settings.stripePublishableKey
+          : settings.stripeLivePublishableKey || settings.stripePublishableKey)
+      : null,
     paypalEnabled: Boolean(settings.paypalEnabled),
     paypalSandboxMode: settings.paypalSandboxMode !== false,
     paypalClientId: settings.paypalEnabled

@@ -2,8 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { CheckoutClient } from "@/components/storefront/CheckoutClient";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CheckoutPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   
   const settings = await prisma.globalSetting.findUnique({
     where: { id: "singleton" }
@@ -28,12 +27,27 @@ export default async function CheckoutPage() {
 
   let savedAddresses: any[] = [];
   let freightMethods: any[] = [];
+  let verifiedUser: any = null;
   
   if (session?.user?.id) {
-    savedAddresses = await prisma.address.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        allowCredit: true,
+        allowPickup: true,
+      },
     });
+    if (dbUser) {
+      verifiedUser = dbUser;
+      savedAddresses = await prisma.address.findMany({
+        where: { userId: dbUser.id },
+        orderBy: { createdAt: "desc" },
+      });
+    }
   }
 
   freightMethods = await prisma.freightMethod.findMany({
@@ -42,7 +56,7 @@ export default async function CheckoutPage() {
   });
 
   return (
-    <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8">
+    <div className="py-10 px-4 sm:px-6 lg:px-10 xl:px-12 w-full space-y-8">
       {/* Breadcrumbs */}
       <nav className="flex items-center space-x-2 text-xs text-slate-500">
         <Link href="/" className="hover:text-slate-900 transition-colors">
@@ -65,21 +79,34 @@ export default async function CheckoutPage() {
         </p>
       </div>
 
-      <CheckoutClient 
-        sessionUser={session?.user || null} 
-        savedAddresses={savedAddresses}
-        freightMethods={freightMethods}
-        stripePublishableKey={settings?.stripeEnabled ? (settings?.stripePublishableKey || undefined) : undefined}
-        paypalEnabled={Boolean(settings?.paypalEnabled)}
-        paypalClientId={
-          settings?.paypalEnabled
-            ? (settings.paypalSandboxMode !== false
-                ? settings.paypalSandboxClientId
-                : settings.paypalLiveClientId) || undefined
-            : undefined
-        }
-        paypalSandboxMode={settings?.paypalSandboxMode !== false}
-      />
+      {/* Resolve Stripe credentials based on active mode (Test vs Live) */}
+      {(() => {
+        const stripeTestMode = settings?.stripeTestMode !== false;
+        const activeStripePublishableKey = settings?.stripeEnabled
+          ? (stripeTestMode
+              ? settings?.stripeTestPublishableKey || settings?.stripePublishableKey
+              : settings?.stripeLivePublishableKey) || undefined
+          : undefined;
+
+        return (
+          <CheckoutClient 
+            sessionUser={verifiedUser} 
+            savedAddresses={savedAddresses}
+            freightMethods={freightMethods}
+            stripePublishableKey={activeStripePublishableKey}
+            stripeTestMode={stripeTestMode}
+            paypalEnabled={Boolean(settings?.paypalEnabled)}
+            paypalClientId={
+              settings?.paypalEnabled
+                ? (settings.paypalSandboxMode !== false
+                    ? settings.paypalSandboxClientId
+                    : settings.paypalLiveClientId) || undefined
+                : undefined
+            }
+            paypalSandboxMode={settings?.paypalSandboxMode !== false}
+          />
+        );
+      })()}
     </div>
   );
 }

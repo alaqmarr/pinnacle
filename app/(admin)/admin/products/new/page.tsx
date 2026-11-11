@@ -12,7 +12,7 @@ export default async function NewProductPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
         <Link href="/admin/products" className="hover:text-slate-900">
           Products

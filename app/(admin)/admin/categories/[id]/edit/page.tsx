@@ -20,7 +20,7 @@ export default async function EditCategoryPage({
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
         <Link href="/admin/categories" className="hover:text-slate-900">
           Categories

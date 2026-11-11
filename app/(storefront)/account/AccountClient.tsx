@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { Modal } from "@/components/ui/Modal";
 
 interface AddressItem {
@@ -225,17 +227,39 @@ export default function AccountClient({ user }: { user: UserAccountData }) {
     }
   };
 
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleAccountSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await fetch("/api/auth/signout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callbackUrl: "/login?signedOut=true" }),
+      });
+    } catch {
+      // Ignore
+    }
+    try {
+      await signOut({ redirect: false });
+    } catch {
+      // Ignore
+    }
+    window.location.assign("/login?signedOut=true");
+  };
+
   return (
     <div className="space-y-8">
       {/* Account Profile Header Card */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-white font-black text-2xl flex items-center justify-center shadow-md">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-white font-black text-2xl flex items-center justify-center shadow-md shrink-0">
               {(user.name || user.email).slice(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-black text-slate-900">
                   {user.name || "Commercial Customer"}
                 </h1>
@@ -250,26 +274,59 @@ export default function AccountClient({ user }: { user: UserAccountData }) {
             </div>
           </div>
 
-          {/* Wholesale Privileges Status Card */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2 text-xs">
-            <div className="font-bold uppercase tracking-wider text-slate-500 text-[10px]">
-              Wholesale Account Privileges
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Wholesale Privileges Status Card */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+              <div className="font-bold uppercase tracking-wider text-slate-500 text-[10px]">
+                Wholesale Account Privileges
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <div className="flex items-center space-x-2">
+                  <span className={`w-2 h-2 rounded-full ${user.allowCredit ? "bg-emerald-500" : "bg-slate-400"}`} />
+                  <span className="font-semibold text-slate-700">Commercial Credit (Net-30):</span>
+                  <span className={user.allowCredit ? "text-emerald-700 font-bold" : "text-slate-500"}>
+                    {user.allowCredit ? "Authorized" : "Prepayment Required"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`w-2 h-2 rounded-full ${user.allowPickup ? "bg-blue-500" : "bg-slate-400"}`} />
+                  <span className="font-semibold text-slate-700">Warehouse Dock Pickup:</span>
+                  <span className={user.allowPickup ? "text-blue-700 font-bold" : "text-slate-500"}>
+                    {user.allowPickup ? "Authorized (Will-Call)" : "Freight Delivery Only"}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <span className={`w-2 h-2 rounded-full ${user.allowCredit ? "bg-emerald-500" : "bg-slate-400"}`} />
-                <span className="font-semibold text-slate-700">Commercial Credit (Net-30):</span>
-                <span className={user.allowCredit ? "text-emerald-700 font-bold" : "text-slate-500"}>
-                  {user.allowCredit ? "Authorized" : "Prepayment Required"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className={`w-2 h-2 rounded-full ${user.allowPickup ? "bg-blue-500" : "bg-slate-400"}`} />
-                <span className="font-semibold text-slate-700">Warehouse Dock Pickup:</span>
-                <span className={user.allowPickup ? "text-blue-700 font-bold" : "text-slate-500"}>
-                  {user.allowPickup ? "Authorized (Will-Call)" : "Freight Delivery Only"}
-                </span>
-              </div>
+
+            {/* Session Actions */}
+            <div className="flex sm:flex-col gap-2.5 shrink-0">
+              {user.role === "ADMIN" && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors"
+                >
+                  Admin Portal →
+                </Link>
+              )}
+              {user.role === "MARKETING" && (
+                <Link
+                  href="/admin/marketing"
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg text-xs font-bold text-white bg-purple-700 hover:bg-purple-600 transition-colors"
+                >
+                  Marketing Portal →
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={handleAccountSignOut}
+                disabled={signingOut}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                {signingOut ? "Signing Out..." : "Sign Out"}
+              </button>
             </div>
           </div>
         </div>

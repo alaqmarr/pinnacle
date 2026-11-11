@@ -10,7 +10,7 @@ export default async function AdminFreightPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 w-full">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Freight Methods</h1>
         <p className="mt-1 text-sm text-slate-500">

@@ -25,7 +25,7 @@ export default async function AdminMarketingPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 w-full">
       <MarketingClient
         initialHeadScripts={settings?.headScripts || ""}
         initialBodyTopScripts={settings?.bodyTopScripts || ""}
