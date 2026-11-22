@@ -4,6 +4,8 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 
 export interface CartItem {
   productId: string;
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   slug: string;
   price: number; // in USD cents
@@ -24,6 +26,8 @@ interface CartContextType {
   addToCart: (
     product: {
       id: string;
+      variantId?: string | null;
+      variantLabel?: string | null;
       name: string;
       slug: string;
       price: number;
@@ -32,8 +36,8 @@ interface CartContextType {
     },
     quantity?: number
   ) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   syncWithServer: () => Promise<void>;
 }
@@ -100,6 +104,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     (
       product: {
         id: string;
+        variantId?: string | null;
+        variantLabel?: string | null;
         name: string;
         slug: string;
         price: number;
@@ -109,9 +115,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       quantity: number = 1
     ) => {
       if (quantity <= 0) return;
+      const targetVariantId = product.variantId || undefined;
       setItems((prevItems) => {
         const existingIndex = prevItems.findIndex(
-          (item) => item.productId === product.id
+          (item) =>
+            item.productId === product.id &&
+            (item.variantId || undefined) === targetVariantId
         );
         if (existingIndex > -1) {
           const updated = [...prevItems];
@@ -125,6 +134,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             ...prevItems,
             {
               productId: product.id,
+              variantId: targetVariantId,
+              variantLabel: product.variantLabel || undefined,
               name: product.name,
               slug: product.slug,
               price: product.price,
@@ -140,21 +151,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.productId !== productId));
-  }, []);
-
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setItems((prevItems) => prevItems.filter((item) => item.productId !== productId));
-      return;
-    }
+  const removeFromCart = useCallback((productId: string, variantId?: string) => {
+    const targetVariantId = variantId || undefined;
     setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+      prevItems.filter(
+        (item) =>
+          !(
+            item.productId === productId &&
+            (item.variantId || undefined) === targetVariantId
+          )
       )
     );
   }, []);
+
+  const updateQuantity = useCallback(
+    (productId: string, quantity: number, variantId?: string) => {
+      const targetVariantId = variantId || undefined;
+      if (quantity <= 0) {
+        setItems((prevItems) =>
+          prevItems.filter(
+            (item) =>
+              !(
+                item.productId === productId &&
+                (item.variantId || undefined) === targetVariantId
+              )
+          )
+        );
+        return;
+      }
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.productId === productId &&
+          (item.variantId || undefined) === targetVariantId
+            ? { ...item, quantity }
+            : item
+        )
+      );
+    },
+    []
+  );
 
   const clearCart = useCallback(() => {
     setItems([]);

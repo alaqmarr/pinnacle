@@ -71,7 +71,10 @@ export default async function CategoryDetailPage({ params }: CategoryPageProps) 
     include: {
       products: {
         orderBy: { createdAt: "desc" },
-        include: { category: true },
+        include: {
+          category: true,
+          _count: { select: { variants: true } },
+        },
       },
       _count: {
         select: { products: true },

@@ -32,6 +32,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     },
     include: {
       category: true,
+      variants: {
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
 
@@ -92,6 +95,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     },
     include: {
       category: true,
+      variants: {
+        orderBy: { sortOrder: "asc" },
+      },
     },
   });
 
@@ -120,6 +126,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       take: 6,
       include: {
         category: true,
+        _count: { select: { variants: true } },
       },
     });
   }

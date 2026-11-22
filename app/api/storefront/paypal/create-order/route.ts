@@ -23,21 +23,43 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "PayPal is not configured or disabled by administrator" }, { status: 500 });
     }
 
-    // 2. Calculate subtotal safely on the server from DB products with item fallback
+    // 2. Calculate subtotal safely on the server from DB products/variants with item fallback
     let subtotal = 0;
     const productIds = items.map((i: any) => i.productId).filter(Boolean);
-    const dbProducts = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-    });
+    const variantIds = items.map((i: any) => i.variantId).filter(Boolean);
+
+    const [dbProducts, dbVariants] = await Promise.all([
+      prisma.product.findMany({ where: { id: { in: productIds } } }),
+      variantIds.length > 0
+        ? prisma.productVariant.findMany({ where: { id: { in: variantIds } } })
+        : Promise.resolve([]),
+    ]);
 
     const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+    const variantMap = new Map(dbVariants.map((v) => [v.id, v]));
     const orderItems: Array<{ name: string; quantity: number; priceInCents: number }> = [];
 
     for (const item of items) {
       const dbProduct = item.productId ? productMap.get(item.productId) : null;
+      const dbVariant = item.variantId ? variantMap.get(item.variantId) : null;
       const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
-      const priceInCents = dbProduct ? dbProduct.price : Math.max(1, Math.round(Number(item.price) || 100));
-      const name = dbProduct ? dbProduct.name : String(item.name || "Commercial Supply Item");
+      const priceInCents =
+        dbVariant && dbVariant.productId === dbProduct?.id
+          ? dbVariant.price
+          : dbProduct
+          ? dbProduct.price
+          : Math.max(1, Math.round(Number(item.price) || 100));
+      if (priceInCents <= 0) {
+        return NextResponse.json(
+          { error: `Item requires a custom commercial quote: ${dbProduct?.name || item.name}` },
+          { status: 400 }
+        );
+      }
+      const name = dbProduct
+        ? dbVariant
+          ? `${dbProduct.name} (${dbVariant.size})`
+          : dbProduct.name
+        : String(item.name || "Commercial Supply Item");
 
       subtotal += priceInCents * qty;
       orderItems.push({

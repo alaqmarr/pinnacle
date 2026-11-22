@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseUSDToCents, centsToDollarString } from "@/lib/currency";
 import { generateSlug } from "@/lib/slug";
+import { VariantsEditor, AdminVariantRow } from "@/components/admin/VariantsEditor";
 
 export default function EditProductForm({
   product,
@@ -22,6 +23,17 @@ export default function EditProductForm({
     originDispatch?: string | null;
     image: string;
     featured: boolean;
+    variants?: Array<{
+      id: string;
+      sku: string;
+      legacySku?: string | null;
+      size: string;
+      style?: string | null;
+      price: number;
+      priceUnit?: string | null;
+      inventory: number;
+      specs: string;
+    }>;
   };
   categories: { id: string; name: string; slug: string }[];
 }) {
@@ -40,6 +52,19 @@ export default function EditProductForm({
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [variants, setVariants] = useState<AdminVariantRow[]>(() =>
+    (product.variants || []).map((v) => ({
+      id: v.id,
+      sku: v.sku || "",
+      legacySku: v.legacySku || "",
+      size: v.size || "",
+      style: v.style || "",
+      price: centsToDollarString(v.price),
+      priceUnit: v.priceUnit || "",
+      inventory: String(v.inventory ?? 100),
+      specs: v.specs || "{}",
+    }))
+  );
 
   const handleNameChange = (val: string) => {
     const generated = generateSlug(val);
@@ -97,6 +122,7 @@ export default function EditProductForm({
           originDispatch: formData.originDispatch.trim() || null,
           image: formData.image.trim(),
           featured: formData.featured,
+          variants,
         }),
       });
 
@@ -262,6 +288,8 @@ export default function EditProductForm({
           Feature this product on the public homepage catalog
         </label>
       </div>
+
+      <VariantsEditor variants={variants} onChange={setVariants} />
 
       <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
         <Link

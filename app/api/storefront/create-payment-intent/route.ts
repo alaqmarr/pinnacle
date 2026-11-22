@@ -14,21 +14,36 @@ export async function POST(request: Request) {
     // 1. Fetch dynamic database-driven Stripe client (Test vs Live mode)
     const { stripe, config } = await getStripeClient();
 
-    // 2. Calculate subtotal safely on the server
+    // 2. Calculate subtotal safely on the server (including product variants)
     let subtotal = 0;
-    const productIds = items.map((i: any) => i.productId);
-    const dbProducts = await prisma.product.findMany({
-      where: { id: { in: productIds } }
-    });
+    const productIds = items.map((i: any) => i.productId).filter(Boolean);
+    const variantIds = items.map((i: any) => i.variantId).filter(Boolean);
+
+    const [dbProducts, dbVariants] = await Promise.all([
+      prisma.product.findMany({ where: { id: { in: productIds } } }),
+      variantIds.length > 0
+        ? prisma.productVariant.findMany({ where: { id: { in: variantIds } } })
+        : Promise.resolve([]),
+    ]);
 
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
+    const variantMap = new Map(dbVariants.map(v => [v.id, v]));
 
     for (const item of items) {
       const dbProduct = productMap.get(item.productId);
       if (!dbProduct) {
         return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 400 });
       }
-      subtotal += dbProduct.price * item.quantity;
+      const dbVariant = item.variantId ? variantMap.get(item.variantId) : undefined;
+      if (item.variantId && (!dbVariant || dbVariant.productId !== dbProduct.id)) {
+        return NextResponse.json({ error: `Product variant not found: ${item.variantId}` }, { status: 400 });
+      }
+      const unitPrice = dbVariant ? dbVariant.price : dbProduct.price;
+      if (unitPrice <= 0) {
+        return NextResponse.json({ error: `Item requires a custom commercial quote: ${dbProduct.name}` }, { status: 400 });
+      }
+      const qty = Math.max(1, parseInt(item.quantity, 10) || 1);
+      subtotal += unitPrice * qty;
     }
 
     // 3. Add Shipping & Tax

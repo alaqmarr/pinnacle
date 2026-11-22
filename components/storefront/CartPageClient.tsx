@@ -70,7 +70,7 @@ export function CartPageClient() {
 
           <div className="divide-y divide-slate-100">
             {items.map((item) => (
-              <div key={item.productId} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div key={item.variantId ? `${item.productId}::${item.variantId}` : item.productId} className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center space-x-4 min-w-0">
                   <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 p-0 m-0 overflow-hidden">
                     {item.image ? (
@@ -88,11 +88,16 @@ export function CartPageClient() {
 
                   <div className="min-w-0">
                     <Link
-                      href={`/products/${item.productId}`}
+                      href={`/products/${item.slug || item.productId}`}
                       className="text-sm font-bold text-slate-900 hover:text-sky-600 line-clamp-1 block transition-colors"
                     >
                       {item.name}
                     </Link>
+                    {item.variantLabel && (
+                      <p className="text-xs font-semibold text-sky-700 mt-0.5 truncate">
+                        Size/Variant: {item.variantLabel}
+                      </p>
+                    )}
                     {item.sku && (
                       <p className="text-[11px] font-mono text-slate-400 uppercase mt-0.5">
                         SKU: {item.sku}
@@ -109,7 +114,7 @@ export function CartPageClient() {
                 <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-6">
                   <QuantitySelector
                     quantity={item.quantity}
-                    onChange={(q) => updateQuantity(item.productId, q)}
+                    onChange={(q) => updateQuantity(item.productId, q, item.variantId)}
                     size="sm"
                   />
 
@@ -121,7 +126,7 @@ export function CartPageClient() {
                     )}
                     <button
                       type="button"
-                      onClick={() => removeFromCart(item.productId)}
+                      onClick={() => removeFromCart(item.productId, item.variantId)}
                       className="text-[11px] text-red-500 hover:text-red-700 font-medium transition-colors"
                     >
                       Remove

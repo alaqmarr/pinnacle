@@ -41,6 +41,7 @@ firebase-admin.json
 # SQLite Database Files (Keep dev.db gitignored)
 prisma/*.db
 prisma/*.db-journal
+prisma/backups/
 
 # OS & Editor Artifacts
 .DS_Store

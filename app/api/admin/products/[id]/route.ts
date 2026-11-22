@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseUSDToCents } from "@/lib/currency";
+import { normalizeVariantInputs } from "@/lib/variants";
 
 export async function GET(
   _req: NextRequest,
@@ -13,6 +14,9 @@ export async function GET(
       where: { id },
       include: {
         category: true,
+        variants: {
+          orderBy: { sortOrder: "asc" },
+        },
       },
     });
 
@@ -46,6 +50,7 @@ export async function GET(
       images: imageList,
       originDispatch: product.originDispatch || null,
       featured: product.featured,
+      variants: product.variants,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     });
@@ -199,12 +204,25 @@ async function updateProduct(
         : "[]";
     }
 
-    const updated = await prisma.product.update({
-      where: { id },
-      data: updateData,
-      include: {
-        category: true,
-      },
+    const parsedVariants = Array.isArray(body.variants) ? normalizeVariantInputs(body.variants) : null;
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (parsedVariants !== null) {
+        await tx.productVariant.deleteMany({ where: { productId: id } });
+      }
+      return tx.product.update({
+        where: { id },
+        data: {
+          ...updateData,
+          ...(parsedVariants !== null && parsedVariants.length > 0
+            ? { variants: { create: parsedVariants } }
+            : {}),
+        },
+        include: {
+          category: true,
+          variants: { orderBy: { sortOrder: "asc" } },
+        },
+      });
     });
 
     let imageList: string[] = [];
@@ -235,6 +253,7 @@ async function updateProduct(
         images: imageList,
         originDispatch: updated.originDispatch || null,
         featured: updated.featured,
+        variants: updated.variants,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
       },

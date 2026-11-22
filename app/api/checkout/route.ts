@@ -95,10 +95,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Validate Products in DB, check inventory, calculate subtotal
+    // 4. Validate Products & Variants in DB, check inventory, calculate subtotal
     let subtotal = 0;
     const validatedItems: Array<{
       productId: string;
+      variantId: string | null;
+      variantSize: string | null;
       name: string;
       sku: string | null;
       price: number;
@@ -131,25 +133,56 @@ export async function POST(req: Request) {
         );
       }
 
-      if (!isQuote && product.inventory < qty) {
+      let variant = null;
+      if (item.variantId) {
+        variant = await prisma.productVariant.findFirst({
+          where: { id: String(item.variantId), productId: product.id },
+        });
+        if (!variant) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Selected size/variant for ${product.name} is no longer available.`,
+              code: "ITEM_UNAVAILABLE",
+            },
+            { status: 400 }
+          );
+        }
+      }
+
+      const availableInventory = variant ? variant.inventory : product.inventory;
+      if (!isQuote && availableInventory < qty) {
         return NextResponse.json(
           {
             success: false,
-            error: `Insufficient stock for product ${product.name}. Available: ${product.inventory}, requested: ${qty}.`,
+            error: `Insufficient stock for product ${product.name}${variant ? ` (${variant.size})` : ""}. Available: ${availableInventory}, requested: ${qty}.`,
             code: "INSUFFICIENT_STOCK",
           },
           { status: 400 }
         );
       }
 
-      const priceInCents = product.price;
+      const priceInCents = variant ? variant.price : product.price;
+      if (!isQuote && priceInCents <= 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Item ${product.name}${variant ? ` (${variant.size})` : ""} requires a custom commercial quote. Please contact sales.`,
+            code: "QUOTE_REQUIRED",
+          },
+          { status: 400 }
+        );
+      }
+
       const lineTotal = priceInCents * qty;
       subtotal += lineTotal;
 
       validatedItems.push({
         productId: product.id,
-        name: product.name,
-        sku: product.sku,
+        variantId: variant ? variant.id : null,
+        variantSize: variant ? variant.size : null,
+        name: variant ? `${product.name} (${variant.size})` : product.name,
+        sku: variant ? variant.sku : product.sku,
         price: priceInCents,
         quantity: qty,
         total: lineTotal,
@@ -244,6 +277,8 @@ export async function POST(req: Request) {
         items: {
           create: validatedItems.map((i) => ({
             productId: i.productId,
+            variantId: i.variantId,
+            variantSize: i.variantSize,
             name: i.name,
             sku: i.sku,
             price: i.price,
@@ -257,7 +292,7 @@ export async function POST(req: Request) {
       },
     });
 
-    // 10. Deduct purchased units from product stock (only for confirmed sales, not quotes)
+    // 10. Deduct purchased units from product & variant stock (only for confirmed sales, not quotes)
     if (!isQuote) {
       await processOrderInventory(validatedItems, isQuote, {
         decrement: (productId, quantity) =>
@@ -270,6 +305,14 @@ export async function POST(req: Request) {
             },
           }),
       });
+      for (const item of validatedItems) {
+        if (item.variantId) {
+          await prisma.productVariant.update({
+            where: { id: item.variantId },
+            data: { inventory: { decrement: item.quantity } },
+          });
+        }
+      }
     }
 
     // 11. Empty authenticated user DB cart if user is logged in

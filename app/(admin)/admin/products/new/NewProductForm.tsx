@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { parseUSDToCents } from "@/lib/currency";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { generateSlug } from "@/lib/slug";
+import { VariantsEditor, AdminVariantRow } from "@/components/admin/VariantsEditor";
 
 export default function NewProductForm({
   categories,
@@ -13,6 +14,7 @@ export default function NewProductForm({
   categories: { id: string; name: string; slug: string }[];
 }) {
   const router = useRouter();
+  const [variants, setVariants] = useState<AdminVariantRow[]>([]);
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
@@ -92,6 +94,7 @@ export default function NewProductForm({
           originDispatch: formData.originDispatch.trim() || null,
           image: formData.image.trim(),
           featured: formData.featured,
+          variants,
         }),
       });
 
@@ -259,6 +262,8 @@ export default function NewProductForm({
           Feature this product on homepage catalog
         </label>
       </div>
+
+      <VariantsEditor variants={variants} onChange={setVariants} />
 
       <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
         <Link

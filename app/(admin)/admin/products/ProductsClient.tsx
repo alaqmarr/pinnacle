@@ -21,6 +21,7 @@ export interface ProductItem {
   categoryName: string;
   image: string;
   featured: boolean;
+  variantCount?: number;
   createdAt?: string;
 }
 
@@ -428,9 +429,16 @@ export default function ProductsClient({
                           )}
                           <div className="min-w-0">
                             <span className="block truncate max-w-xs">{p.name}</span>
-                            <span className="text-xs font-mono text-slate-400 font-normal">
-                              /{p.slug}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono text-slate-400 font-normal">
+                                /{p.slug}
+                              </span>
+                              {(p.variantCount ?? 0) > 0 && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
+                                  {p.variantCount} sizes
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>

@@ -21,6 +21,9 @@ export interface ProductCardProps {
       name: string;
       slug: string;
     } | null;
+    _count?: {
+      variants?: number;
+    };
   };
 }
 
@@ -52,6 +55,8 @@ export function ProductCard({ product }: ProductCardProps) {
     (displayImage.startsWith("http") || displayImage.startsWith("/"));
 
   const inventory = typeof product.inventory === "number" ? product.inventory : undefined;
+  const variantCount = product._count?.variants ?? 0;
+  const hasMultipleVariants = variantCount > 1;
   const isOutOfStock = inventory !== undefined && inventory <= 0;
   const isLowStock = inventory !== undefined && inventory > 0 && inventory <= 10;
   const productHref = `/products/${product.slug || product.id}`;
@@ -63,12 +68,17 @@ export function ProductCard({ product }: ProductCardProps) {
         href={productHref}
         className="relative aspect-square w-full overflow-hidden bg-slate-50 flex items-center justify-center border-b border-slate-100"
       >
-        {/* Real Data Badges Only (Featured / Stock Status) */}
-        {(product.featured || isOutOfStock || isLowStock) && (
+        {/* Real Data Badges Only (Featured / Stock Status / Variants Count) */}
+        {(product.featured || isOutOfStock || isLowStock || variantCount > 0) && (
           <div className="absolute top-3 left-3 right-3 flex flex-wrap items-center gap-1.5 z-10 pointer-events-none">
             {product.featured && (
               <span className="bg-[#0F4288] text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded shadow-xs">
                 Featured
+              </span>
+            )}
+            {variantCount > 0 && (
+              <span className="bg-sky-600 text-white text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded shadow-xs">
+                {variantCount} {variantCount === 1 ? "Size" : "Sizes"}
               </span>
             )}
             {isOutOfStock ? (
@@ -148,9 +158,22 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="mt-3 mb-4 pt-2 border-t border-slate-100">
           {ecommerceMode ? (
-            <span className="text-xl sm:text-2xl font-black text-[#0B1E36] tracking-tight">
-              {formatUSD(product.price)}
-            </span>
+            product.price > 0 ? (
+              <div className="flex items-baseline gap-1.5">
+                {hasMultipleVariants && (
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    From
+                  </span>
+                )}
+                <span className="text-xl sm:text-2xl font-black text-[#0B1E36] tracking-tight">
+                  {formatUSD(product.price)}
+                </span>
+              </div>
+            ) : (
+              <span className="inline-block text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded">
+                Call / Quote for Price
+              </span>
+            )
           ) : (
             <span className="inline-block text-xs font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-1 rounded">
               Quote on Request
@@ -158,12 +181,21 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        <QuickAddButton
-          product={{
-            ...product,
-            image: hasValidImage ? displayImage : undefined,
-          }}
-        />
+        {hasMultipleVariants ? (
+          <Link
+            href={productHref}
+            className="w-full text-center font-bold py-3 px-3 text-xs sm:text-sm rounded-lg transition-all duration-300 bg-slate-900 hover:bg-slate-800 text-white block"
+          >
+            Select Size ({variantCount}) &rarr;
+          </Link>
+        ) : (
+          <QuickAddButton
+            product={{
+              ...product,
+              image: hasValidImage ? displayImage : undefined,
+            }}
+          />
+        )}
       </div>
     </div>
   );

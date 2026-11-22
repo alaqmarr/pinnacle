@@ -16,6 +16,9 @@ export async function GET(
       },
       include: {
         category: true,
+        variants: {
+          orderBy: { sortOrder: "asc" },
+        },
       },
     });
 

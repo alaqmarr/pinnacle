@@ -30,6 +30,18 @@ export async function GET(req: Request) {
         { name: { contains: search } },
         { description: { contains: search } },
         { sku: { contains: search } },
+        {
+          variants: {
+            some: {
+              OR: [
+                { sku: { contains: search } },
+                { legacySku: { contains: search } },
+                { size: { contains: search } },
+                { style: { contains: search } },
+              ],
+            },
+          },
+        },
       ];
     }
 
@@ -55,6 +67,9 @@ export async function GET(req: Request) {
         where,
         include: {
           category: true,
+          _count: {
+            select: { variants: true },
+          },
         },
         orderBy,
         skip,

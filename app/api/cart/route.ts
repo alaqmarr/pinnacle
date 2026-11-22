@@ -22,6 +22,7 @@ export async function GET() {
         items: {
           include: {
             product: true,
+            variant: true,
           },
         },
       },
@@ -48,12 +49,14 @@ export async function GET() {
       return {
         id: item.id,
         productId: item.productId,
+        variantId: item.variantId || undefined,
+        variantLabel: item.variant ? item.variant.size : undefined,
         name: item.product.name,
         slug: item.product.slug,
-        price: item.product.price,
+        price: item.variant ? item.variant.price : item.product.price,
         quantity: item.quantity,
         image,
-        sku: item.product.sku,
+        sku: item.variant ? item.variant.sku : item.product.sku,
       };
     });
 

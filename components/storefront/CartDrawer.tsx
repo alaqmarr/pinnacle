@@ -138,7 +138,7 @@ export function CartDrawer({ session }: { session?: any }) {
             ) : (
               <div className="divide-y divide-slate-100">
                 {items.map((item) => (
-                  <div key={item.productId} className="py-4 flex gap-4 items-start">
+                  <div key={item.variantId ? `${item.productId}::${item.variantId}` : item.productId} className="py-4 flex gap-4 items-start">
                     {/* Thumbnail */}
                     <div className="w-16 h-16 rounded-lg bg-slate-50 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 p-0 m-0">
                       {item.image ? (
@@ -157,12 +157,17 @@ export function CartDrawer({ session }: { session?: any }) {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <Link
-                        href={`/products/${item.productId}`}
+                        href={`/products/${item.slug || item.productId}`}
                         onClick={closeCart}
                         className="text-sm font-semibold text-slate-900 hover:text-sky-600 line-clamp-1 block"
                       >
                         {item.name}
                       </Link>
+                      {item.variantLabel && (
+                        <p className="text-[11px] font-semibold text-sky-700 mt-0.5 truncate">
+                          Size/Variant: {item.variantLabel}
+                        </p>
+                      )}
                       {item.sku && (
                         <p className="text-[10px] font-mono text-slate-400 uppercase mt-0.5">
                           SKU: {item.sku}
@@ -177,7 +182,7 @@ export function CartDrawer({ session }: { session?: any }) {
                       <div className="mt-3 flex items-center justify-between">
                         <QuantitySelector
                           quantity={item.quantity}
-                          onChange={(q) => updateQuantity(item.productId, q)}
+                          onChange={(q) => updateQuantity(item.productId, q, item.variantId)}
                           size="sm"
                         />
 
@@ -189,7 +194,7 @@ export function CartDrawer({ session }: { session?: any }) {
                           )}
                           <button
                             type="button"
-                            onClick={() => removeFromCart(item.productId)}
+                            onClick={() => removeFromCart(item.productId, item.variantId)}
                             className="text-[11px] text-red-500 hover:text-red-700 font-medium"
                           >
                             Remove

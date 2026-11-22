@@ -56,6 +56,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         { name: { contains: search } },
         { description: { contains: search } },
         { sku: { contains: search } },
+        {
+          variants: {
+            some: {
+              OR: [
+                { sku: { contains: search } },
+                { legacySku: { contains: search } },
+                { size: { contains: search } },
+                { style: { contains: search } },
+              ],
+            },
+          },
+        },
       ],
     });
   }
@@ -88,6 +100,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         where,
         include: {
           category: true,
+          _count: {
+            select: { variants: true },
+          },
         },
         orderBy,
       }),

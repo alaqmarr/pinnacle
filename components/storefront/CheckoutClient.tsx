@@ -1003,9 +1003,14 @@ export function CheckoutClient({
           </h3>
           <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto pr-1">
             {items.map((item) => (
-              <div key={item.productId} className="py-3 flex justify-between text-xs gap-3">
+              <div key={item.variantId ? `${item.productId}::${item.variantId}` : item.productId} className="py-3 flex justify-between text-xs gap-3">
                 <div className="min-w-0">
                   <strong className="text-slate-900 block truncate">{item.name}</strong>
+                  {item.variantLabel && (
+                    <span className="text-[11px] font-semibold text-sky-700 block truncate">
+                      {item.variantLabel}
+                    </span>
+                  )}
                   <span className="text-slate-400">
                     Qty: {item.quantity}{ecommerceMode ? ` × ${formatUSD(item.price)}` : ""}
                   </span>

@@ -70,25 +70,43 @@ export async function POST(req: Request) {
 
       if (!product) continue;
 
-      // Upsert cart item with increment
-      await prisma.cartItem.upsert({
+      let validVariantId: string | null = null;
+      if (item.variantId && typeof item.variantId === "string") {
+        const variant = await prisma.productVariant.findFirst({
+          where: { id: item.variantId, productId: item.productId },
+          select: { id: true },
+        });
+        if (variant) validVariantId = variant.id;
+      }
+
+      // Safe findFirst + update/create for nullable variantId in SQLite
+      const existingCartItem = await prisma.cartItem.findFirst({
         where: {
-          cartId_productId: {
-            cartId: cart.id,
-            productId: item.productId,
-          },
-        },
-        update: {
-          quantity: {
-            increment: item.quantity,
-          },
-        },
-        create: {
           cartId: cart.id,
           productId: item.productId,
-          quantity: item.quantity,
+          variantId: validVariantId,
         },
       });
+
+      if (existingCartItem) {
+        await prisma.cartItem.update({
+          where: { id: existingCartItem.id },
+          data: {
+            quantity: {
+              increment: item.quantity,
+            },
+          },
+        });
+      } else {
+        await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: item.productId,
+            variantId: validVariantId,
+            quantity: item.quantity,
+          },
+        });
+      }
 
       migratedCount++;
     }

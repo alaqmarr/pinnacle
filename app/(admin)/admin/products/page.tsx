@@ -11,6 +11,7 @@ export default async function AdminProductsPage() {
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
+        _count: { select: { variants: true } },
       },
     }),
     prisma.category.findMany({
@@ -45,6 +46,7 @@ export default async function AdminProductsPage() {
       categoryName: p.category?.name || "Uncategorized",
       image: imageList[0] || "",
       featured: p.featured,
+      variantCount: p._count?.variants ?? 0,
       createdAt: p.createdAt.toISOString(),
     };
   });

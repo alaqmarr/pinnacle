@@ -19,7 +19,10 @@ export default async function StorefrontHomePage() {
       prisma.product.findMany({
         take: 12,
         orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-        include: { category: true },
+        include: {
+          category: true,
+          _count: { select: { variants: true } },
+        },
       }),
     ]);
     categories = cats;

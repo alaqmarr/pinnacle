@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "seed:catalog": "npx tsx scripts/import_packaging_catalog.ts",
     "test": "node tests/runner.js",
     "deploy": "git stash && git pull && npm i --legacy-peer-deps && npx prisma generate && npx prisma db push && npm run build",
     "update": "git stash && git pull && npm i --legacy-peer-deps && npx prisma generate && npx prisma db push && npm run build && pm2 restart pinnacle"

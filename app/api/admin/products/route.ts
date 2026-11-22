@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseUSDToCents } from "@/lib/currency";
+import { normalizeVariantInputs } from "@/lib/variants";
 import crypto from "crypto";
 
 function generateSlug(name: string): string {
@@ -29,6 +30,17 @@ export async function GET(req: NextRequest) {
         { name: { contains: q } },
         { sku: { contains: q } },
         { description: { contains: q } },
+        {
+          variants: {
+            some: {
+              OR: [
+                { sku: { contains: q } },
+                { legacySku: { contains: q } },
+                { size: { contains: q } },
+              ],
+            },
+          },
+        },
       ];
     }
 
@@ -37,6 +49,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       include: {
         category: true,
+        _count: { select: { variants: true } },
       },
     });
 
@@ -71,6 +84,7 @@ export async function GET(req: NextRequest) {
         images: imageList,
         originDispatch: prod.originDispatch || null,
         featured: prod.featured,
+        variantCount: prod._count?.variants ?? 0,
         createdAt: prod.createdAt.toISOString(),
         updatedAt: prod.updatedAt.toISOString(),
       };
@@ -99,7 +113,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Empty payload" }, { status: 400 });
     }
 
-    const { name, slug, sku, price, stock, inventory, description, originDispatch, categoryId, image, images, featured } = body;
+    const { name, slug, sku, price, stock, inventory, description, originDispatch, categoryId, image, images, featured, variants } = body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -186,6 +200,8 @@ export async function POST(req: NextRequest) {
       imagesJson = JSON.stringify([image.trim()]);
     }
 
+    const normalizedVariants = normalizeVariantInputs(variants);
+
     const product = await prisma.product.create({
       data: {
         id: finalSlug,
@@ -199,9 +215,13 @@ export async function POST(req: NextRequest) {
         categoryId: validCategoryId,
         images: imagesJson,
         featured: Boolean(featured),
+        ...(normalizedVariants.length > 0
+          ? { variants: { create: normalizedVariants } }
+          : {}),
       },
       include: {
         category: true,
+        variants: { orderBy: { sortOrder: "asc" } },
       },
     });
 
@@ -234,6 +254,7 @@ export async function POST(req: NextRequest) {
           images: imageList,
           originDispatch: product.originDispatch || null,
           featured: product.featured,
+          variants: product.variants,
           createdAt: product.createdAt.toISOString(),
           updatedAt: product.updatedAt.toISOString(),
         },
