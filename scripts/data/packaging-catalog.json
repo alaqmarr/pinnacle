@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-22T16:58:34.215Z",
+  "generatedAt": "2026-11-24T11:31:25.033Z",
   "categories": [
     {
       "name": "Corrugated Boxes & Pads",
@@ -54,6 +54,12 @@
       "slug": "edge-protectors-dunnage",
       "description": "Laminated fiberboard corner edge protectors, steel stake pocket protectors, and AAR-approved inflatable dunnage bags.",
       "image": "/images/catalog/strap-edge-padding.png"
+    },
+    {
+      "name": "Janitorial Supplies",
+      "slug": "janitorial-supplies",
+      "description": "Commercial paper towels, bath & facial tissues, trash can liners, mops & buckets, wet floor caution signage, and hand soaps.",
+      "image": "/images/catalog/tissues-towels-seat-covers.png"
     }
   ],
   "products": [
@@ -18224,6 +18230,1243 @@
       "price": 3530,
       "sku": "PBF20-2024",
       "inventory": 1200
+    },
+    {
+      "name": "Tissues, Towels, & Seat Covers",
+      "slug": "tissues-towels-seat-covers",
+      "categorySlug": "janitorial-supplies",
+      "description": "Commercial toilet tissue, jumbo bath tissue, facial tissue, multi-fold/roll/center-pull paper towels, toilet seat covers, and heavy-duty wall dispensers.",
+      "image": "/images/catalog/tissues-towels-seat-covers.png",
+      "featured": true,
+      "price": 400,
+      "sku": "JTT-3V-24",
+      "inventory": 2800,
+      "variants": [
+        {
+          "sku": "JTT-3V-24",
+          "size": "3.5 W x 4.3\" L 500 Sheets / Roll",
+          "price": 1900,
+          "priceUnit": "Price Per Bag",
+          "specs": {
+            "Style": "Toilet Tissue • Super Soft, 2 Ply",
+            "Color": "White",
+            "Qty / Case": "24 Rolls / Bag 100 Bags / Skid"
+          }
+        },
+        {
+          "sku": "JTT-3V-48",
+          "size": "3.5 W x 4.3\" L 500 Sheets / Roll",
+          "price": 3300,
+          "priceUnit": "Price Per Bag",
+          "specs": {
+            "Style": "Toilet Tissue • Super Soft, 2 Ply",
+            "Color": "White",
+            "Qty / Case": "48 Rolls / Case 50 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JTT-3V-96",
+          "size": "3.5 W x 4.3\" L 500 Sheets / Roll",
+          "price": 6200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Toilet Tissue • Super Soft, 2 Ply",
+            "Color": "White",
+            "Qty / Case": "96 Rolls / Case 25 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JJR-2V-800",
+          "size": "3.5\" x 800'",
+          "price": 4200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Jumbo Bath Tissue • Premium, 2 Ply",
+            "Color": "White",
+            "Qty / Case": "12 Rolls / Case 48 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JFT-3V-100",
+          "size": "8.25 L x 8\" W 100 Sheets / Box",
+          "price": 2500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Facial Tissue • Super Soft, 2 Ply",
+            "Color": "White",
+            "Qty / Case": "30 Boxes / Case 80 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JMT-1K-4000",
+          "size": "9.05 W x 9.25\" L",
+          "price": 3100,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Multi Fold Towel • Kraft, 1 Ply",
+            "Color": "Kraft",
+            "Qty / Case": "4000 Sheets / Case 72 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JMT-2V-4000",
+          "size": "8.75 W x 9\" L",
+          "price": 3300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Multi Fold Towel • Premium, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "4000 Sheets / Case 72 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JRT-1K-800",
+          "size": "7.8\" W x 800' L",
+          "price": 3600,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Roll Towel • Kraft, 1 Ply",
+            "Color": "Kraft",
+            "Qty / Case": "6 Rolls / Case 50 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JRT-1R-800",
+          "size": "7.8\" W x 800' L",
+          "price": 3920,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Roll Towel • Economy, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "6 Rolls / Case 55 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JCP-2V-600",
+          "size": "7.6 W x 10\" L 600 Sheets / Roll",
+          "price": 3500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Center Pull Towel • Economy, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "6 Rolls / Case 55 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JTC-HF-20P",
+          "size": "14.5 W x 17.25\" L 250 Sheets / Pack",
+          "price": 4000,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Toilet Seat Cover • Half-Fold, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "20 Packs / Case 70 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JTC-QF-25P",
+          "size": "14.5 W x 17.25\" L 200 Sheets / Pack",
+          "price": 4500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Toilet Seat Cover • Quarter-Fold, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "25 Packs / Case 200 Cases / Skid"
+          }
+        },
+        {
+          "sku": "JTC-HF-20PK",
+          "size": "14.5 W x 17.25\" L",
+          "price": 400,
+          "priceUnit": "Price Per Pack",
+          "specs": {
+            "Style": "Toilet Seat Cover • Half-Fold, 1 Ply",
+            "Color": "White",
+            "Qty / Case": "250 Sheets / Pack 1400 Pack / Skid"
+          }
+        },
+        {
+          "sku": "JJR-DS9-S",
+          "size": "9.85 L x 4.8 W x 11.1\" H",
+          "price": 1570,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Jumbo Bath Tissue Dispensers • 9\" Diameter Roll (Single)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JJR-DS9-W",
+          "size": "9.85 L x 4.8 W x 11.1\" H",
+          "price": 1570,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Jumbo Bath Tissue Dispensers • 9\" Diameter Roll (Single)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JJR-DD9-B",
+          "size": "20 L x 4.9 W x 11.5\" H",
+          "price": 3030,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Jumbo Bath Tissue Dispensers • 9\" Diameter Roll (Double)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JMT-D275-S",
+          "size": "9.85 W x 4.8 D x 11.1\" H",
+          "price": 1300,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Multi Fold Towel Dispensers • 275 Shts Capacity (Manual)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JMT-D275-W",
+          "size": "9.85 W x 4.8 D x 11.1\" H",
+          "price": 1300,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Multi Fold Towel Dispensers • 275 Shts Capacity (Manual)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JMT-D525-S",
+          "size": "10.85 W x 4.15 D x 14.8\" H",
+          "price": 1900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Multi Fold Towel Dispensers • 525 Shts Capacity (Manual)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JMT-D525-W",
+          "size": "10.85 W x 4.15 D x 14.8\" H",
+          "price": 1900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Multi Fold Towel Dispensers • 525 Shts Capacity (Manual)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JRT-D8A-S",
+          "size": "13.40 W x 8.75 D x 14.75\" H",
+          "price": 9900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Roll Towel Dispensers • 8\" Diameter (Automatic)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JRT-D8A-W",
+          "size": "13.40 W x 8.75 D x 14.75\" H",
+          "price": 9900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Roll Towel Dispensers • 8\" Diameter (Automatic)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JRT-D8-S",
+          "size": "14.20 W x 9.25 D x 14.80\" H",
+          "price": 6500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Roll Towel Dispensers • 8\" Diameter (Hand Free)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JRT-D8-W",
+          "size": "14.20 W x 9.25 D x 14.80\" H",
+          "price": 6500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Roll Towel Dispensers • 8\" Diameter (Hand Free)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JCP-D600-S",
+          "size": "9.5 W x 9 D x 11.5\" H",
+          "price": 2900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Center Pull Towel Dispensers • 600 Shts Capacity (Manual)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JCP-D600-W",
+          "size": "9.5 W x 9 D x 11.5\" H",
+          "price": 2900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Center Pull Towel Dispensers • 600 Shts Capacity (Manual)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JTC-D250-S",
+          "size": "16.55 W x 1.95 D x 11.05\" H",
+          "price": 1100,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Toilet Seat Cover Dispensers • 250 Shts Capacity (Half-Fold)",
+            "Color": "Smoke",
+            "Qty / Case": "1 Unit / Case"
+          }
+        },
+        {
+          "sku": "JTC-D250-W",
+          "size": "16.55 W x 1.95 D x 11.05\" H",
+          "price": 1100,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Toilet Seat Cover Dispensers • 250 Shts Capacity (Half-Fold)",
+            "Color": "White",
+            "Qty / Case": "1 Unit / Case"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paper Napkins",
+      "slug": "paper-napkins",
+      "categorySlug": "janitorial-supplies",
+      "description": "Commercial paper napkins for breakrooms, cafeterias, and food service in beverage, lunch, dinner, mid-fold, and tall-fold dispenser styles.",
+      "image": "/images/catalog/paper-napkins.png",
+      "featured": false,
+      "price": 2300,
+      "sku": "JNB-1V-BF",
+      "inventory": 800,
+      "variants": [
+        {
+          "sku": "JNB-1V-BF",
+          "size": "9\" x 9\"",
+          "price": 2300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Beverage • Economy, 1 Ply",
+            "Color": "White",
+            "Qty / Pack": "500Shts/Pack, 8 Pack/Case"
+          }
+        },
+        {
+          "sku": "JNL-2V-LF",
+          "size": "11.6\"W x 11.6\"L",
+          "price": 4900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Lunch • Premium, 1 Ply",
+            "Color": "White",
+            "Qty / Pack": "500 Shts / Pack, 12 Packs / Case"
+          }
+        },
+        {
+          "sku": "JND-1V-1/8",
+          "size": "15\"W x 17\"L",
+          "price": 4100,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Dinner • Economy, 1 Ply - 1/8 Fold",
+            "Color": "White",
+            "Qty / Pack": "150 Shts / Pack, 20 Packs / Case"
+          }
+        },
+        {
+          "sku": "JND-2V-1/8",
+          "size": "15\"W x 17\"L",
+          "price": 4700,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Dinner • Premium, 2 Ply - 1/8 Fold",
+            "Color": "White",
+            "Qty / Pack": "150 Shts / Pack, 20 Packs / Case"
+          }
+        },
+        {
+          "sku": "JNM-1K-MF",
+          "size": "11.8\"W x 13\"L",
+          "price": 4100,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Mid Fold • Kraft, 1 Ply",
+            "Color": "Kraft",
+            "Qty / Pack": "250 Shts / Pack, 24 Packs / Case",
+            "Availability": "Made to Order"
+          }
+        },
+        {
+          "sku": "JNM-1V-MF",
+          "size": "12\"W x 13\"L",
+          "price": 5300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Mid Fold • Economy, 1 Ply",
+            "Color": "White",
+            "Qty / Pack": "250 Shts / Pack, 24 Packs / Case"
+          }
+        },
+        {
+          "sku": "JNT-1V-TF",
+          "size": "6.3\"W x 13\"L",
+          "price": 4300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Tall Fold • Economy, 1 Ply",
+            "Color": "White",
+            "Qty / Pack": "500 Shts / Pack, 20 Packs / Case"
+          }
+        },
+        {
+          "sku": "JNT-2V-TF",
+          "size": "6.3\"W x 13\"L",
+          "price": 4500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Tall Fold • Premium, 2 Ply",
+            "Color": "White",
+            "Qty / Pack": "500 Shts / Pack, 20 Packs / Case"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trash Liners",
+      "slug": "trash-liners",
+      "categorySlug": "janitorial-supplies",
+      "description": "Kitchen drawstring bags, high-density light-duty liners, and heavy-duty industrial LLDPE trash can liners in sizes from 4 to 60 gallons.",
+      "image": "/images/catalog/trash-liners.png",
+      "featured": true,
+      "price": 1900,
+      "sku": "TL00-13C",
+      "inventory": 3000,
+      "variants": [
+        {
+          "sku": "TL00-13C",
+          "size": "24 x 27\"",
+          "price": 2000,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "13 Gal.",
+            "Thickness (Mil)": "0.80",
+            "Scent": "Lavender",
+            "Color": "White",
+            "Bags / Case": "200"
+          }
+        },
+        {
+          "sku": "TL01-2424-1LN",
+          "size": "24 x 24\"",
+          "price": 1900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "7-10 Gal.",
+            "Thickness (Mil)": "0.23",
+            "Micron": "6",
+            "Strength": "Light Duty",
+            "Color": "Natural",
+            "Bags / Case": "1,000"
+          }
+        },
+        {
+          "sku": "TL01-2433-1LN",
+          "size": "24 x 33\"",
+          "price": 3800,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "12-16 Gal.",
+            "Thickness (Mil)": "0.23",
+            "Micron": "6",
+            "Strength": "Light Duty",
+            "Color": "Natural",
+            "Bags / Case": "1,000"
+          }
+        },
+        {
+          "sku": "TL02-2433-1LB",
+          "size": "24 x 33\"",
+          "price": 3200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "12-16 Gal.",
+            "Thickness (Mil)": "0.23",
+            "Micron": "6",
+            "Strength": "Light Duty",
+            "Color": "Black",
+            "Bags / Case": "1,000"
+          }
+        },
+        {
+          "sku": "TL01-2433-2MN",
+          "size": "24 x 33\"",
+          "price": 4200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "12-16 Gal.",
+            "Thickness (Mil)": "0.31",
+            "Micron": "8",
+            "Strength": "Medium Duty",
+            "Color": "Natural",
+            "Bags / Case": "1,000"
+          }
+        },
+        {
+          "sku": "TL02-2433-2MB",
+          "size": "24 x 33\"",
+          "price": 4600,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "12-16 Gal.",
+            "Thickness (Mil)": "0.31",
+            "Micron": "8",
+            "Strength": "Medium Duty",
+            "Color": "Black",
+            "Bags / Case": "1,000"
+          }
+        },
+        {
+          "sku": "TL01-3037-1LN",
+          "size": "30 x 37\"",
+          "price": 3000,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "20-30 Gal.",
+            "Thickness (Mil)": "0.31",
+            "Micron": "8",
+            "Strength": "Light Duty",
+            "Color": "Natural",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL01-3037-3HN",
+          "size": "30 x 37\"",
+          "price": 4800,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "20-30 Gal.",
+            "Thickness (Mil)": "0.51",
+            "Micron": "13",
+            "Strength": "Heavy Duty",
+            "Color": "Natural",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL01-3037-4XN",
+          "size": "30 x 37\"",
+          "price": 5900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "20-30 Gal.",
+            "Thickness (Mil)": "0.63",
+            "Micron": "16",
+            "Strength": "Extra Heavy",
+            "Color": "Natural",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL01-3340-2MN",
+          "size": "33 x 40\"",
+          "price": 4300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "0.43",
+            "Micron": "11",
+            "Strength": "Medium Duty",
+            "Color": "Natural",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL01-3340-3HN",
+          "size": "33 x 40\"",
+          "price": 5300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "0.51",
+            "Micron": "13",
+            "Strength": "Heavy Duty",
+            "Color": "Natural",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL01-3340-4XN",
+          "size": "33 x 40\"",
+          "price": 3400,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "0.63",
+            "Micron": "16",
+            "Strength": "Extra Heavy",
+            "Color": "Natural",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL02-3340-4XB",
+          "size": "33 x 40\"",
+          "price": 3500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "0.63",
+            "Micron": "16",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL03-3340-4XB",
+          "size": "33 x 40\"",
+          "price": 3700,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "0.74",
+            "Micron": "19",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL01-4048-3HN",
+          "size": "40 x 48\"",
+          "price": 4900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "0.55",
+            "Micron": "14",
+            "Strength": "Heavy Duty",
+            "Color": "Natural",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL02-4048-3HB",
+          "size": "40 x 48\"",
+          "price": 4200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "0.55",
+            "Micron": "14",
+            "Strength": "Heavy Duty",
+            "Color": "Black",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL01-4048-4XN",
+          "size": "40 x 48\"",
+          "price": 5100,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "0.63",
+            "Micron": "16",
+            "Strength": "Extra Heavy",
+            "Color": "Natural",
+            "Bags / Case": "250"
+          }
+        },
+        {
+          "sku": "TL03-4048-4XB",
+          "size": "40 x 48\"",
+          "price": 4600,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "0.74",
+            "Micron": "19",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "200"
+          }
+        },
+        {
+          "sku": "TL03-4048-5SB",
+          "size": "40 x 48\"",
+          "price": 4000,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "0.86",
+            "Micron": "22",
+            "Strength": "Super Heavy",
+            "Color": "Black",
+            "Bags / Case": "150",
+            "Availability": "Made to Order"
+          }
+        },
+        {
+          "sku": "TL01-4348-3HN",
+          "size": "43 x 48\"",
+          "price": 3900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "56-60 Gal.",
+            "Thickness (Mil)": "0.55",
+            "Micron": "14",
+            "Strength": "Heavy Duty",
+            "Color": "Natural",
+            "Bags / Case": "200"
+          }
+        },
+        {
+          "sku": "TL01-4348-4XN",
+          "size": "43 x 48\"",
+          "price": 4300,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "56-60 Gal.",
+            "Thickness (Mil)": "0.67",
+            "Micron": "17",
+            "Strength": "Extra Heavy",
+            "Color": "Natural",
+            "Bags / Case": "200"
+          }
+        },
+        {
+          "sku": "TL03-4348-5SB",
+          "size": "43 x 48\"",
+          "price": 4500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "56-60 Gal.",
+            "Thickness (Mil)": "0.86",
+            "Micron": "22",
+            "Strength": "Super Heavy",
+            "Color": "Black",
+            "Bags / Case": "150"
+          }
+        },
+        {
+          "sku": "TL03-3860-5SB",
+          "size": "38 x 60\"",
+          "price": 5200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "60 Gal.",
+            "Thickness (Mil)": "0.86",
+            "Micron": "22",
+            "Strength": "Super Heavy",
+            "Color": "Black",
+            "Bags / Case": "150"
+          }
+        },
+        {
+          "sku": "TL04-2432-3HB",
+          "size": "24 x 32\"",
+          "price": 2900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "12-16 Gal.",
+            "Thickness (Mil)": "0.45",
+            "Strength": "Heavy Duty",
+            "Color": "Black",
+            "Bags / Case": "500"
+          }
+        },
+        {
+          "sku": "TL04-3036-3HB",
+          "size": "30 x 36\"",
+          "price": 2200,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "20-30 Gal.",
+            "Thickness (Mil)": "0.70",
+            "Strength": "Heavy Duty",
+            "Color": "Black",
+            "Bags / Case": "200"
+          }
+        },
+        {
+          "sku": "TL04-3339-3HB",
+          "size": "33 x 39\"",
+          "price": 2900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "1.00",
+            "Strength": "Heavy Duty",
+            "Color": "Black",
+            "Bags / Case": "150"
+          }
+        },
+        {
+          "sku": "TL04-3339-4XB",
+          "size": "33 x 39\"",
+          "price": 4600,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "33 Gal.",
+            "Thickness (Mil)": "1.50",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "150"
+          }
+        },
+        {
+          "sku": "TL04-4046-4XB",
+          "size": "40 x 46\"",
+          "price": 6000,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "40-45 Gal.",
+            "Thickness (Mil)": "1.50",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "150"
+          }
+        },
+        {
+          "sku": "TL04-4348-4XB",
+          "size": "43 x 48\"",
+          "price": 4900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "56-60 Gal.",
+            "Thickness (Mil)": "1.50",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "100"
+          }
+        },
+        {
+          "sku": "TL04-3858-4XB",
+          "size": "38 x 58\"",
+          "price": 5500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Capacity": "60 Gal.",
+            "Thickness (Mil)": "1.50",
+            "Strength": "Extra Heavy",
+            "Color": "Black",
+            "Bags / Case": "100"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mops & Buckets",
+      "slug": "mops-and-buckets",
+      "categorySlug": "janitorial-supplies",
+      "description": "Industrial wet mops, disposable dust mops, microfiber mop heads, heavy-duty handles, wringer buckets, and floor squeegees.",
+      "image": "/images/catalog/mops-buckets.png",
+      "featured": false,
+      "price": 430,
+      "sku": "JLM03-P1-3",
+      "inventory": 2100,
+      "variants": [
+        {
+          "sku": "JLM03-P1-3",
+          "size": "5 W x 24\" L",
+          "price": 570,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Head • Medium Duty (Disposable)",
+            "Color": "Nat./Black",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P1-4",
+          "size": "5 W x 36\" L",
+          "price": 770,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Head • Medium Duty (Disposable)",
+            "Color": "Nat./Black",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P1-1",
+          "size": "5 W x 24\" L",
+          "price": 740,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Head • Heavy Duty (Loop End)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P1-2",
+          "size": "5 W x 36\" L",
+          "price": 980,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Head • Heavy Duty (Loop End)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P2-1",
+          "size": "5 W x 24\" L",
+          "price": 450,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Frame • Quick Change (Universal)",
+            "Color": "Black",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P2-2",
+          "size": "5 W x 36\" L",
+          "price": 610,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Frame • Quick Change (Universal)",
+            "Color": "Black",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM03-P3",
+          "size": "60\" L",
+          "price": 1060,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dust Mop • Mop Handle • Quick Change (Universal)",
+            "Color": "Wood",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM01-P1B",
+          "size": "20oz",
+          "price": 500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Head • Economy (Screw / Synthetic)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM01-P1G",
+          "size": "20oz",
+          "price": 500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Head • Economy (Screw / Synthetic)",
+            "Color": "Green",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM01-P1R",
+          "size": "20oz",
+          "price": 500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Head • Economy (Screw / Synthetic)",
+            "Color": "Red",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM02-P1G",
+          "size": "28oz",
+          "price": 980,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Head • Heavy Duty (Screw / Synthetic)",
+            "Color": "Green",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM02-P1R",
+          "size": "28oz",
+          "price": 980,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Head • Heavy Duty (Screw / Synthetic)",
+            "Color": "Red",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM01-P2G",
+          "size": "60\" L",
+          "price": 490,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Handle • Economy (Thread Style)",
+            "Color": "Gray",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM02-P2B",
+          "size": "60\" L",
+          "price": 640,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Handle • Heavy Duty (Quick Release)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM02-P2L",
+          "size": "60\" L",
+          "price": 660,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Wet Mop • Mop Handle • Heavy Duty (Clamp Style)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM04-P1-1",
+          "size": "5 W x 18\" L",
+          "price": 430,
+          "priceUnit": "Price / PAD",
+          "specs": {
+            "Style": "Microfiber Mop • Mop Pad • Loop End (Reusable)",
+            "Color": "Blue",
+            "Qty / Case": "12 Pads / Pack"
+          }
+        },
+        {
+          "sku": "JLM04-P2-1",
+          "size": "4 W x 16\" L",
+          "price": 510,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Microfiber Mop • Mop Frame • Hook & Loop Fastener",
+            "Color": "Aluminum",
+            "Qty / Case": "12 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM04-P3",
+          "size": "60\" L",
+          "price": 610,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Microfiber Mop • Mop Handle • Adjustable",
+            "Color": "Aluminum",
+            "Qty / Case": "24 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM07-24QT",
+          "size": "22 L x 11.6 W x 13.4“ H",
+          "price": 4600,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Microfiber Mop Bucket • 24 Qt • With Press Wringer",
+            "Color": "Gray/Black",
+            "Qty / Case": "5 Pcs / Case"
+          }
+        },
+        {
+          "sku": "JLM07-36QT",
+          "size": "22.4 L x 16.1 W x 36.4'' H",
+          "price": 7900,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Mop Bucket • 36 Qt • With Side Press Wringer",
+            "Color": "Yellow",
+            "Qty / Case": "1 Pc / Case",
+            "Availability": "Made to Order"
+          }
+        },
+        {
+          "sku": "JLM07-42QT",
+          "size": "26.8 L x 14.2 W x 15.7'' H",
+          "price": 8500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Microfiber Mop Bucket • 42 Qt • With Press Wringer",
+            "Color": "Yellow",
+            "Qty / Case": "2 Pcs / Case"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Caution Signage",
+      "slug": "caution-signage",
+      "categorySlug": "janitorial-supplies",
+      "description": "High-visibility bilingual yellow A-frame fold-up wet floor caution signs, safety floor cones, and clip-on warning signs.",
+      "image": "/images/catalog/caution-signage.jpg",
+      "featured": false,
+      "price": 490,
+      "sku": "JLM05-1912",
+      "inventory": 400,
+      "variants": [
+        {
+          "sku": "JLM05-1912",
+          "size": "19 H x 12\" W",
+          "price": 490,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Fold Up",
+            "Color": "Yellow"
+          }
+        },
+        {
+          "sku": "JLM05-2512",
+          "size": "25 H x 12\" W",
+          "price": 570,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Fold Up",
+            "Color": "Yellow"
+          }
+        },
+        {
+          "sku": "JLM05-2514",
+          "size": "25 H x 14\" W",
+          "price": 1020,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Fold Up",
+            "Color": "Yellow"
+          }
+        },
+        {
+          "sku": "JLM05-36C",
+          "size": "36 H x 12\" W",
+          "price": 1980,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Cone",
+            "Color": "Yellow"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hand Soaps & Cleaners",
+      "slug": "hand-soaps",
+      "categorySlug": "janitorial-supplies",
+      "description": "Commercial foaming and liquid hand soaps, refill cartridges, wall dispensers, and all-purpose concentrated cleaners.",
+      "image": "/images/catalog/hand-soaps.png",
+      "featured": false,
+      "price": 1100,
+      "sku": "JHS-7019",
+      "inventory": 700,
+      "variants": [
+        {
+          "sku": "JHS-7019",
+          "size": "800 ML",
+          "price": 6800,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Lotion Hand Soap • Antimicrobial",
+            "Color": "Amber",
+            "Qty / Case": "12 Bottles / Case"
+          }
+        },
+        {
+          "sku": "JSP-7031",
+          "size": "800 ML",
+          "price": 6100,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Lotion Hand Soap • Antimicrobial",
+            "Color": "Amber",
+            "Qty / Case": "12 Bottles / Case"
+          }
+        },
+        {
+          "sku": "JSP-7033",
+          "size": "800 ML",
+          "price": 4900,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Lotion Hand Soap • Enviromental",
+            "Color": "Amber",
+            "Qty / Case": "12 Bottles / Case"
+          }
+        },
+        {
+          "sku": "JSP-7231",
+          "size": "1000 ML",
+          "price": 8500,
+          "priceUnit": "Price Per Case",
+          "specs": {
+            "Style": "Foam Hand Soap • Antimicrobial",
+            "Color": "Amber",
+            "Qty / Case": "6 Bottles / Case"
+          }
+        },
+        {
+          "sku": "JSD-1550-3",
+          "size": "5 W x 5.2 D x 11.2\" H",
+          "price": 1500,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dispensers - Manual • 1000 ML Capacity",
+            "Color": "White",
+            "Qty / Case": "1 Pcs / Box"
+          }
+        },
+        {
+          "sku": "JSD-D1570-2",
+          "size": "4.65 W x 4.75 D x 10.45\" H",
+          "price": 1100,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dispensers - Manual • 1000 ML Capacity",
+            "Color": "White",
+            "Qty / Case": "1 Pcs / Box"
+          }
+        },
+        {
+          "sku": "JSD-D1570B-3",
+          "size": "4.65 W x 4.75 D x 10.45\" H",
+          "price": 1300,
+          "priceUnit": "Price Each",
+          "specs": {
+            "Style": "Dispensers - Manual • 1000 ML Capacity",
+            "Color": "Smoke",
+            "Qty / Case": "1 Pcs / Box"
+          }
+        }
+      ]
     }
   ]
 }

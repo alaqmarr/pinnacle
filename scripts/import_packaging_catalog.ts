@@ -61,40 +61,46 @@ async function main() {
   const raw = fs.readFileSync(dataPath, "utf8");
   const catalog: CatalogPayload = JSON.parse(raw);
 
-  const existingVariantsCount = await prisma.productVariant.count();
-  if (existingVariantsCount > 0 && !forceResync) {
-    console.log(
-      `[Import] Packaging catalog already populated (${existingVariantsCount} variants found). Skipping one-time import. Pass --force to re-sync.`
-    );
-    return;
-  }
-
   console.log(
-    `[Import] Starting one-time import: ${catalog.categories.length} categories, ${catalog.products.length} products...`
+    `[Import] Checking catalog (${catalog.categories.length} categories, ${catalog.products.length} products)...`
   );
 
-  // 1. Upsert Categories
+  // 1. Ensure Categories exist (create missing categories; update existing only with --force)
   const categoryIdBySlug = new Map<string, string>();
+  let createdCategories = 0;
   for (const cat of catalog.categories) {
-    const record = await prisma.category.upsert({
+    const existingCat = await prisma.category.findUnique({
       where: { slug: cat.slug },
-      update: {
-        name: cat.name,
-        description: cat.description,
-        ...(cat.image ? { image: cat.image } : {}),
-      },
-      create: {
-        id: cat.slug,
-        name: cat.name,
-        slug: cat.slug,
-        description: cat.description,
-        image: cat.image || null,
-      },
     });
-    categoryIdBySlug.set(cat.slug, record.id);
+
+    if (existingCat) {
+      if (forceResync) {
+        await prisma.category.update({
+          where: { id: existingCat.id },
+          data: {
+            name: cat.name,
+            description: cat.description,
+            ...(cat.image ? { image: cat.image } : {}),
+          },
+        });
+      }
+      categoryIdBySlug.set(cat.slug, existingCat.id);
+    } else {
+      const record = await prisma.category.create({
+        data: {
+          id: cat.slug,
+          name: cat.name,
+          slug: cat.slug,
+          description: cat.description,
+          image: cat.image || null,
+        },
+      });
+      categoryIdBySlug.set(cat.slug, record.id);
+      createdCategories++;
+    }
   }
 
-  // 2. Upsert Products + ProductVariants
+  // 2. Upsert Products + ProductVariants (insert missing products unless --force)
   let createdProducts = 0;
   let updatedProducts = 0;
   let totalVariantsInserted = 0;
@@ -102,13 +108,6 @@ async function main() {
   for (const prod of catalog.products) {
     const categoryId = categoryIdBySlug.get(prod.categorySlug) || null;
     const imagesJson = prod.image ? JSON.stringify([prod.image]) : "[]";
-
-    // Check if product already exists by slug or sku
-    const existing = await prisma.product.findFirst({
-      where: {
-        OR: [{ slug: prod.slug }, { sku: prod.sku }],
-      },
-    });
 
     const variantRows = prod.variants.map((v, idx) => ({
       sku: v.sku,
@@ -122,6 +121,24 @@ async function main() {
       sortOrder: idx,
     }));
 
+    const positivePrices = variantRows.map((v) => v.price).filter((p) => p > 0);
+    const resolvedPrice =
+      typeof prod.price === "number"
+        ? prod.price
+        : positivePrices.length > 0
+          ? Math.min(...positivePrices)
+          : 0;
+    const resolvedSku = prod.sku || variantRows[0]?.sku || prod.slug;
+    const resolvedInventory =
+      typeof prod.inventory === "number" ? prod.inventory : variantRows.length * 100;
+
+    // Check if product already exists by slug or sku
+    const existing = await prisma.product.findFirst({
+      where: {
+        OR: [{ slug: prod.slug }, { sku: resolvedSku }],
+      },
+    });
+
     if (existing) {
       if (!forceResync) {
         continue;
@@ -134,8 +151,8 @@ async function main() {
           data: {
             name: prod.name,
             description: prod.description,
-            price: prod.price,
-            inventory: prod.inventory,
+            price: resolvedPrice,
+            inventory: resolvedInventory,
             categoryId,
             images: imagesJson,
             featured: Boolean(prod.featured),
@@ -154,10 +171,10 @@ async function main() {
           id: prod.slug,
           name: prod.name,
           slug: prod.slug,
-          sku: prod.sku,
+          sku: resolvedSku,
           description: prod.description,
-          price: prod.price,
-          inventory: prod.inventory,
+          price: resolvedPrice,
+          inventory: resolvedInventory,
           categoryId,
           images: imagesJson,
           featured: Boolean(prod.featured),
@@ -172,9 +189,15 @@ async function main() {
     }
   }
 
-  console.log(
-    `[Import] Completed! Created ${createdProducts} products, updated ${updatedProducts} products, inserted ${totalVariantsInserted} size/variant rows.`
-  );
+  if (createdCategories === 0 && createdProducts === 0 && updatedProducts === 0) {
+    console.log(
+      `[Import] Catalog is already up to date (${catalog.products.length} products checked). Pass --force to re-sync existing products.`
+    );
+  } else {
+    console.log(
+      `[Import] Completed! Created ${createdCategories} categories, ${createdProducts} products, updated ${updatedProducts} products, inserted ${totalVariantsInserted} size/variant rows.`
+    );
+  }
 }
 
 main()
