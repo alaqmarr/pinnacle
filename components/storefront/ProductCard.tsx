@@ -188,6 +188,13 @@ export function ProductCard({ product }: ProductCardProps) {
           >
             Select Size ({variantCount}) &rarr;
           </Link>
+        ) : ecommerceMode && product.price <= 0 ? (
+          <Link
+            href={productHref}
+            className="w-full text-center font-bold py-3 px-3 text-xs sm:text-sm rounded-lg transition-all duration-300 bg-amber-600 hover:bg-amber-700 text-white block"
+          >
+            Request Quote &rarr;
+          </Link>
         ) : (
           <QuickAddButton
             product={{
