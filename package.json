@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node -e \"try{require('child_process').execSync('prisma generate',{stdio:'inherit'})}catch(e){console.log('Prisma client already generated')}\" && next build",
-    "start": "next start",
+    "start": "next start -p 3232",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

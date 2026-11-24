@@ -8,6 +8,8 @@ APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$APP_DIR"
 
 PM2_APP_NAME="${PM2_APP_NAME:-pinnacle}"
+PORT="${PORT:-3232}"
+export PORT
 TARGET_BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
 BACKUP_DIR="$APP_DIR/prisma/backups"
 TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
@@ -16,7 +18,7 @@ log() {
   echo "[$(date +"%Y-%m-%d %H:%M:%S")] $*"
 }
 
-log "Starting backend update in $APP_DIR (branch: $TARGET_BRANCH)"
+log "Starting backend update in $APP_DIR (branch: $TARGET_BRANCH, pm2: $PM2_APP_NAME, port: $PORT)"
 
 # 1. Backup SQLite database before making any changes
 if [ -f "$APP_DIR/prisma/dev.db" ]; then
@@ -59,18 +61,18 @@ npx prisma db push
 log "Building Next.js application..."
 npm run build
 
-# 7. Restart or start application under PM2
+# 7. Restart or start application under PM2 on port $PORT
 if command -v pm2 >/dev/null 2>&1; then
   if pm2 describe "$PM2_APP_NAME" >/dev/null 2>&1; then
-    log "Restarting PM2 process '$PM2_APP_NAME'..."
-    pm2 restart "$PM2_APP_NAME" --update-env
+    log "Restarting PM2 process '$PM2_APP_NAME' on port $PORT..."
+    PORT="$PORT" pm2 restart "$PM2_APP_NAME" --update-env
   else
-    log "PM2 process '$PM2_APP_NAME' not found; starting new PM2 process..."
-    pm2 start npm --name "$PM2_APP_NAME" -- start
+    log "PM2 process '$PM2_APP_NAME' not found; starting new PM2 process on port $PORT..."
+    PORT="$PORT" pm2 start npm --name "$PM2_APP_NAME" -- start
   fi
   pm2 save
 else
-  log "WARNING: pm2 not found in PATH. Start/restart your server manually with 'npm run start'."
+  log "WARNING: pm2 not found in PATH. Start/restart your server manually with 'PORT=$PORT npm run start'."
 fi
 
 if [ "$STASHED" -eq 1 ]; then
