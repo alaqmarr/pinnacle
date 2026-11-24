@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { handleBulkCategoryDeleteRequest } from "@/lib/admin/catalog-delete";
 import crypto from "crypto";
 
 function generateSlug(name: string): string {
@@ -119,4 +120,8 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleBulkCategoryDeleteRequest(req);
 }

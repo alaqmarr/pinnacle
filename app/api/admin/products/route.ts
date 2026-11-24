@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseUSDToCents } from "@/lib/currency";
 import { normalizeVariantInputs } from "@/lib/variants";
+import { handleBulkProductDeleteRequest } from "@/lib/admin/catalog-delete";
 import crypto from "crypto";
 
 function generateSlug(name: string): string {
@@ -268,4 +269,8 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleBulkProductDeleteRequest(req);
 }

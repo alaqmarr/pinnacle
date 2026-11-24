@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatUSD, parseUSDToCents, centsToDollarString } from "@/lib/currency";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { generateSlug } from "@/lib/slug";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 export interface ProductItem {
   id: string;
@@ -47,6 +48,11 @@ export default function ProductsClient({
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editProduct, setEditProduct] = useState<ProductItem | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<ProductItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const selectAllRef = React.useRef<HTMLInputElement | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -77,6 +83,34 @@ export default function ProductsClient({
 
     return matchesCategory && matchesSearch;
   });
+
+  const selectedSet = new Set(selectedIds);
+  const allFilteredSelected =
+    filteredProducts.length > 0 && filteredProducts.every((p) => selectedSet.has(p.id));
+  const someFilteredSelected =
+    filteredProducts.some((p) => selectedSet.has(p.id)) && !allFilteredSelected;
+
+  React.useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someFilteredSelected;
+    }
+  }, [someFilteredSelected]);
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredProducts.map((p) => p.id);
+    if (allFilteredSelected) {
+      const filteredSet = new Set(filteredIds);
+      setSelectedIds((prev) => prev.filter((id) => !filteredSet.has(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
+    }
+  };
+
+  const toggleSelectRow = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   // Slug generator effect
   React.useEffect(() => {
@@ -281,24 +315,65 @@ export default function ProductsClient({
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteProduct) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch(`/api/admin/products/${deleteProduct.id}`, {
-        method: "DELETE",
-      });
+  const pendingDeleteTargets = isBulkDeleteOpen
+    ? products.filter((p) => selectedSet.has(p.id))
+    : deleteProduct
+      ? [deleteProduct]
+      : [];
 
-      if (!res.ok) {
+  const totalVariantsAffected = pendingDeleteTargets.reduce(
+    (sum, p) => sum + (p.variantCount ?? 0),
+    0
+  );
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteError(null);
+    setDeleteProduct(null);
+    setIsBulkDeleteOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (pendingDeleteTargets.length === 0) return;
+    setIsSubmitting(true);
+    setDeleteError(null);
+
+    try {
+      const targetIds = pendingDeleteTargets.map((p) => p.id);
+
+      if (isBulkDeleteOpen) {
+        const res = await fetch("/api/admin/products/bulk-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: targetIds }),
+        });
         const data = await res.json();
-        throw new Error(data.error || "Failed to delete product");
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to bulk delete products");
+        }
+
+        const removedSet = new Set(targetIds);
+        setProducts((prev) => prev.filter((p) => !removedSet.has(p.id)));
+        setSelectedIds((prev) => prev.filter((id) => !removedSet.has(id)));
+        setActionMessage(data.message || `Deleted ${targetIds.length} products.`);
+        setIsBulkDeleteOpen(false);
+      } else if (deleteProduct) {
+        const res = await fetch(`/api/admin/products/${deleteProduct.id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to delete product");
+        }
+
+        setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
+        setSelectedIds((prev) => prev.filter((id) => id !== deleteProduct.id));
+        setActionMessage(data.message || `Deleted "${deleteProduct.name}".`);
+        setDeleteProduct(null);
       }
 
-      setProducts((prev) => prev.filter((p) => p.id !== deleteProduct.id));
-      setDeleteProduct(null);
       router.refresh();
     } catch (err: any) {
-      alert(err.message || "Failed to delete product");
+      setDeleteError(err.message || "Failed to delete selected product(s).");
     } finally {
       setIsSubmitting(false);
     }
@@ -355,12 +430,77 @@ export default function ProductsClient({
         </button>
       </div>
 
+      {/* Feedback Banner */}
+      {actionMessage && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <span className="font-medium">{actionMessage}</span>
+          <button
+            type="button"
+            onClick={() => setActionMessage(null)}
+            className="text-emerald-700 hover:text-emerald-950 font-semibold shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-red-50 border border-red-200 px-4 py-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-red-900">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold bg-red-600 text-white text-xs">
+              {selectedIds.length} selected
+            </span>
+            {!allFilteredSelected && filteredProducts.length > 0 && (
+              <button
+                type="button"
+                onClick={toggleSelectAllFiltered}
+                className="font-semibold text-red-700 hover:text-red-900 underline"
+              >
+                Select all {filteredProducts.length} filtered
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="font-medium text-slate-600 hover:text-slate-900"
+            >
+              Clear selection
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError(null);
+              setIsBulkDeleteOpen(true);
+            }}
+            className="inline-flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-xs transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Selected ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {/* Table: Always renders headers with SKU, Price, Stock */}
       <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
               <tr>
+                <th className="py-3.5 px-4 w-10">
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    checked={allFilteredSelected}
+                    onChange={toggleSelectAllFiltered}
+                    disabled={filteredProducts.length === 0}
+                    aria-label="Select all visible products"
+                    className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                  />
+                </th>
                 <th className="py-3.5 px-4">Product</th>
                 <th className="py-3.5 px-4">SKU</th>
                 <th className="py-3.5 px-4">Category</th>
@@ -373,7 +513,7 @@ export default function ProductsClient({
             <tbody className="divide-y divide-slate-100">
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 px-4 text-center">
+                  <td colSpan={8} className="py-12 px-4 text-center">
                     <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -412,7 +552,21 @@ export default function ProductsClient({
                   const isOutOfStock = p.stock <= 0;
 
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50/75 transition-colors">
+                    <tr
+                      key={p.id}
+                      className={`hover:bg-slate-50/75 transition-colors ${
+                        selectedSet.has(p.id) ? "bg-sky-50/50" : ""
+                      }`}
+                    >
+                      <td className="py-3.5 px-4 w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedSet.has(p.id)}
+                          onChange={() => toggleSelectRow(p.id)}
+                          aria-label={`Select ${p.name}`}
+                          className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                        />
+                      </td>
                       {/* Product Name & Visual */}
                       <td className="py-3.5 px-4 font-semibold text-slate-900">
                         <div className="flex items-center space-x-3">
@@ -500,7 +654,11 @@ export default function ProductsClient({
                             Modal
                           </button>
                           <button
-                            onClick={() => setDeleteProduct(p)}
+                            onClick={() => {
+                              setDeleteError(null);
+                              setIsBulkDeleteOpen(false);
+                              setDeleteProduct(p);
+                            }}
                             className="text-xs font-semibold text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition-colors"
                           >
                             Delete
@@ -883,41 +1041,37 @@ export default function ProductsClient({
         </div>
       )}
 
-      {/* Delete Safeguard Modal */}
-      {deleteProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-6">
-            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">Delete Product</h3>
-            <p className="mt-2 text-sm text-slate-600 leading-normal">
-              Are you sure you want to permanently delete{" "}
-              <span className="font-bold text-slate-900">"{deleteProduct.name}"</span> (SKU: {deleteProduct.sku})? This action cannot be undone and will remove it from all carts.
-            </p>
-
-            <div className="mt-6 flex items-center justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => setDeleteProduct(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={isSubmitting}
-                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? "Deleting..." : "Delete Product"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete / Bulk Delete Safeguard Modal */}
+      <ConfirmDeleteDialog
+        isOpen={Boolean(deleteProduct || isBulkDeleteOpen)}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title={
+          isBulkDeleteOpen
+            ? `Bulk Delete ${pendingDeleteTargets.length} Product${pendingDeleteTargets.length === 1 ? "" : "s"}`
+            : "Delete Product"
+        }
+        description={
+          isBulkDeleteOpen
+            ? `You are about to permanently delete ${pendingDeleteTargets.length} selected product(s) from your catalog. This action cannot be undone.`
+            : deleteProduct
+              ? `Are you sure you want to permanently delete "${deleteProduct.name}" (SKU: ${deleteProduct.sku || "N/A"})? This action cannot be undone.`
+              : ""
+        }
+        confirmLabel={
+          isBulkDeleteOpen
+            ? `Delete ${pendingDeleteTargets.length} Product${pendingDeleteTargets.length === 1 ? "" : "s"}`
+            : "Delete Product"
+        }
+        isSubmitting={isSubmitting}
+        error={deleteError}
+        items={pendingDeleteTargets.map((p) => ({
+          id: p.id,
+          label: p.name,
+          meta: p.sku || `/${p.slug}`,
+        }))}
+        cascadeSummary={`Removes ${pendingDeleteTargets.length} product(s), ${totalVariantsAffected} size/variant SKU(s), and any matching shopping cart items. Historical order snapshots remain safely preserved.`}
+      />
     </div>
   );
 }

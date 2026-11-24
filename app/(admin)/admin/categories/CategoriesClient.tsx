@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { generateSlug } from "@/lib/slug";
+import { ConfirmDeleteDialog } from "@/components/admin/ConfirmDeleteDialog";
 
 export interface CategoryItem {
   id: string;
@@ -29,6 +30,12 @@ export default function CategoriesClient({
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<CategoryItem | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<CategoryItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [cascadeProducts, setCascadeProducts] = useState(true);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const selectAllRef = React.useRef<HTMLInputElement | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -45,6 +52,34 @@ export default function CategoriesClient({
     const q = search.toLowerCase();
     return c.name.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q);
   });
+
+  const selectedSet = new Set(selectedIds);
+  const allFilteredSelected =
+    filteredCategories.length > 0 && filteredCategories.every((c) => selectedSet.has(c.id));
+  const someFilteredSelected =
+    filteredCategories.some((c) => selectedSet.has(c.id)) && !allFilteredSelected;
+
+  React.useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = someFilteredSelected;
+    }
+  }, [someFilteredSelected]);
+
+  const toggleSelectAllFiltered = () => {
+    const filteredIds = filteredCategories.map((c) => c.id);
+    if (allFilteredSelected) {
+      const filteredSet = new Set(filteredIds);
+      setSelectedIds((prev) => prev.filter((id) => !filteredSet.has(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
+    }
+  };
+
+  const toggleSelectRow = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   // Slug generator effect
   React.useEffect(() => {
@@ -182,23 +217,66 @@ export default function CategoriesClient({
     }
   };
 
+  const pendingDeleteTargets = isBulkDeleteOpen
+    ? categories.filter((c) => selectedSet.has(c.id))
+    : deleteCategory
+      ? [deleteCategory]
+      : [];
+
+  const totalAffectedProducts = pendingDeleteTargets.reduce(
+    (sum, c) => sum + (c.productCount || 0),
+    0
+  );
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteError(null);
+    setDeleteCategory(null);
+    setIsBulkDeleteOpen(false);
+  };
+
   const handleDeleteConfirm = async () => {
-    if (!deleteCategory) return;
+    if (pendingDeleteTargets.length === 0) return;
     setIsSubmitting(true);
+    setDeleteError(null);
     try {
-      const res = await fetch(`/api/admin/categories/${deleteCategory.id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
+      const targetIds = pendingDeleteTargets.map((c) => c.id);
+
+      if (isBulkDeleteOpen) {
+        const res = await fetch("/api/admin/categories/bulk-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: targetIds, cascadeProducts }),
+        });
         const data = await res.json();
-        throw new Error(data.error || "Failed to delete category");
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to bulk delete categories");
+        }
+
+        const removedSet = new Set(targetIds);
+        setCategories((prev) => prev.filter((c) => !removedSet.has(c.id)));
+        setSelectedIds((prev) => prev.filter((id) => !removedSet.has(id)));
+        setActionMessage(data.message || `Deleted ${targetIds.length} categories.`);
+        setIsBulkDeleteOpen(false);
+      } else if (deleteCategory) {
+        const res = await fetch(`/api/admin/categories/${deleteCategory.id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cascadeProducts }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to delete category");
+        }
+
+        setCategories((prev) => prev.filter((c) => c.id !== deleteCategory.id));
+        setSelectedIds((prev) => prev.filter((id) => id !== deleteCategory.id));
+        setActionMessage(data.message || `Deleted "${deleteCategory.name}".`);
+        setDeleteCategory(null);
       }
 
-      setCategories((prev) => prev.filter((c) => c.id !== deleteCategory.id));
-      setDeleteCategory(null);
       router.refresh();
     } catch (err: any) {
-      alert(err.message || "Failed to delete category");
+      setDeleteError(err.message || "Failed to delete selected category(ies).");
     } finally {
       setIsSubmitting(false);
     }
@@ -238,6 +316,61 @@ export default function CategoriesClient({
         </button>
       </div>
 
+      {/* Feedback Banner */}
+      {actionMessage && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-xl flex items-center justify-between gap-3 text-xs sm:text-sm">
+          <span className="font-medium">{actionMessage}</span>
+          <button
+            type="button"
+            onClick={() => setActionMessage(null)}
+            className="text-emerald-700 hover:text-emerald-950 font-semibold shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-red-50 border border-red-200 px-4 py-3 rounded-xl flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-red-900">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold bg-red-600 text-white text-xs">
+              {selectedIds.length} selected
+            </span>
+            {!allFilteredSelected && filteredCategories.length > 0 && (
+              <button
+                type="button"
+                onClick={toggleSelectAllFiltered}
+                className="font-semibold text-red-700 hover:text-red-900 underline"
+              >
+                Select all {filteredCategories.length} filtered
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="font-medium text-slate-600 hover:text-slate-900"
+            >
+              Clear selection
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError(null);
+              setCascadeProducts(true);
+              setIsBulkDeleteOpen(true);
+            }}
+            className="inline-flex items-center px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-xs transition-colors"
+          >
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Selected ({selectedIds.length})
+          </button>
+        </div>
+      )}
+
       {/* Table / Empty state */}
       {filteredCategories.length === 0 ? (
         <div className="p-12 text-center bg-white border border-slate-200 rounded-xl shadow-xs">
@@ -263,6 +396,17 @@ export default function CategoriesClient({
             <table className="w-full text-left text-sm border-collapse">
               <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 <tr>
+                  <th className="py-3.5 px-4 w-10">
+                    <input
+                      ref={selectAllRef}
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAllFiltered}
+                      disabled={filteredCategories.length === 0}
+                      aria-label="Select all visible categories"
+                      className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                    />
+                  </th>
                   <th className="py-3.5 px-4">Name</th>
                   <th className="py-3.5 px-4">Slug</th>
                   <th className="py-3.5 px-4">Product Count</th>
@@ -271,7 +415,21 @@ export default function CategoriesClient({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredCategories.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/75 transition-colors">
+                  <tr
+                    key={c.id}
+                    className={`hover:bg-slate-50/75 transition-colors ${
+                      selectedSet.has(c.id) ? "bg-sky-50/50" : ""
+                    }`}
+                  >
+                    <td className="py-3.5 px-4 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedSet.has(c.id)}
+                        onChange={() => toggleSelectRow(c.id)}
+                        aria-label={`Select ${c.name}`}
+                        className="w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 cursor-pointer"
+                      />
+                    </td>
                     <td className="py-3.5 px-4 font-semibold text-slate-900">
                       <div className="flex items-center space-x-3">
                         {c.image ? (
@@ -320,7 +478,12 @@ export default function CategoriesClient({
                           Modal
                         </button>
                         <button
-                          onClick={() => setDeleteCategory(c)}
+                          onClick={() => {
+                            setDeleteError(null);
+                            setCascadeProducts(true);
+                            setIsBulkDeleteOpen(false);
+                            setDeleteCategory(c);
+                          }}
                           className="text-xs font-semibold text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded transition-colors"
                         >
                           Delete
@@ -516,40 +679,54 @@ export default function CategoriesClient({
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full p-6">
-            <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-4">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">Delete Category</h3>
-            <p className="mt-2 text-sm text-slate-600 leading-normal">
-              Are you sure you want to delete <span className="font-bold text-slate-900">"{deleteCategory.name}"</span>? Any tagged products will safely become uncategorized.
-            </p>
-
-            <div className="mt-6 flex items-center justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => setDeleteCategory(null)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeleteConfirm}
-                disabled={isSubmitting}
-                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? "Deleting..." : "Delete Category"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete / Bulk Delete Confirmation Modal */}
+      <ConfirmDeleteDialog
+        isOpen={Boolean(deleteCategory || isBulkDeleteOpen)}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title={
+          isBulkDeleteOpen
+            ? `Bulk Delete ${pendingDeleteTargets.length} Categor${pendingDeleteTargets.length === 1 ? "y" : "ies"}`
+            : "Delete Category"
+        }
+        description={
+          isBulkDeleteOpen
+            ? `You are about to permanently delete ${pendingDeleteTargets.length} selected category(ies). This action cannot be undone.`
+            : deleteCategory
+              ? `Are you sure you want to permanently delete "${deleteCategory.name}"? This action cannot be undone.`
+              : ""
+        }
+        confirmLabel={
+          isBulkDeleteOpen
+            ? `Delete ${pendingDeleteTargets.length} Categor${pendingDeleteTargets.length === 1 ? "y" : "ies"}`
+            : "Delete Category"
+        }
+        isSubmitting={isSubmitting}
+        error={deleteError}
+        items={pendingDeleteTargets.map((c) => ({
+          id: c.id,
+          label: c.name,
+          meta: `${c.productCount} products`,
+        }))}
+        cascadeToggle={
+          totalAffectedProducts > 0
+            ? {
+                checked: cascadeProducts,
+                onChange: setCascadeProducts,
+                label: `Cascade delete all ${totalAffectedProducts} related product${totalAffectedProducts === 1 ? "" : "s"}, variants & cart items`,
+                helperText:
+                  "Uncheck to keep the products in your catalog as Uncategorized instead of deleting them.",
+              }
+            : undefined
+        }
+        cascadeSummary={
+          totalAffectedProducts === 0
+            ? "Selected category(ies) have no tagged products and will be removed cleanly."
+            : cascadeProducts
+              ? `All ${totalAffectedProducts} related product(s), their size/variant SKUs, and matching shopping cart items will be permanently deleted. Past order history snapshots remain intact.`
+              : `The ${totalAffectedProducts} tagged product(s) will NOT be deleted and will safely move to Uncategorized.`
+        }
+      />
     </div>
   );
 }

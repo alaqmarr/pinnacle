@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseUSDToCents } from "@/lib/currency";
 import { normalizeVariantInputs } from "@/lib/variants";
+import { deleteProductsCascade } from "@/lib/admin/catalog-delete";
 
 export async function GET(
   _req: NextRequest,
@@ -282,19 +283,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    // Clean up orphaned cart items
-    await prisma.cartItem.deleteMany({
-      where: { productId: id },
-    });
-
-    // Delete product
-    await prisma.product.delete({
-      where: { id },
-    });
+    const stats = await deleteProductsCascade([id]);
 
     return NextResponse.json({
       success: true,
-      message: "Product deleted successfully",
+      ...stats,
+      message: `Product deleted (${stats.deletedVariants} variant(s) and ${stats.deletedCartItems} cart item(s) cascaded).`,
     });
   } catch (error: any) {
     console.error("[Admin API] Failed to delete product:", error);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { deleteCategoriesCascade } from "@/lib/admin/catalog-delete";
 
 function generateSlug(name: string): string {
   return name
@@ -157,7 +158,7 @@ async function updateCategory(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -171,20 +172,25 @@ export async function DELETE(
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
-    // Reassign tagged products to null (uncategorized)
-    await prisma.product.updateMany({
-      where: { categoryId: id },
-      data: { categoryId: null },
-    });
+    const cascadeParam = new URL(req.url).searchParams.get("cascade");
+    let cascadeProducts = cascadeParam !== "false";
+    try {
+      const body = await req.json();
+      if (typeof body?.cascadeProducts === "boolean") {
+        cascadeProducts = body.cascadeProducts;
+      }
+    } catch {
+      // Optional JSON body
+    }
 
-    // Delete the category
-    await prisma.category.delete({
-      where: { id },
-    });
+    const stats = await deleteCategoriesCascade([id], cascadeProducts);
 
     return NextResponse.json({
       success: true,
-      message: "Category deleted. Tagged products are now uncategorized.",
+      ...stats,
+      message: cascadeProducts
+        ? `Category deleted and cascaded ${stats.deletedProducts} product(s), ${stats.deletedVariants} variant(s), and ${stats.deletedCartItems} cart item(s).`
+        : `Category deleted. Moved ${stats.uncategorizedProducts} tagged product(s) to Uncategorized.`,
     });
   } catch (error: any) {
     console.error("[Admin API] Failed to delete category:", error);
